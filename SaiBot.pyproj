@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="saiclasses.py" />
     <Compile Include="TEMP.py">
       <SubType>Code</SubType>
     </Compile>
