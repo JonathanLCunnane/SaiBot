@@ -414,7 +414,7 @@ async def on_message(message):
         await message.channel.send(f"{message.author.mention} Your application was successful, please be patient while it is reviewed!", delete_after=10)
 
     #else if prefix is recognised
-    elif content.startswith("s.") or content.startswith("S.") or content.strip() == "<@858663143931641857>":
+    elif content.startswith("s.") or content.startswith("S.") or content.strip() == "<@858663143931641857>" or content.strip() == "<@&859935057090576425>":
 
         #if in a DM channel, send a friendly embed message with an invite
         if isinstance(message.channel, discord.channel.DMChannel):
@@ -449,7 +449,7 @@ async def on_message(message):
         commandsrun += 1
 
         #processes the command entered
-        if content.strip() == "<@858663143931641857>":
+        if content.strip() == "<@858663143931641857>" or content.strip() == "<@&859935057090576425>":
             command = "help"
         else:
             command = content[2:].strip()
