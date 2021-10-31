@@ -450,7 +450,7 @@ async def on_message(message):
 
         #processes the command entered
         if content.strip() == "<@858663143931641857>":
-            command = "s.help"
+            command = "help"
         else:
             command = content[2:].strip()
 
