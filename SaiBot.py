@@ -414,7 +414,7 @@ async def on_message(message):
         await message.channel.send(f"{message.author.mention} Your application was successful, please be patient while it is reviewed!", delete_after=10)
 
     #else if prefix is recognised
-    elif content.startswith("s."):
+    elif content.startswith("s.") or content.startswith("S.") or content.strip() == "<@858663143931641857>":
 
         #if in a DM channel, send a friendly embed message with an invite
         if isinstance(message.channel, discord.channel.DMChannel):
@@ -449,7 +449,10 @@ async def on_message(message):
         commandsrun += 1
 
         #processes the command entered
-        command = message.content[2:].strip()
+        if content.strip() == "<@858663143931641857>":
+            command = "s.help"
+        else:
+            command = content[2:].strip()
 
         
         #code for logging the command
@@ -673,7 +676,7 @@ async def on_message(message):
 
             #if 's.help' is run return list of commands
             if helpcommand == "":
-                helpembed=discord.Embed(title="Help <:help:881883309142077470>", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, run **`s.help <command>`**", color=embedcolour)
+                helpembed=discord.Embed(title="Help <:help:881883309142077470>", description="\n**Prefix - **`s.`\n\nHere is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, run **`s.help <command>`**", color=embedcolour)
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="<:naruto:886208833393938452> Naruto", value="```character, information```", inline=False)
                 helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), profile, statistics, testcount```", inline=False)
@@ -3086,14 +3089,7 @@ async def on_guild_remove(guild):
         loggingembed.set_footer(text="Owner {0}#{1}".format(guild.owner.name, guild.owner.discriminator), icon_url=guild.owner.avatar_url)
         await client.get_guild(859934506159833178).get_channel(881913733532758036).send(embed=loggingembed)
     except:
-        #code for logging the guild leave
-        loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
-
-        loggingembed=discord.Embed(title="Guild Left", colour=embedcolour)
-        loggingembed.add_field(name="Server", value=f"```{guild.name} (id:{guild.id})```", inline=True)
-        loggingembed.add_field(name="Time", value=f"```{loggingtime}```", inline=True)
-        loggingembed.set_footer(text="Owner Unknown")
-        await client.get_guild(859934506159833178).get_channel(881913733532758036).send(embed=loggingembed)
+        pass
 
 @client.event
 async def on_error(event, *args, **kwargs):
