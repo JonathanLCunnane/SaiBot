@@ -1862,6 +1862,7 @@ class Characters():
                      ["Chocho Akimichi", "Choji Akimichi"],
                      ["Lightning Release"],
                      ["<:lightningrelease:886020049457008710>"],
+                     ["Cloud-Style Front Beheading (Manga only)"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/904074868058890262/karui.png")
     karura = Character("Karura",
                        ["None"],
