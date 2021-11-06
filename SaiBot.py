@@ -104,7 +104,7 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 28
+commandnumber = 29
 version = "1.7.0"
 linesofcode = "6724"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
@@ -172,7 +172,8 @@ informationcooldown = 5
 aboutcooldown = 5
 helpcooldown = 5
 linkscooldown = 5
-profilecooldown = 10
+patreoncooldown = 10
+profilecooldown = 5
 statisticscooldown = 5
 testcountcooldown = 5
 
@@ -679,7 +680,7 @@ async def on_message(message):
                 helpembed=discord.Embed(title="Help <:help:881883309142077470>", description="\n**Prefix - **`s.`\n\nHere is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, run **`s.help <command>`**", color=embedcolour)
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="<:naruto:886208833393938452> Naruto", value="```character, information```", inline=False)
-                helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), profile, statistics, testcount```", inline=False)
+                helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
                 helpembed.add_field(name="<:utility:881883277424746546> Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time```", inline=False)
                 helpembed.add_field(name="<:moderation_and_admin:881897640948826133> Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
                 helpembed.add_field(name="<:fun:881899126286061609> Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
@@ -748,6 +749,16 @@ async def on_message(message):
                 helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed)
             
+            #if 's.help patreon' is run
+            elif helpcommand == "patreon" or helpcommand == "donate" or helpcommand == "premium":
+                helpembed=discord.Embed(title="Help", description="Command specific help for: `patreon` <:info:881883500515590144>", color=embedcolour)
+                helpembed.set_thumbnail(url=client.user.avatar_url)
+                helpembed.add_field(name="Description", value="The `patreon` command is used to get information on supporting Sai through Patreon!", inline=False)
+                helpembed.add_field(name="How to use it", value="```s.patreon```", inline=False)
+                helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```patreon, donate, premium```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(patreoncooldown), inline=False)
+                helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+                await message.channel.send(embed=helpembed)
+
             #if 's.help profile' is run
             elif helpcommand == "profile" or helpcommand == "p" or helpcommand == "userinfo":
                 helpembed=discord.Embed(title="Help", description="Command specific help for: `profile` <:info:881883500515590144>", color=embedcolour)
@@ -1066,7 +1077,8 @@ async def on_message(message):
             aboutembed.add_field(name="Users", value="Sai can see `{0}` users".format(usernum), inline=True)
             aboutembed.add_field(name="Version", value="<:sai:881902408786120715> Sai ({0})\n<:python:881906567325302844> Python (3.9.7)\n<:discordpy:881907255639941151> discord.py (1.7.3)".format(version), inline=True)
             aboutembed.add_field(name="Libraries", value="```{0}```".format(libraries), inline=False)
-            aboutembed.add_field(name="Invite the bot", value="[Invite Here!](https://discord.com/api/oauth2/authorize?client_id=858663143931641857&permissions=8&scope=bot)", inline=False)
+            aboutembed.add_field(name="Invite the bot", value="[Invite Here!](https://discord.com/api/oauth2/authorize?client_id=858663143931641857&permissions=8&scope=bot)", inline=True)
+            aboutembed.add_field(name="Colour", value="Hex - #d6d6d6\nRGB - 214, 214, 214", inline=True)
             aboutembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
             await message.channel.send(embed=aboutembed)
                        
@@ -1097,6 +1109,29 @@ async def on_message(message):
             linksembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
             await message.channel.send(embed=linksembed)
 
+        #code for patreon command
+        elif command == "patreon" or command == "donate" or command == "premium":
+            #firstly checks if the cooldown has been met
+            if (currentuser.cooldowns.patreon + timedelta(seconds=patreoncooldown) <= datetime.now()) or message.author.id == 457517248786202625:
+                currentuser.cooldowns.patreon = datetime.now()
+            else:
+                timeleft = (currentuser.cooldowns.patreon + timedelta(seconds=patreoncooldown)) - datetime.now()
+                timeleft = formattimedelta(timeleft)
+                cooldownembed = getcooldownembed("patreon", timeleft, message.author)
+                await message.channel.send(embed=cooldownembed)
+                return
+
+            #creates embed and sends
+            patreonembed=discord.Embed(title="The best way to support Sai", description=f"If you are looking for a way to customise Sai for your server, or simply want to show your support for the bot, all that you need is right here! If you want other tiers to be included or anything along those lines, feel free to ping the owner ({str(client.get_user(457517248786202625))}) in [The Official Sai Support Server](https://discord.com/invite/BSFCCFKK7f).", color=0xd6d6d6)
+            patreonembed.set_author(name="Support Sai on Patreon:\nhttps://www.patreon.com/officialsaibot", icon_url=client.get_user(216303189073461248).avatar_url)
+            patreonembed.set_thumbnail(url=client.user.avatar_url)
+            patreonembed.add_field(name="Tier Ⅰ - Rasengan", value="- Advisor role\n- Tier Ⅰ Supporter role", inline=True)
+            patreonembed.add_field(name="Tier Ⅱ - Tailed Beast Ball", value="\n- Advisor role\n- Custom Bot Avatar\n- Custom Bot Name\n- Tier Ⅱ Supporter role", inline=True)
+            patreonembed.add_field(name="Tier Ⅲ - Tailed Beast Ball Rasenshuriken", value="- Advisor role\n- Custom Bot Avatar\n- Custom Bot Name\n- Up to 5 Server\n Specific Commands\n- Tier Ⅲ Supporter role", inline=True)
+            patreonembed.add_field(name="Become a Patron Now:", value="[Click here](https://www.patreon.com/officialsaibot) for the official Patreon page for Sai. (Note the roles refer to ones within the Official Sai Support Server)", inline=False)
+            patreonembed.set_footer(text="Command run by {0}#{1} | Have a great day!".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+            await message.channel.send(embed=patreonembed)
+        
         #code for profile command
         elif command == "profile" or command[0:8] == "profile " or command == "p" or command[0:2] == "p " or command == "userinfo" or command[0:9] == "userinfo ":
 
