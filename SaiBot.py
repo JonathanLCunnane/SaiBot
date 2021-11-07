@@ -4,6 +4,7 @@ from operator import ge
 import discord
 from discord.embeds import Embed
 from discord.enums import ActivityType, ChannelType
+from discord.http import HTTPException
 from discord.ext import tasks
 from discord import Spotify
 import os
@@ -103,7 +104,7 @@ snipedict = {}
 editsnipedict = {}
 allcooldowns = []
 
-### UPDATE THESE BEFORE BOT UPDATE ###
+### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 29
 version = "1.7.0"
 linesofcode = "6724"
@@ -1473,6 +1474,25 @@ async def on_message(message):
 
             #send conformation message
             await message.channel.send("Added test to: {0} !".format(str(addtestmember)))
+
+        #code for owner Sai info
+        elif command == "admin info" and message.author.id == 457517248786202625:
+            #compile info 
+            informationfile = open("AdminInformation.txt", "w+")
+            with informationfile as file:
+                file.write("================================================================================================================================\n\t\t\t\t\t\tGUILD INFORMATION\n================================================================================================================================\n")
+                file.write("{: ^50} {: ^50}\n".format(*["Guild Name:", "Member Count:"]))
+                for guild in client.guilds:
+                    data = [guild.name, str(guild.member_count)]
+                    try:
+                        file.write("{: ^50} {: ^50}\n".format(*data))
+                    except:
+                        data = ["Cannot Display", str(guild.member_count)]
+                        file.write("{: ^50} {: ^50}\n".format(*data))
+                file.close()
+                await message.channel.send(content="See Attachment:", file=discord.File(r".\AdminInformation.txt"))
+                
+
 
         #endregion
         
