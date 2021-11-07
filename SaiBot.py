@@ -1123,7 +1123,7 @@ async def on_message(message):
                 return
 
             #creates embed and sends
-            patreonembed=discord.Embed(title="The best way to support Sai", description=f"If you are looking for a way to customise Sai for your server, or simply want to show your support for the bot, all that you need is right here! If you want other tiers to be included or anything along those lines, feel free to ping the owner ({str(client.get_user(457517248786202625))}) in [The Official Sai Support Server](https://discord.com/invite/BSFCCFKK7f).", color=0xd6d6d6)
+            patreonembed=discord.Embed(title="The best way to support Sai", description=f"If you are looking for a way to customise Sai for your server, or simply want to show your support for the bot, we have opened a Patreon page to do so, adding to the many ways you can support the bot! If you want other tiers to be included or anything along those lines, feel free to ping the owner ({str(client.get_user(457517248786202625))}) in [The Official Sai Support Server](https://discord.com/invite/BSFCCFKK7f).", color=0xd6d6d6)
             patreonembed.set_author(name="Support Sai on Patreon:\nhttps://www.patreon.com/officialsaibot", icon_url=client.get_user(216303189073461248).avatar_url)
             patreonembed.set_thumbnail(url=client.user.avatar_url)
             patreonembed.add_field(name="Tier Ⅰ - Rasengan", value="- Advisor role\n- Tier Ⅰ Supporter role", inline=True)

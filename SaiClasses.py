@@ -945,7 +945,7 @@ class Characters():
                       ["Gaara of the Sand", "Gaara of the Sand Waterfall", "Fifth Kazekage", "The Golden Child", "Prince of the Sand Waterfall Gourd"],
                       20,
                       ["Magnet Release"],
-                      ["<:darkrelease:885589504524681246>"],
+                      ["<:magnetrelease:885592081974841434>"],
                       "January 19th",
                       "Male",
                       "♂️",
