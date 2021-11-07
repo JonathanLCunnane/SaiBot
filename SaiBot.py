@@ -106,12 +106,12 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 29
-version = "1.7.0"
-linesofcode = "6724"
+version = "1.8.0"
+linesofcode = "7730"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/cat-wholesome-epic-black-cat-no-way-gif-21571850"
+weeklytulaiigif = "https://tenor.com/view/federal-agents-sad-sad-spongebob-spongebob-sad-sponge-gif-23709580"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
