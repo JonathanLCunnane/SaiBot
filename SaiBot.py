@@ -397,7 +397,6 @@ async def on_message(message):
         return
 
     #endregion
-
     #if message is sent in Sai server's tester-recruitment, delete it and send me a dm
     if message.channel.id == 865877072131784724:
         if message.content.strip().startswith("s."):
@@ -416,7 +415,7 @@ async def on_message(message):
         await message.channel.send(f"{message.author.mention} Your application was successful, please be patient while it is reviewed!", delete_after=10)
 
     #else if prefix is recognised
-    elif content.startswith("s.") or content.startswith("S.") or content.strip() == "<@858663143931641857>" or content.strip() == "<@&859935057090576425>":
+    elif content.startswith("s.") or content.startswith("S.") or (client.user.mentioned_in(message) and content.strip() == "<@!858663143931641857>"):
 
         #if in a DM channel, send a friendly embed message with an invite
         if isinstance(message.channel, discord.channel.DMChannel):
@@ -451,7 +450,7 @@ async def on_message(message):
         commandsrun += 1
 
         #processes the command entered
-        if content.strip() == "<@858663143931641857>" or content.strip() == "<@&859935057090576425>":
+        if client.user.mentioned_in(message) and content.strip() == "<@!858663143931641857>":
             command = "help"
         else:
             command = content[2:].strip()
