@@ -106,12 +106,12 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 29
-version = "1.8.0"
-linesofcode = "7730"
+version = "1.9.0"
+linesofcode = "7804"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/federal-agents-sad-sad-spongebob-spongebob-sad-sponge-gif-23709580"
+weeklytulaiigif = "https://tenor.com/view/matrix-npc-meme-gif-13216897"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -650,6 +650,20 @@ async def on_message(message):
 
                 except asyncio.TimeoutError:
                     await informationmessage.clear_reactions()
+
+        elif command == "naruto":
+            #firstly checks if the cooldown has been met
+            if (currentuser.cooldowns.character + timedelta(seconds=charactercooldown) <= datetime.now()) or message.author.id == 457517248786202625:
+                currentuser.cooldowns.character = datetime.now()
+            else:
+                timeleft = (currentuser.cooldowns.character + timedelta(seconds=charactercooldown)) - datetime.now()
+                timeleft = formattimedelta(timeleft)
+                cooldownembed = getcooldownembed("character", timeleft, message.author)
+                await message.channel.send(embed=cooldownembed)
+                return
+
+            #send prompt to run the command correctly
+            await message.channel.send("Try running `s.character Naruto`!\nRun `s.help character` for more information.")
 
         #endregion
                
