@@ -4221,7 +4221,7 @@ class Characters():
                       "https://cdn.discordapp.com/attachments/886205213420191795/893255232883138580/tekka_uchiha.png")
     temari = Character("Temari",
                        ["Nara Temari"],
-                       "20",
+                       20,
                        ["None"],
                        ["<:none:886242085244649522>"],
                        "August 23rd",
@@ -4484,8 +4484,8 @@ class Characters():
                      ["Calorie Control"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/904072281058328576/torifu_akimichi.png")
     torune = Character("Torune Aburame",
-                     0,
                      ["Aburame Torune", "Torune", "Toruné"],
+                     418,
                      ["None"],
                      ["<:none:886242085244649522>"],
                      "October 24th",
@@ -4837,3 +4837,9 @@ class Characters():
             
         #else return None
         return None
+
+if __name__ == "__main__":
+    print("Debugging...")
+    choice = int(input("\t1. Return the keys of Characters.\n\t2. Return the whole dictionary of Characters.\n"))
+    if choice == 1:
+        print(f"Keys of Characters: {dict(Characters.__dict__).keys()}")
