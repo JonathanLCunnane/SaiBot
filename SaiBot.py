@@ -2854,7 +2854,7 @@ async def on_raw_reaction_add(payload):
     try:
         message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
     except:
-        print(f"Message could not be fetched when reaction added!")
+        print("Message could not be fetched when reaction added!")
         return
 
     #if reaction is from Sai, or another bot no action is taken
@@ -2862,8 +2862,13 @@ async def on_raw_reaction_add(payload):
         if payload.member.bot:
             return
     except:
-        pass
-    if payload.member == client.user:
+        print("Bot-or-not status could not be fetched when reaction removed!")
+        return
+    try:
+        if payload.member == client.user:
+            return
+    except:
+        print("Member could not be fetched when reaction added!")
         return
 
     #start database conection
@@ -2975,7 +2980,7 @@ async def on_raw_reaction_remove(payload):
     try:
         message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
     except:
-        print(f"Message could not be fetched when reaction added!")
+        print(f"Message could not be fetched when reaction removed!")
         return
 
     #if reaction is from Sai, or anothre bot, no action is taken
@@ -2983,8 +2988,13 @@ async def on_raw_reaction_remove(payload):
         if payload.member.bot:
             return
     except:
-        pass
-    if payload.member == client.user:
+        print("Bot-or-not status could not be fetched when reaction removed!")
+        return
+    try:
+        if payload.member == client.user:
+            return
+    except:
+        print("Member could not be fetched when reaction removed!")
         return
 
     #start database conection
