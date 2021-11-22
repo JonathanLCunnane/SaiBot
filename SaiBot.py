@@ -106,12 +106,12 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 29
-version = "1.9.0"
-linesofcode = "7804"
+version = "1.10.0"
+linesofcode = "8074"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/matrix-npc-meme-gif-13216897"
+weeklytulaiigif = "https://tenor.com/view/death-note-hey-can-i-have-autograph-sign-it-gif-18164531"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -2851,9 +2851,18 @@ async def on_message_edit(before, after):
 @client.event
 async def on_raw_reaction_add(payload):
     #get message from payload
-    message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+    try:
+        message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+    except:
+        print(f"Message could not be fetched when reaction added!")
+        return
 
-    #if reaction is from Sai, no action is taken
+    #if reaction is from Sai, or another bot no action is taken
+    try:
+        if payload.member.bot:
+            return
+    except:
+        pass
     if payload.member == client.user:
         return
 
@@ -2963,9 +2972,18 @@ async def on_raw_reaction_add(payload):
 @client.event
 async def on_raw_reaction_remove(payload):
     #get message from payload
-    message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+    try:
+        message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+    except:
+        print(f"Message could not be fetched when reaction added!")
+        return
 
-    #if reaction is from Sai, no action is taken
+    #if reaction is from Sai, or anothre bot, no action is taken
+    try:
+        if payload.member.bot:
+            return
+    except:
+        pass
     if payload.member == client.user:
         return
 
@@ -3135,6 +3153,38 @@ async def on_member_join(member):
 
 @client.event
 async def on_guild_join(guild):
+
+    #send the guild join welcome message
+    for text_channel in guild.text_channels:
+        if "general" in text_channel.name.lower():
+            general = text_channel
+    owner = await client.fetch_user(457517248786202625)
+    ownername = "{}#{}".format(owner.name, owner.discriminator)
+    owneravatar = owner.avatar_url 
+    welcomeembed = discord.Embed(title="Thank you for inviting Sai!", description="I hope you will enjoy using my bot, and if you ever need help with anything to do with the bot, run `s.help`, or simply ping sai with @Sai#9289. If you need more help, you can join the official Sai Support server." , colour=embedcolour)
+    welcomeembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
+    welcomeembed.set_thumbnail(url=client.user.avatar_url)
+    welcomeembed.set_image(url="https://cdn.discordapp.com/attachments/777130317815349258/911657189712740443/tumblr_a5c8249773e4e4cdcf83eef4fd7ca917_ae2bc31f_500.gif")
+    welcomeembed.add_field(name=f"First time commands <:info:881883500515590144>:", value="```s.help\ns.links\ns.about\ns.patreon```",inline=True)
+    welcomeembed.add_field(name=f"Naruto commands <:naruto:886208833393938452>:", value="```s.character\ns.info\ns.gif\ns.quote```",inline=True)
+    welcomeembed.add_field(name=f"Moderation and Utility commands <:moderation_and_admin:881897640948826133>:",value="```s.ban\ns.kick\ns.event\ns.time```", inline=True)
+    welcomeembed.add_field(name=f"Additional information:",value="Thanks for supporting Sai by inviting this bot to your server! For more support options, you can run `s.links` and `s.patreon`. To get command specific help, run `s.help` followed by the command, as shown here: `s.help character`.", inline=False)
+    welcomeembed.set_footer(text="Have an amazing day, and I hope you enjoy your time while Sai is on your server! If you need a custom version of the bot, do not hesitate to contact the owner. | Welcome image taken from here: https://gfycat.com/leafycoolisabellineshrike", icon_url=guild.icon_url)
+    if general: 
+        try:
+            await general.send(embed=welcomeembed)
+        except:
+            try:
+                await guild.owner.send(embed=welcomeembed)
+            except:
+                print("Guild Owner's DMs are closed, could not send welcome message.")
+    else:
+        try:
+            await guild.owner.send(embed=welcomeembed)
+        except:
+            print("Guild Owner's DMs are closed, could not send welcome message.")
+
+
 
     #code for logging the guild join
     loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
