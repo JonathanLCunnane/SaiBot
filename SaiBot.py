@@ -2881,16 +2881,17 @@ async def on_raw_reaction_add(payload):
     
     #what type of message was reacted to
     iseventmessage = False
-    for event in eventsdb:
-        if event[0] == int(message.id):
-            iseventmessage = True
-            break
-
     istesterreactionrolemessage = False
-    testeremoji = client.get_emoji(865963914721886248)
-    if message.id == 880778807219470346 and payload.emoji == testeremoji:
-        istesterreactionrolemessage = True
-
+    try:
+        for event in eventsdb:
+            if event[0] == int(message.id):
+                iseventmessage = True
+                break
+        testeremoji = client.get_emoji(865963914721886248)
+        if message.id == 880778807219470346 and payload.emoji == testeremoji:
+            istesterreactionrolemessage = True
+    except:
+        print("Type of message could not be fetched!")
 
     if iseventmessage:
         previouseventembed = message.embeds[0]
@@ -3007,15 +3008,17 @@ async def on_raw_reaction_remove(payload):
     
     #what type of message was reacted to
     iseventmessage = False
-    for event in eventsdb:
-        if event[0] == int(message.id):
-            iseventmessage = True
-            break
-
     istesterreactionrolemessage = False
-    testeremoji = client.get_emoji(865963914721886248)
-    if message.id == 880778807219470346 and payload.emoji == testeremoji:
-        istesterreactionrolemessage = True
+    try:
+        for event in eventsdb:
+            if event[0] == int(message.id):
+                iseventmessage = True
+                break
+        testeremoji = client.get_emoji(865963914721886248)
+        if message.id == 880778807219470346 and payload.emoji == testeremoji:
+            istesterreactionrolemessage = True
+    except:
+        print("Type of message could not be fetched!")
 
     if iseventmessage:
         previouseventembed = message.embeds[0]
