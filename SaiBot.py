@@ -106,9 +106,9 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
-commandnumber = 29
-version = "1.10.1"
-linesofcode = "8074"
+commandnumber = 30
+version = "1.11.0"
+linesofcode = "8467"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
@@ -878,6 +878,16 @@ async def on_message(message):
                 helpembed.add_field(name="How to use it", value="To display desired timezone:```s.time {UTC}, (timezone#1), (timezone#2), ... , (timezone#n)```To display all timezones:```s.time all/ALL```Get timezones wikipedia page for more info:```s.time wiki/wikipedia```\n*Note: timezones should be written in their shortened form (e.g. IST, BST, GMT, est, pst, ast)*", inline=False)
                 helpembed.add_field(name="About", value="**Category:** Utility\n**Aliases:** ```time, t```\n**Cooldown**: `{0}` seconds\n**Delimiter:** `,`".format(timecooldown), inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | For Sai's accepted timezones, run 's.help timezones'".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+                await message.channel.send(embed=helpembed)
+
+            #if 's.help vote reminder' is run
+            elif helpcommand == "vote reminder" or helpcommand == "remind" or helpcommand == "vote remind":
+                helpembed=discord.Embed(title="Help", description="Command specific help for: `vote reminder` <:utility:881883277424746546>", color=embedcolour)
+                helpembed.set_thumbnail(url=client.user.avatar_url)
+                helpembed.add_field(name="Description", value="The `vote reminder` command is used for notifying the user when they can vote again, DMing the user after 12 hours of the command being run.", inline=False)
+                helpembed.add_field(name="How to use it", value="```s.vote reminder```", inline=False)
+                helpembed.add_field(name="About", value="**Category:** Utility\n**Aliases:** ```vote reminder, remind, vote```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(voteremindcooldown), inline=False)
+                helpembed.set_footer(text="Command run by {0}#{1} | Note that DMs have to be open for this command to work, this is to stop channels potentially being clogged due to reminders.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed)
             
             #endregion 
@@ -1821,7 +1831,10 @@ async def on_message(message):
                 await message.channel.send(content=f"An error occured!\n```Send this error message to the bot developer\n{e}```")
                 return
             await sleep(43200)
-            await message.author.send("You can vote!")
+            try:
+                await message.author.send("You can vote!")
+            except:
+                print("The user's DM's were closed, so could not be reminded to vote!")
         
         #endregion
 
