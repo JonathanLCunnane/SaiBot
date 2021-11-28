@@ -7,6 +7,7 @@ from discord.enums import ActivityType, ChannelType
 from discord.http import HTTPException
 from discord.ext import tasks
 from discord import Spotify
+from discord_slash import SlashCommand, SlashContext
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -29,8 +30,8 @@ print(f"Character Import Time: {timetwo - timeone}\n\n")
 #gets client token and creates client
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
-intents = discord.Intents.all()
-client = discord.Client(intents=intents)
+client = discord.Client(intents=discord.Intents.all(), command_prefix="s.", help_command=False)
+slash = SlashCommand(client, sync_commands=True)
 
 #variables
 #region
@@ -186,6 +187,7 @@ pingcooldown = 1
 rescuecooldown = 2
 snipecooldown = 3
 timecooldown = 5
+voteremindercooldown = 43200
 
 ### MODERATION AND ADMIN ###
 bancooldown = 5
@@ -359,7 +361,7 @@ async def beforeswitchstatus():
 
 #endregion
 
-#events
+#old events
 #region
 
 
@@ -1800,6 +1802,27 @@ async def on_message(message):
             timeembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
             await message.channel.send(embed=timeembed)
       
+        #code for vote reminder command
+        elif command == "vote reminder" or command == "remind" or command == "vote remind":
+            #firstly checks if the cooldown has been met
+            if (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown) <= datetime.now()) or message.author.id == 457517248786202625:
+                currentuser.cooldowns.votereminder = datetime.now()
+            else:
+                timeleft = (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown)) - datetime.now()
+                timeleft = formattimedelta(timeleft)
+                cooldownembed = getcooldownembed("vote reminder", timeleft, message.author)
+                await message.channel.send(embed=cooldownembed)
+                return 
+            try:
+                voteremindembed = discord.Embed(title="Reminder Set.", description="A reminder has been set for 12 hours from now! A DM will be sent to you at the time, to prevent clogging up channels, so make sure you have your DMs open! If you want to vote now, you can do that here:\nhttps://top.gg/bot/858663143931641857", color=embedcolour)
+                voteremindembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+                await message.channel.send(embed=voteremindembed)
+            except Exception as e:
+                await message.channel.send(content=f"An error occured!\n```Send this error message to the bot developer\n{e}```")
+                return
+            await sleep(43200)
+            await message.author.send("You can vote!")
+        
         #endregion
 
         #moderation and admin
@@ -3168,6 +3191,7 @@ async def on_member_join(member):
 async def on_guild_join(guild):
 
     #send the guild join welcome message
+    general = False
     for text_channel in guild.text_channels:
         if "general" in text_channel.name.lower():
             general = text_channel
@@ -3241,6 +3265,47 @@ async def on_error(event, *args, **kwargs):
 
 #endregion
 
+#new events i.e. slash commands
+#region
+
+def get_current_user(author):
+    adduser = True
+    for user in allcooldowns:
+        if int(user.userID) == int(author.id):
+            adduser = False
+            currentuser = allcooldowns[allcooldowns.index(user)]
+            break
+            
+    if adduser:
+        newuser = usercooldown(int(author.id)) 
+        allcooldowns.append(newuser)
+        currentuser = allcooldowns[-1]
+    return currentuser
+
+@slash.slash(name="voteReminder", description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", guild_ids=[729672504662294669])
+async def test(ctx: SlashContext):
+    #firstly checks if the cooldown has been met
+    try:
+        currentuser = get_current_user(ctx.author)
+        if (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+            currentuser.cooldowns.votereminder = datetime.now()
+        else:
+            timeleft = (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown)) - datetime.now()
+            timeleft = formattimedelta(timeleft)
+            cooldownembed = getcooldownembed("/votereminder", timeleft, ctx.author)
+            await ctx.send(embed=cooldownembed)
+            return
+        voteremindembed = discord.Embed(title="Reminder Set.", description="A reminder has been set for 12 hours from now! A DM will be sent to you at the time, to prevent clogging up channels, so make sure you have your DMs open! If you want to vote now, you can do that here:\nhttps://top.gg/bot/858663143931641857", color=embedcolour)
+        voteremindembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=voteremindembed)
+    except Exception as e:
+        await ctx.send(content=f"An error occured!\n```Send this error message to the bot developer\n{e}```")
+        return
+    await sleep(43200)
+    await ctx.author.send("You can vote!")
+
+
+#endregion
 if __name__ == "__main__":
     #start the bot if run from the file not imported
     switchstatus.start()
