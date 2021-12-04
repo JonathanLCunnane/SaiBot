@@ -10,7 +10,7 @@ from discord import Spotify
 from discord_slash import SlashCommand, SlashContext
 import os
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from random import choice, randrange, randint
 import sqlite3
 from re import search
@@ -106,7 +106,7 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
-commandnumber = 30
+commandnumber = 31
 version = "1.11.0"
 linesofcode = "8467"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
@@ -166,45 +166,47 @@ saiquotes = [
 
 #cooldown timers in seconds
 
+temp = usercooldown(0)
 ### NARUTO ###
-charactercooldown = 5
-informationcooldown = 5
+charactercooldown = temp.get_cooldown_length("character")
+informationcooldown = temp.get_cooldown_length("character")
 
 ### INFO ###
-aboutcooldown = 5
-helpcooldown = 5
-linkscooldown = 5
-patreoncooldown = 10
-profilecooldown = 5
-statisticscooldown = 5
-testcountcooldown = 5
+aboutcooldown = temp.get_cooldown_length("about")
+helpcooldown = temp.get_cooldown_length("help")
+linkscooldown = temp.get_cooldown_length("links")
+patreoncooldown = temp.get_cooldown_length("patreon")
+profilecooldown = temp.get_cooldown_length("profile")
+statisticscooldown = temp.get_cooldown_length("statistics")
+testcountcooldown = temp.get_cooldown_length("testcount")
 
 ### UTILITY ###
-editsnipecooldown = 3
-eventcooldown = 30
-nicknamecooldown = 10
-pingcooldown = 1
-rescuecooldown = 2
-snipecooldown = 3
-timecooldown = 5
-voteremindercooldown = 43200
+cooldownscooldown = temp.get_cooldown_length("cooldowns")
+editsnipecooldown = temp.get_cooldown_length("editsnipe")
+eventcooldown = temp.get_cooldown_length("event")
+nicknamecooldown = temp.get_cooldown_length("nickname")
+pingcooldown = temp.get_cooldown_length("ping")
+rescuecooldown = temp.get_cooldown_length("rescue")
+snipecooldown = temp.get_cooldown_length("snipe")
+timecooldown = temp.get_cooldown_length("time")
+voteremindercooldown = temp.get_cooldown_length("votereminder")
 
 ### MODERATION AND ADMIN ###
-bancooldown = 5
-kickcooldown = 5
-lockdowncooldown = 10
-messagecooldown = 3
-purgecooldown = 1
-rolecooldown = 2
-slowmodecooldown = 10
-unlockdowncooldown = 10
+bancooldown = temp.get_cooldown_length("ban")
+kickcooldown = temp.get_cooldown_length("kick")
+lockdowncooldown = temp.get_cooldown_length("lockdown")
+messagecooldown = temp.get_cooldown_length("message")
+purgecooldown = temp.get_cooldown_length("purge")
+rolecooldown = temp.get_cooldown_length("role")
+slowmodecooldown = temp.get_cooldown_length("slowmode")
+unlockdowncooldown = temp.get_cooldown_length("unlockdown")
 
 ### FUN ###
-decidecooldown = 5
-eightballcooldown = 2
-gifcooldown = 3
-quotecooldown = 3
-tulaiiisabigmancooldown = 120
+decidecooldown = temp.get_cooldown_length("decide")
+eightballcooldown = temp.get_cooldown_length("eightball")
+gifcooldown = temp.get_cooldown_length("gif")
+quotecooldown = temp.get_cooldown_length("quote")
+tulaiiisabigmancooldown = temp.get_cooldown_length("tulaiiisabigman")
 #endregion
 
 #functions
@@ -697,7 +699,7 @@ async def on_message(message):
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="<:naruto:886208833393938452> Naruto", value="```character, information```", inline=False)
                 helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
-                helpembed.add_field(name="<:utility:881883277424746546> Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time```", inline=False)
+                helpembed.add_field(name="<:utility:881883277424746546> Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
                 helpembed.add_field(name="<:moderation_and_admin:881897640948826133> Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
                 helpembed.add_field(name="<:fun:881899126286061609> Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
@@ -881,12 +883,12 @@ async def on_message(message):
                 await message.channel.send(embed=helpembed)
 
             #if 's.help vote reminder' is run
-            elif helpcommand == "vote reminder" or helpcommand == "remind" or helpcommand == "vote remind":
+            elif helpcommand == "vote reminder" or helpcommand == "remind" or helpcommand == "vote remind" or helpcommand == "votereminder":
                 helpembed=discord.Embed(title="Help", description="Command specific help for: `vote reminder` <:utility:881883277424746546>", color=embedcolour)
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="Description", value="The `vote reminder` command is used for notifying the user when they can vote again, DMing the user after 12 hours of the command being run.", inline=False)
                 helpembed.add_field(name="How to use it", value="```s.vote reminder```", inline=False)
-                helpembed.add_field(name="About", value="**Category:** Utility\n**Aliases:** ```vote reminder, remind, vote```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(voteremindcooldown), inline=False)
+                helpembed.add_field(name="About", value="**Category:** Utility\n**Aliases:** ```vote reminder, remind, vote remind, votereminder```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(voteremindercooldown), inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | Note that DMs have to be open for this command to work, this is to stop channels potentially being clogged due to reminders.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed)
             
@@ -1518,11 +1520,60 @@ async def on_message(message):
                 await message.channel.send(content="See Attachment:", file=discord.File(r".\AdminInformation.txt"))
                 
 
-
         #endregion
         
         #utility
         #region
+
+        #code for the cooldowns command
+        elif command == "cooldowns" or command == "cooldown" or command == "cd":
+            # firstly check if the cooldown has been met (ironic lmfao)
+            if (currentuser.cooldowns.cooldowns + timedelta(seconds=cooldownscooldown) <= datetime.now()) or message.author.id == 457517248786202625:
+                currentuser.cooldowns.cooldowns = datetime.now()
+            else:
+                timeleft = (currentuser.cooldowns.cooldowns + timedelta(seconds=cooldownscooldown)) - datetime.now()
+                timeleft = formattimedelta(timeleft)
+                cooldownembed = getcooldownembed("cooldowns", timeleft, message.author)
+                await message.channel.send(embed=cooldownembed)
+                return
+            
+            # create and then attempt to return an embed
+            cooldownsembed = discord.Embed(title=f"Cooldowns", description="Below is a table of your cooldowns for each of the commands. The first column shows the command in question, and the columns show, in order the cooldown left for a certain user, the generic cooldown length, the time the command was last run, and if the command is runnable now.", color=embedcolour)
+            # fetch cooldowns for the user
+            column_name_one = "Command"
+            column_name_two = "Cooldown"
+            column_name_three = "General Cooldown"
+            column_name_four = "Last Run"
+            column_name_five = "Runnable"
+            empty = ""
+            table = f"{column_name_one:^15}|{column_name_two:^20}|{column_name_three:^20}|{column_name_four:^10}|{column_name_five:^10}\n{empty:_^15} {empty:_^20} {empty:_^20} {empty:_^10} {empty:_^10}\n"
+            small_table = f"{column_name_one:^15}|{column_name_two:^20}|{column_name_five:^10}\n{empty:_^15} {empty:_^20} {empty:_^10}\n"
+            zero_timedelta = timedelta(0)
+            for cooldown, time in currentuser:
+                time_last_run = time.strftime("%H:%M:%S")
+                cooldown_command = "s." + cooldown
+                cooldown_length = currentuser.get_cooldown_length(cooldown)
+                if time == datetime.utcfromtimestamp(0):
+                    cooldown_left = formattimedelta(zero_timedelta)
+                else:
+                    cooldown_left = (time + timedelta(seconds=cooldown_length)) - datetime.now()
+                    if cooldown_left < zero_timedelta:
+                        cooldown_left = formattimedelta(zero_timedelta)
+                    else:
+                        cooldown_left = formattimedelta(cooldown_left)
+                if cooldown_left == formattimedelta(zero_timedelta):
+                    runnable = "Yes"
+                else:
+                    runnable = "No"                
+                table += f"{cooldown_command:^15}|{cooldown_left:^20}|{formattimedelta(timedelta(seconds=cooldown_length)):^20}|{time_last_run:^10}|{runnable:^10}\n"
+                small_table += f"{cooldown_command:^15}|{cooldown_left:^20}|{runnable:^10}\n"
+            # add table to field
+            cooldownsembed.add_field(name=f"Cooldowns for {str(message.author)}:", value=small_table)
+            
+            try:
+                await message.channel.send(embed=cooldownsembed)
+            except Exception as e:
+                print(e)
 
         #code for edit snipe command
         elif command == "editsnipe" or command == "es":
@@ -1813,7 +1864,7 @@ async def on_message(message):
             await message.channel.send(embed=timeembed)
       
         #code for vote reminder command
-        elif command == "vote reminder" or command == "remind" or command == "vote remind":
+        elif command == "vote reminder" or command == "remind" or command == "vote remind" or command == "votereminder":
             #firstly checks if the cooldown has been met
             if (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown) <= datetime.now()) or message.author.id == 457517248786202625:
                 currentuser.cooldowns.votereminder = datetime.now()

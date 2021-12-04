@@ -6,7 +6,7 @@ class allcooldowns:
     def __init__(self, 
     character=epoch, information=epoch, ### NARUTO ###
     about=epoch, help=epoch, links=epoch, patreon=epoch, profile=epoch, statistics=epoch, testcount=epoch, ### INFO ###
-    editsnipe=epoch, event=epoch, nickname=epoch, ping=epoch, rescue=epoch, snipe=epoch, time=epoch, votereminder=epoch, ### UTILITY ###
+    cooldowns=epoch, editsnipe=epoch, event=epoch, nickname=epoch, ping=epoch, rescue=epoch, snipe=epoch, time=epoch, votereminder=epoch, ### UTILITY ###
     ban=epoch, kick=epoch, lockdown=epoch, message=epoch, purge=epoch, role=epoch, slowmode=epoch, unlockdown=epoch, ### MODERATION AND ADMIN ###
     decide=epoch, eightball=epoch, gif=epoch, quote=epoch, tulaiiisabigman=epoch): ### FUN ###
         
@@ -24,6 +24,7 @@ class allcooldowns:
         self.testcount = testcount
 
         ### UTILITY ###
+        self.cooldowns = cooldowns
         self.editsnipe = editsnipe
         self.event = event
         self.nickname = nickname
@@ -49,12 +50,56 @@ class allcooldowns:
         self.quote = quote
         self.tulaiiisabigman = tulaiiisabigman
         self.kick = kick
+    
+    # for iterating over all cooldowns
+    def __iter__(self):
+        for attribute, value in self.__dict__.items():
+            yield attribute, value
+            
 
 class usercooldown:
     """a class that can be used to note down cooldowns of a certain player"""   
     def __init__(self, userID):
         self.userID = int(userID)
         self.cooldowns = allcooldowns()
+        self.cooldown_lengths = {"character":5, 
+                        "information":5, ### NARUTO ###
+                        "about":5, 
+                        "help":5, 
+                        "links":5, 
+                        "patreon":10, 
+                        "profile":5, 
+                        "statistics":5, 
+                        "testcount":5, ### INFO ###
+                        "cooldowns":10, 
+                        "editsnipe":3, 
+                        "event":30, 
+                        "nickname":10, 
+                        "ping":1, 
+                        "rescue":2, 
+                        "snipe":3, 
+                        "time":5, 
+                        "votereminder":43200, ### UTILITY ###
+                        "ban":5, 
+                        "kick":5, 
+                        "lockdown":10, 
+                        "message":3, 
+                        "purge":1, 
+                        "role":2, 
+                        "slowmode":10, 
+                        "unlockdown":10, ### MODERATION AND ADMIN ###
+                        "decide":5, 
+                        "eightball":2, 
+                        "gif":3, 
+                        "quote":3, 
+                        "tulaiiisabigman":120}### FUN ###
+    
+    def __iter__(self):
+        for cooldown, time in self.cooldowns:
+            yield cooldown, time
+
+    def get_cooldown_length(self, cooldown_name):
+        return self.cooldown_lengths[cooldown_name]
 
 class Character():
 
@@ -159,13 +204,13 @@ class Characters():
                      "♂️",
                      "Unknown",
                      "Unknown",
-                     "Anbu",
-                     "<:anbu:886256679241515069>",
-                     ["Konohagakure", "Root"],
-                     ["<:konohagakure:886006368572690452>", "<:root:886011610336997416>"],
                      "None",
                      "<:none:886242085244649522>",
-                     "None",
+                     ["Otogakure"],
+                     ["<:otogakure:886006804084031518>"],
+                     "",
+                     "",
+                     "Sound Five",
                      ["Unknown"],
                      ["None"],
                      ["<:none:886242085244649522>"],
@@ -2218,6 +2263,50 @@ class Characters():
                       ["<:firerelease:886019827121127445>", "<:yinrelease:886020498482397226>"],
                       ["Fire Release: Great Fireball Technique (Anime only)", "Genjutsu: Sharingan (Anime only)"],
                       "https://cdn.discordapp.com/attachments/886205213420191795/891099383318315058/izuna_uchiha.png")
+    jirobo = Character("Jirobo",
+                     ["The Fourth", "Jirobo of the South Gate"],
+                     68,
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     "June 26th",
+                     "Male",
+                     "♂️",
+                     "181.3cm",
+                     "97.3kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Otogakure"],
+                     ["<:otogakure:886006804084031518>"],
+                     "None",
+                     "<:none:886242085244649522>",
+                     "Sound Four",
+                     ["Unknown"],
+                     ["Earth Release"],
+                     ["<:earthrelease:886019985909108748>"],
+                     ["Arhat Fist", "Barrier Method Formation", "Combination Transformation", "Earth Release Barrier: Earth Prison Dome of Magnificent Nothingness", "Earth Release: Earth Mausoleum Dumpling", "Earth Release: Earth Shore Return", "Earth Release: Hiding Like a Mole Technique", "Four Black Fogs Formation", "Four Violet Flames Formation", "Sound Four's Cursed Seals", "Sound Four: Summoning: Four Beasts Encirclement Formation (Anime only)", "Space–Time Technique Formula: Underworld Turnover (Anime only)", "Summoning Technique (Earth Prison Golem) (Anime only)"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916744096104726528/jirobo.png")
+    jugo = Character("Jugo",
+                     ["Bipolar Jugo", "Jugo of the Scales"],
+                     336,
+                     ["Jugo Clan's Kekkai Genkai"],
+                     ["<:jugosclanskekkeigenkai:885591300009758792>"],
+                     "October 1st",
+                     "Male",
+                     "♂️",
+                     "202.1cm",
+                     "75.8kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Otogakure", "Akatsuki"],
+                     ["<:otogakure:886006804084031518>", "<:akatsuki:886008680607277067>"],
+                     "Jugo's Clan",
+                     "<:jugosclan:885974456080687176>",
+                     "Taka, Hebi",
+                     ["Unknown"],
+                     ["Wind Release", "Earth Release", "Water Release", "Yang Release"],
+                     ["<:windrelease:886019877847068732>", "<:earthrelease:886019985909108748>", "<:waterrelease:886019914727571566>", "<:yangrelease:886020578392293396>"],
+                     ["Cellular Regeneration Absorption", "Cellular Regeneration Ejection", "Chain", "Chakra Transfer Technique", "Destroying Axe Fist", "Jet Booster Jump", "Multiple Lotus Nonself Connected Cannons", "Piston Fist", "Piston Fist: Style One", "Sage Mode", "Sage Transformation"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916739690625908786/jugo.png")
     juzo = Character("Juzo Biwa",
                      ["Biwa Juzo", "Juzo"],
                      639,
@@ -2636,6 +2725,28 @@ class Characters():
                      ["<:earthrelease:886019985909108748>", "<:yangrelease:886020578392293396>"],
                      ["Beast Human Clone", "Booby Trap", "Combination Transformation", "Fang Passing Fang", "Fang Rotating Fang", "Fang Wolf Fang", "Four Legs Technique", "Human Beast Combination Transformation: Double-Headed Wolf", "Human Beast Mixture Transformation — Three-Headed Wolf", "Passing Fang", "Shadow Clone Technique", "Super Fang Wolf Fang (Anime only)", "Tail Chasing Fang Fang Rotating Fang"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/896765816698204180/kiba_inuzuka.png")
+    kidomaru = Character("Kidomaru",
+                     ["The First", "Kidomaru of the East Gate"],
+                     68,
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     "December 16th",
+                     "Male",
+                     "♂️",
+                     "159.2cm",
+                     "56.2kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Otogakure"],
+                     ["<:otogakure:886006804084031518>"],
+                     "None",
+                     "<:none:886242085244649522>",
+                     "Sound Four",
+                     ["Unknown"],
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     ["Armour of Sticky Gold", "Barrier Method Formation", "Combination Transformation", "Four Black Fogs Formation", "Four Violet Flames Formation", "Rain of Spiders", "Sound Four's Cursed Seals", "Sound Four: Summoning: Four Beasts Encirclement Formation (Anime only)", "Space–Time Technique Formula: Underworld Turnover (Anime only)", "Spider Bind", "Spider Cocoon", "Spider Sticking Spit", "Spider Sticky Gold", "Spider War Bow: Terrible Split", "Spider Web Area", "Spider Web Flower", "Spider Web Unrolling", "Summoning Technique (Kyodaigumo)"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916746020967317514/kidomaru.png")
     kie = Character("Kie",
                      ["Monjin"],
                      472,
@@ -2680,6 +2791,28 @@ class Characters():
                      ["<:lightningrelease:886020049457008710>", " <:waterrelease:886019914727571566>", "<:firerelease:886019827121127445>", "<:yangrelease:886020578392293396>"],
                      ["Acrobat", "Cloud-Style Deception Beheading (Anime only)", "Continuous Tailed Beast Balls", "Disturbance Taijutsu", "Headbutt", "Ink Clone Technique", "Ink Creation", "Lightning Release: Double Lariat", "Lightning Release: Lariat", "Octopus Leg Clone Technique", "Reverse Mist Beheading (Anime only)", "Sealing Technique: Octopus Hold", "Shadow Clone Technique (Anime only)", "Tailed Beast Ball", "Tailed Beast Chakra Arms", "Tailed Beast Eight Twists", "Tailed Beast Full Charge", "Tailed Beast Lariat"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/909189513610412093/killer_b.png")
+    kimimaro = Character("Kimimaro",
+                     ["No Aliases!"],
+                     118,
+                     ["Shikotsumyaku"],
+                     ["<:shikotsumyaku:885594454227058708>"],
+                     "June 15th",
+                     "Male",
+                     "♂️",
+                     "166.1cm",
+                     "49.8kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Otogakure"],
+                     ["<:otogakure:886006804084031518>"],
+                     "Kaguya Clan",
+                     "<:kaguyaclan:885974543406071858>",
+                     "Sound Five",
+                     ["Unknown"],
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     ["Cursed Seal of Earth", "Dance of the Camellia", "Dance of the Clematis: Flower", "Dance of the Clematis: Vine", "Dance of the Larch", "Dance of the Seedling Fern", "Dance of the Willow", "Ten-Finger Drilling Bullets"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916740896756756540/kimimaro.png")
     kinoto = Character("Kinoto",
                      ["No Aliases!"],
                      569,
@@ -3846,6 +3979,28 @@ class Characters():
                      ["<:waterrelease:886019914727571566>"],
                      ["Chakra Transfer Technique", "Leech Gap", "Soap Bubble Ninjutsu (Anime only)", "Tailed Beast Ball", "Tailed Beast Full Charge", "Tailed Beast Telepathy", "Water Release: Starch Syrup Capturing Field", "Wisdom Wolf Decay"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/909514477463011338/saiken.png")
+    sakonandukon = Character("Sakon and Ukon",
+                     ["The Second", "Sakon of the West Gate", "Sakon to Ukon", "Sakon", "Ukon"],
+                     68,
+                     ["Sakon and Ukon's Kekkei Genkai"],
+                     ["<:sakonandukonskekkeigenkai:885593894568489001>"],
+                     "June 20th",
+                     "Male",
+                     "♂️",
+                     "155.1cm",
+                     "45kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Otogakure"],
+                     ["<:otogakure:886006804084031518>"],
+                     "None",
+                     "<:none:886242085244649522>",
+                     "Sound Four",
+                     ["Unknown"],
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     ["Attack of the Twin Demons", "Barrier Method Formation", "Combination Transformation", "Dark Sealing Method", "Four Black Fogs Formation", "Four Violet Flames Formation", "Multiple Connected Feet", "Multiple Connected Fists", "Multiple Connected Whirlwinds (Anime only)", "Parasite Demon Demolition Technique", "Sound Four's Cursed Seals", "Sound Four: Summoning: Four Beasts Encirclement Formation (Anime only)", "Space–Time Technique Formula: Underworld Turnover (Anime only)", "Summoning Technique", "Summoning: Rashōmon", "Summoning: Triple Rashōmon (Anime only)"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916742229102575616/sakon_and_ukon.png")
     sakura = Character("Sakura Haruno",
                        ["Sakura", "Haruno Sakura", "Forehead Girl", "Tsunade Number Two"],
                        1,
@@ -4330,6 +4485,28 @@ class Characters():
                      ["<:lavarelease:885591994011906128>", "<:firerelease:886019827121127445>", "<:earthrelease:886019985909108748>"],
                      ["Chakra Transfer Technique", "Flower–Fruit Mountain", "Monkey Flame Arson", "Tailed Beast Ball", "Tailed Beast Full Charge", "Tailed Beast Telepathy"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/909512179819110410/son_goku.png")
+    suigetsu = Character("Suigetsu Hozuki",
+                     ["Second Coming of the Demon"],
+                     335,
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     "February 18th",
+                     "Male",
+                     "♂️",
+                     "Part II: 177.4 cm, Gaiden: 178.6 cm",
+                     "57kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Kirigakure", "Otogakure", "Akatsuki"],
+                     ["<:kirigakure:886006283977785405>", "<:otogakure:886006804084031518>", "<:akatsuki:886008680607277067>"],
+                     "Hozuki Clan",
+                     "<:hozukiclan:885972955312554014>",
+                     "Taka, Hebi",
+                     ["Mangetsu Hozuki"],
+                     ["Water Release", "Wind Release"],
+                     ["<:waterrelease:886019914727571566>", "<:windrelease:886019877847068732>"],
+                     ["Drowning Water Blob Technique", "Hydrification Technique", "Silent Killing", "Water Clone Technique (Anime only)", "Water Gun Technique", "Water Gun: Two Guns", "Water Release: Great Water Arm Technique", "Water Release: Tate Eboshi", "Water Release: Water Hail (Anime only)"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916738133465374761/suigetsu_hozuki.png")
     suzaku = Character("Suzaku Nara",
                        ["Suzaku", "Naru Suzuka"],
                        495,
@@ -4440,6 +4617,28 @@ class Characters():
                      ["<:none:886242085244649522>"],
                      ["Parasitic Destruction Insect Technique"],
                      "https://cdn.discordapp.com/attachments/886205213420191795/911696784114483240/tatsuma_aburame.png")
+    tayuya = Character("Tayuya",
+                     ["The Third", "Tayuya of the North Gate"],
+                     68,
+                     ["None"],
+                     ["<:none:886242085244649522>"],
+                     "February 15th",
+                     "Male",
+                     "♂️",
+                     "148.2cm",
+                     "38.2kg",
+                     "None",
+                     "<:none:886242085244649522>",
+                     ["Otogakure"],
+                     ["<:otogakure:886006804084031518>"],
+                     "None",
+                     "<:none:886242085244649522>",
+                     "Sound Four",
+                     ["Unknown"],
+                     ["Yin Release"],
+                     ["<:yinrelease:886020498482397226>"],
+                     ["Barrier Method Formation", "Combination Transformation", "Demonic Flute: Illusionary Warriors Manipulating Melody", "Demonic Flute: Phantom Sound Chains", "Four Black Fogs Formation", "Four Violet Flames Formation", "Revolt of the Demon World", "Sound Four's Cursed Seals", "Sound Four: Summoning: Four Beasts Encirclement Formation (Anime only)", "Space–Time Technique Formula: Underworld Turnover (Anime only)", "Summoning Technique (Doki)"],
+                     "https://cdn.discordapp.com/attachments/886205213420191795/916747311751770152/tayuya.png")
     tekka = Character("Tekka Uchiha",
                       ["Tekka", "Uchiha Tekka"],
                       129,

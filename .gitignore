@@ -342,3 +342,4 @@ healthchecksdb
 # Don't upload .env file
 .env
 AdminInformation.txt
+SaiCharacterlist.txt
