@@ -1,4 +1,4 @@
 discord.py
-discord_slash
+discord-py-interactions
 python-dotenv
 psutil
