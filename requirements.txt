@@ -1,3 +1,4 @@
 discord.py
+discord_slash
 python-dotenv
 psutil
