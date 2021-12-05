@@ -343,3 +343,4 @@ healthchecksdb
 .env
 AdminInformation.txt
 SaiCharacterlist.txt
+FullCooldownsTable.txt

@@ -1538,7 +1538,7 @@ async def on_message(message):
                 return
             
             # create and then attempt to return an embed
-            cooldownsembed = discord.Embed(title=f"Cooldowns", description="Below is a table of your cooldowns for each of the commands. The first column shows the command in question, and the columns show, in order the cooldown left for a certain user, the generic cooldown length, the time the command was last run, and if the command is runnable now.", color=embedcolour)
+            cooldownsembed = discord.Embed(title=f"Cooldowns", description="Above is a table of your cooldowns for each of the commands. The first column shows the command in question, and the columns show, in order the cooldown left for a certain user, the generic cooldown length, the time the command was last run, and if the command is runnable now.", color=embedcolour)
             # fetch cooldowns for the user
             column_name_one = "Command"
             column_name_two = "Cooldown"
@@ -1546,11 +1546,12 @@ async def on_message(message):
             column_name_four = "Last Run"
             column_name_five = "Runnable"
             empty = ""
-            table = f"{column_name_one:^15}|{column_name_two:^20}|{column_name_three:^20}|{column_name_four:^10}|{column_name_five:^10}\n{empty:_^15} {empty:_^20} {empty:_^20} {empty:_^10} {empty:_^10}\n"
-            small_table = f"{column_name_one:^15}|{column_name_two:^20}|{column_name_five:^10}\n{empty:_^15} {empty:_^20} {empty:_^10}\n"
+            table = f"{column_name_one:^17}|{column_name_two:^38}|{column_name_three:^38}|{column_name_four:^10}|{column_name_five:^10}\n{empty:_^17} {empty:_^38} {empty:_^38} {empty:_^10} {empty:_^10}\n"
             zero_timedelta = timedelta(0)
             for cooldown, time in currentuser:
                 time_last_run = time.strftime("%H:%M:%S")
+                if str(time_last_run) == "00:00:00":
+                    time_last_run = "Never"
                 cooldown_command = "s." + cooldown
                 cooldown_length = currentuser.get_cooldown_length(cooldown)
                 if time == datetime.utcfromtimestamp(0):
@@ -1565,15 +1566,15 @@ async def on_message(message):
                     runnable = "Yes"
                 else:
                     runnable = "No"                
-                table += f"{cooldown_command:^15}|{cooldown_left:^20}|{formattimedelta(timedelta(seconds=cooldown_length)):^20}|{time_last_run:^10}|{runnable:^10}\n"
-                small_table += f"{cooldown_command:^15}|{cooldown_left:^20}|{runnable:^10}\n"
+                table += f"{cooldown_command:^17}|{cooldown_left:^38}|{formattimedelta(timedelta(seconds=cooldown_length)):^38}|{time_last_run:^10}|{runnable:^10}\n"
             # add table to field
-            cooldownsembed.add_field(name=f"Cooldowns for {str(message.author)}:", value=small_table)
-            
-            try:
-                await message.channel.send(embed=cooldownsembed)
-            except Exception as e:
-                print(e)
+            cooldownsembed.set_thumbnail(url=client.user.avatar_url)
+            cooldownsembed.add_field(name=f"Cooldowns for {str(message.author)}:", value="­")
+            cooldownsembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+            cooldownsfile = open("FullCooldownsTable.txt", "w")
+            with cooldownsfile as f:
+                f.write(table)
+            await message.channel.send(embed=cooldownsembed, file=discord.File(r".\FullCooldownsTable.txt"))
 
         #code for edit snipe command
         elif command == "editsnipe" or command == "es":
