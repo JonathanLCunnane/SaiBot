@@ -1,6 +1,5 @@
 #imports
 #region
-from operator import ge
 import discord
 from discord.embeds import Embed
 from discord.enums import ActivityType, ChannelType
@@ -110,12 +109,12 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.12.0"
-linesofcode = "8932"
+version = "1.13.0"
+linesofcode = "9699"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/putyourfinger-here-cute-funny-heart-gif-7761375"
+weeklytulaiigif = "https://tenor.com/view/super-mario-3d-world-smg4-gif-15054375"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -561,8 +560,14 @@ async def on_message(message):
             informationmessage = await message.channel.send(embed=informationembed)
             
             #add reactions for pages
-            await informationmessage.add_reaction("⬅️")
-            await informationmessage.add_reaction("➡️")
+            try:
+                await informationmessage.add_reaction("⬅️")
+                await informationmessage.add_reaction("➡️")
+            except Exception as e:
+                try:
+                    await message.channel.send(f"An error has occured, exiting command! Please report this on the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n```{e}```")
+                except:
+                    pass
 
             def check(reaction, user):
                 return (user.id != 858663143931641857 and str(reaction.emoji) in ["⬅️", "➡️"])
@@ -651,12 +656,25 @@ async def on_message(message):
                     informationembed.set_image(url=character.image)
                     informationembed.set_footer(text="Command run by {0}#{1} | Page {2} of 5 | Run 's.help information' for more info on how this command functions!".format(message.author.name, message.author.discriminator, pagenum), icon_url=message.author.avatar_url)
 
-                    await informationmessage.edit(embed=informationembed)
-                    await reaction.remove(user)
+                    try:
+                        await informationmessage.edit(embed=informationembed)
+                        await reaction.remove(user)
+                    except Exception as e:
+                        try:
+                            await message.channel.send(f"An error has occured, exiting command! Please report this on the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n```{e}```")
+                        except:
+                            pass
 
 
                 except asyncio.TimeoutError:
-                    await informationmessage.clear_reactions()
+                    try:
+                        await informationmessage.clear_reactions()
+                    except Exception as e:
+                        try:
+                            await message.channel.send(f"An error has occured, exiting command! Please report this on the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n```{e}```")
+                        except:
+                            pass
+
 
         elif command == "naruto":
             #firstly checks if the cooldown has been met
@@ -3372,7 +3390,7 @@ async def character(ctx: SlashContext, character_name: str):
     else:
         timeleft = (currentuser.cooldowns.character + timedelta(seconds=charactercooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
-        cooldownembed = getcooldownembed("character", timeleft, ctx.author)
+        cooldownembed = getcooldownembed("/character", timeleft, ctx.author)
         await ctx.send(embed=cooldownembed)
         return
 
@@ -3402,6 +3420,60 @@ async def character(ctx: SlashContext, character_name: str):
     characterembed.set_image(url=character.image)
     characterembed.set_footer(text="Command run by {0}#{1} | Run 's.help character' for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=characterembed)
+
+@slash.slash(name="information",
+             description="Get the specific information of any character in naruto.",
+             guild_ids=[917125124770132038],
+             options=[
+                 create_option(
+                     name="character_name",
+                     description="The name of the desired character",
+                     option_type=3,
+                     required=True
+                )
+             ])
+async def information(ctx: SlashContext, character_name: str):
+    #firstly checks if the cooldown has been met
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.information + timedelta(seconds=informationcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.information = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.information + timedelta(seconds=informationcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/information", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    
+    character = Characters.find(character_name)   
+    #if no character found
+    if character == None:
+        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `s.help characterlist`")
+        return
+    
+    #generate dropdown
+    select_menu = create_select(
+        custom_id = "information_select",
+        placeholder="Select a Page to Jump to...",
+        options=[
+            create_select_option(label="Page 1", description= "General Information", value=f"1 {ctx.author} {character.name}", emoji=client.get_emoji(881883500515590144)),
+            create_select_option(label="Page 2", description= "Incl. Kekkei Genkai and Nature Types", value=f"2 {ctx.author} {character.name}", emoji=client.get_emoji(885593511330717758)),
+            create_select_option(label="Page 3", description= "Rank, Birthday, Height, Weight, and Sex", value=f"3 {ctx.author} {character.name}", emoji=client.get_emoji(885603650112720896)),
+            create_select_option(label="Page 4", description= "Full List of Known Jutsu", value=f"4 {ctx.author} {character.name}", emoji=client.get_emoji(919637034610622474)),
+            create_select_option(label="Page 5", description= "Teams and Family", value=f"5 {ctx.author} {character.name}", emoji="👪"),
+        ]
+    )
+    select_menu = [create_actionrow(select_menu)]
+
+    #send first page
+    informationembed = discord.Embed(title=f"Information for {character.name}", color=embedcolour)
+    informationembed.add_field(name="Name:", value=character.name, inline=False)
+    informationembed.add_field(name="Aliases:", value=", ".join(character.aliases), inline=False)
+    informationembed.add_field(name="Debut:", value=str(character.debut), inline=False)
+    informationembed.set_image(url=character.image)
+    informationembed.set_footer(text="Command run by {0}#{1} | Page {2} of 5 | Run 's.help information' for more info on how this command functions!".format(ctx.author.name, ctx.author.discriminator, "1"), icon_url=ctx.author.avatar_url)
+
+    await ctx.send(embed=informationembed, components=select_menu)
+
 #endregion
 
 #info
@@ -3424,11 +3496,11 @@ async def help(ctx: SlashContext):
     # create menu
     menu = create_select(placeholder="Select a Category...", custom_id="help_category",
                          options=[
-                             create_select_option(label="Naruto", value="Naruto", description="Specific naruto-based commands", emoji=client.get_emoji(886208833393938452)),
-                             create_select_option(label="Info", value="Info", description="Find out more about Sai", emoji=client.get_emoji(881883500515590144)),
-                             create_select_option(label="Utility", value="Utility", description="Commands to streamline your experience", emoji=client.get_emoji(881883277424746546)),
-                             create_select_option(label="Moderation and Admin", value="Moderation and Admin", description="Commands helpful to Moderators and Admins", emoji=client.get_emoji(881897640948826133)),
-                             create_select_option(label="Fun", value="Fun", description="Have some fun", emoji=client.get_emoji(881899126286061609))
+                             create_select_option(label="Naruto", value=f"Naruto {ctx.author}", description="Specific naruto-based commands", emoji=client.get_emoji(886208833393938452)),
+                             create_select_option(label="Info", value=f"Info {ctx.author}", description="Find out more about Sai", emoji=client.get_emoji(881883500515590144)),
+                             create_select_option(label="Utility", value=f"Utility {ctx.author}", description="Commands to streamline your experience", emoji=client.get_emoji(881883277424746546)),
+                             create_select_option(label="Moderation and Admin", value=f"ModerationandAdmin {ctx.author}", description="Commands helpful to Moderators and Admins", emoji=client.get_emoji(881897640948826133)),
+                             create_select_option(label="Fun", value=f"Fun {ctx.author}", description="Have some fun", emoji=client.get_emoji(881899126286061609))
                          ])
     menu = [create_actionrow(menu)]
     # create embed
@@ -3445,46 +3517,145 @@ async def help(ctx: SlashContext):
 
 #endregion
 
+# utility
+#region
+
+
 @slash.slash(name="votereminder", description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", guild_ids=[917125124770132038])
 async def votereminder(ctx: SlashContext):
     #firstly checks if the cooldown has been met
-    try:
-        currentuser = get_current_user(ctx.author)
-        if (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
-            currentuser.cooldowns.votereminder = datetime.now()
-        else:
-            timeleft = (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown)) - datetime.now()
-            timeleft = formattimedelta(timeleft)
-            cooldownembed = getcooldownembed("/votereminder", timeleft, ctx.author)
-            await ctx.send(embed=cooldownembed)
-            return
-        voteremindembed = discord.Embed(title="Reminder Set.", description="A reminder has been set for 12 hours from now! A DM will be sent to you at the time, to prevent clogging up channels, so make sure you have your DMs open! If you want to vote now, you can do that here:\nhttps://top.gg/bot/858663143931641857", color=embedcolour)
-        voteremindembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=voteremindembed)
-    except Exception as e:
-        await ctx.send(content=f"An error occured!\n```Send this error message to the bot developer\n{e}```")
+    #try:
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.votereminder = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/votereminder", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
         return
+    # get link button
+    button = create_button(
+        style=5,
+        label="Vote for Sai Here",
+        emoji=client.get_emoji(921879377455743057),
+        url="https://top.gg/bot/858663143931641857"
+    )
+    button = [create_actionrow(button)]
+    voteremindembed = discord.Embed(title="Reminder Set.", description="A reminder has been set for 12 hours from now! A DM will be sent to you at the time, to prevent clogging up channels, so make sure you have your DMs open! If you want to vote now, you can do that here:\nhttps://top.gg/bot/858663143931641857", color=embedcolour)
+    voteremindembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=voteremindembed, components=button)
+    #except Exception as e:
+       # await ctx.send(content=f"An error occured!\n```Send this error message to the bot developer\n{e}```")
+        #return
     await sleep(43200)
     await ctx.author.send("You can vote!")
+
+
+#endregion
+
 
 # component callbacks
 #region
 
-#info
+# naruto
+#region
+
+@slash.component_callback()
+async def information_select(ctx: ComponentContext):
+    apart = ctx.values[0].split()
+    option = apart[0]
+    character = Characters.find(" ".join(apart[2:]))
+    user = apart[1]
+    if str(user) != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    informationembed = discord.Embed(title=f"Information for {character.name}", color=embedcolour)
+    if option == "1":
+        pagenum = 1
+        informationembed.add_field(name="Name:", value=character.name, inline=False)
+        informationembed.add_field(name="Aliases:", value=", ".join(character.aliases), inline=False)
+        informationembed.add_field(name="Debut:", value=str(character.debut), inline=False)
+    elif option == "2":
+        pagenum = 2
+        informationembed.add_field(name="Kekkei Genkai:", value=("\n".join([character.kekkeigenkaiemojis[index] + " - " + character.kekkeigenkai[index] for index in range(len(character.kekkeigenkai))])), inline=False)
+        informationembed.add_field(name="Nature Types:", value=("\n".join([character.naturetypeemojis[index] + " - " + character.naturetypes[index] for index in range(len(character.naturetypes))])), inline=False)
+        informationembed.add_field(name="Clan:", value=(character.clanemoji + " - " + character.clan), inline=False)
+        informationembed.add_field(name="Affiliations:", value=("\n".join([character.affiliationemojis[index] + " - " + character.affiliations[index] for index in range(len(character.affiliations))])), inline=False)
+    elif option == "3":
+        pagenum = 3
+        informationembed.add_field(name="Rank:", value=(character.rankemoji + " - " + character.rank), inline=False)
+        informationembed.add_field(name="Birth Date:", value=character.dob, inline=False)
+        informationembed.add_field(name="Sex:", value=(character.sexemoji + " - " + character.sex), inline=False)
+        informationembed.add_field(name="Height:", value=character.height, inline=False)
+        informationembed.add_field(name="Weight:", value=character.weight, inline=False)
+    elif option == "4":
+        pagenum = 4
+        jutsustringnumber = 1
+        jutsustring = ""
+        jutsustringtwo = ""
+        jutsustringthree = ""
+        for jutsu in character.jutsu:
+            #choose which string to add to
+            if len(jutsustring) + len("*" + jutsu + "*,\n") > 1024 and jutsustringnumber == 1:
+                jutsustringnumber = 2
+            elif len(jutsustringtwo) + len("*" + jutsu + "*,\n") > 1024 and jutsustringnumber == 2:
+                jutsustringnumber = 3
+            
+            #add to correct string
+            if jutsustringnumber == 1:
+                if jutsu != character.jutsu[-1]:
+                    jutsustring += ("*" + jutsu + "*,\n")
+                else:
+                    jutsustring += ("*" + jutsu + "*")
+            elif jutsustringnumber == 2:
+                if jutsu != character.jutsu[-1]:
+                    jutsustringtwo += ("*" + jutsu + "*,\n")
+                else:
+                    jutsustringtwo += ("*" + jutsu + "*")
+            elif jutsustringnumber == 3:
+                if jutsu != character.jutsu[-1]:
+                    jutsustringthree += ("*" + jutsu + "*,\n")
+                else:
+                    jutsustringthree += ("*" + jutsu + "*")
+        
+        informationembed.add_field(name="Jutsu:", value=jutsustring, inline=False)
+        if jutsustringtwo != "":
+            informationembed.add_field(name="­", value=jutsustringtwo, inline=False)
+        if jutsustringthree != "":
+            informationembed.add_field(name="­", value=jutsustringthree, inline=False)
+    else: #option == "5"
+        pagenum = 5
+        informationembed.add_field(name="Teams:", value=(",\n".join(character.team.split(","))), inline=False)
+        informationembed.add_field(name="Family:", value=(",\n".join(["**" + member + "**" for member in character.familymembers])), inline=False)
+    
+    informationembed.set_image(url=character.image)
+    informationembed.set_footer(text="Command run by {0}#{1} | Page {2} of 5 | Run 's.help information' for more info on how this command functions!".format(ctx.author.name, ctx.author.discriminator, pagenum), icon_url=ctx.author.avatar_url)
+
+    await ctx.edit_origin(embed=informationembed)
+
+#endregion
+
+# info
 #region
 
 #help
 #region
 @slash.component_callback()
 async def help_home(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
     # create menu
     menu = create_select(placeholder="Select a Category...", custom_id="help_category",
                         options=[
-                            create_select_option(label="Naruto", value="Naruto", description="Specific naruto-based commands", emoji=client.get_emoji(886208833393938452)),
-                            create_select_option(label="Info", value="Info", description="Find out more about Sai", emoji=client.get_emoji(881883500515590144)),
-                            create_select_option(label="Utility", value="Utility", description="Commands to streamline your experience", emoji=client.get_emoji(881883277424746546)),
-                            create_select_option(label="Moderation and Admin", value="Moderation and Admin", description="Commands helpful to Moderators and Admins", emoji=client.get_emoji(881897640948826133)),
-                            create_select_option(label="Fun", value="Fun", description="Have some fun", emoji=client.get_emoji(881899126286061609))
+                             create_select_option(label="Naruto", value=f"Naruto {ctx.author}", description="Specific naruto-based commands", emoji=client.get_emoji(886208833393938452)),
+                             create_select_option(label="Info", value=f"Info {ctx.author}", description="Find out more about Sai", emoji=client.get_emoji(881883500515590144)),
+                             create_select_option(label="Utility", value=f"Utility {ctx.author}", description="Commands to streamline your experience", emoji=client.get_emoji(881883277424746546)),
+                             create_select_option(label="Moderation and Admin", value=f"ModerationandAdmin {ctx.author}", description="Commands helpful to Moderators and Admins", emoji=client.get_emoji(881897640948826133)),
+                             create_select_option(label="Fun", value=f"Fun {ctx.author}", description="Have some fun", emoji=client.get_emoji(881899126286061609))
                         ])
     menu = [create_actionrow(menu)]
     # create embed
@@ -3499,7 +3670,12 @@ async def help_home(ctx: ComponentContext):
     await ctx.edit_origin(embed=helpembed, components=menu)
 @slash.component_callback()
 async def help_category(ctx: ComponentContext):
-    option = ctx.values[0]
+    apart = ctx.values[0].split()
+    option = apart[0]
+    user = apart[1]
+    if str(user) != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
     if option == "Naruto":
         # create buttons
         buttons = [
@@ -3525,9 +3701,222 @@ async def help_category(ctx: ComponentContext):
         helpembed=discord.Embed(title=f"Naruto Commands {client.get_emoji(886208833393938452)}", description="Here is a list of all of Sai's commands in the Naruto Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
         helpembed.set_thumbnail(url=client.user.avatar_url)
         helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    elif option == "Info":
+       # create buttons
+        buttons_one = [
+            create_button(
+                style=ButtonStyle.primary,
+                label="Help Home",
+                emoji=client.get_emoji(881883309142077470),
+                custom_id="help_home"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="About",
+                custom_id="about"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Help",
+                custom_id="help"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Links",
+                custom_id="links"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Patreon",
+                custom_id="patreon"
+            )
+        ]
+        buttons_two = [
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Profile",
+                custom_id="profile"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Statistics",
+                custom_id="statistics"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Testcount",
+                custom_id="testcount"
+            )
+        ]
+        buttons = [create_actionrow(*buttons_one), create_actionrow(*buttons_two)]
+        # create embed
+        helpembed=discord.Embed(title=f"Info Commands {client.get_emoji(881883500515590144)}", description="Here is a list of all of Sai's commands in the Info Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
+        helpembed.set_thumbnail(url=client.user.avatar_url)
+        helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url) 
+    elif option == "Utility":
+        # create buttons
+        buttons_one = [
+            create_button(
+                style=ButtonStyle.primary,
+                label="Help Home",
+                emoji=client.get_emoji(881883309142077470),
+                custom_id="help_home"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Editsnipe",
+                custom_id="editsnipe"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Event",
+                custom_id="event"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Nickname",
+                custom_id="nickname"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Ping",
+                custom_id="ping"
+            )
+        ]
+        buttons_two = [
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Rescue",
+                custom_id="rescue"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Snipe",
+                custom_id="snipe"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Time",
+                custom_id="time"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Vote Reminder",
+                custom_id="vote_reminder"
+            )
+        ]
+        buttons = [create_actionrow(*buttons_one), create_actionrow(*buttons_two)]
+        # create embed
+        helpembed=discord.Embed(title=f"Utility Commands {client.get_emoji(881883277424746546)}", description="Here is a list of all of Sai's commands in the Utility Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
+        helpembed.set_thumbnail(url=client.user.avatar_url)
+        helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    elif option == "ModerationandAdmin":
+        # create buttons
+        buttons_one = [
+            create_button(
+                style=ButtonStyle.primary,
+                label="Help Home",
+                emoji=client.get_emoji(881883309142077470),
+                custom_id="help_home"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Ban",
+                custom_id="ban"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Kick",
+                custom_id="kick"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Lockdown",
+                custom_id="lockdown"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Message",
+                custom_id="message"
+            )
+        ]
+        buttons_two = [
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Purge",
+                custom_id="purge"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Role",
+                custom_id="role"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Slowmode",
+                custom_id="slowmode"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Unlockdown",
+                custom_id="unlockdown"
+            )
+        ]
+        buttons = [create_actionrow(*buttons_one), create_actionrow(*buttons_two)]
+        # create embed
+        helpembed=discord.Embed(title=f"Moderation and Admin Commands {client.get_emoji(881897640948826133)}", description="Here is a list of all of Sai's commands in the Moderation and Admin Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
+        helpembed.set_thumbnail(url=client.user.avatar_url)
+        helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    else: # option == "Fun"
+        # create buttons
+        buttons_one = [
+            create_button(
+                style=ButtonStyle.primary,
+                label="Help Home",
+                emoji=client.get_emoji(881883309142077470),
+                custom_id="help_home"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Decide",
+                custom_id="decide"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Gif",
+                custom_id="gif"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Quote",
+                custom_id="quote"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Tulaiiisabigman",
+                custom_id="tulaiiisabigman"
+            )
+        ]
+        buttons_two = [
+            create_button(
+                style=ButtonStyle.secondary,
+                label="8ball",
+                custom_id="eight_ball"
+            )
+        ]
+        buttons = [create_actionrow(*buttons_one), create_actionrow(*buttons_two)]
+        # create embed
+        helpembed=discord.Embed(title=f"Fun Commands {client.get_emoji(881899126286061609)}", description="Here is a list of all of Sai's commands in the Fun Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
+        helpembed.set_thumbnail(url=client.user.avatar_url)
+        helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
 @slash.component_callback()
 async def character(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
     # create back button
     button = [
         create_button(
@@ -3550,6 +3939,11 @@ async def character(ctx: ComponentContext):
     await ctx.edit_origin(embed=helpembed, components=button)
 @slash.component_callback()
 async def information(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
     # create back button
     button = [
         create_button(
