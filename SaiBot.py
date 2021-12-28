@@ -109,12 +109,13 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.13.0"
-linesofcode = "9699"
+version = "1.14.0"
+linesofcode = "10137"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
+total_commands_run = 3839
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/super-mario-3d-world-smg4-gif-15054375"
+weeklytulaiigif = "https://tenor.com/view/you-have-failed-the-vibe-check-gif-21387145"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -348,6 +349,19 @@ def parsetimestring(string):
     time = time - datetime(1900, 1, 1)
     time = time.total_seconds()
     return time
+async def logslashcommand(ctx: SlashContext):
+    """Logs the command in the given slash context `SlashContext`"""
+    params = ""
+    for param in ctx.args:
+        params += param + " "
+    loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
+    loggingembed=discord.Embed(title="Command Executed", colour=embedcolour)
+    loggingembed.add_field(name="Command", value=f"```/{ctx.command} {params}```", inline=True)
+    loggingembed.add_field(name="Server", value=f"```{ctx.guild.name} (id:{ctx.guild_id})```", inline=True)
+    loggingembed.add_field(name="Channel", value=f"```{ctx.channel.name} (id:{ctx.channel_id})```", inline=True)
+    loggingembed.add_field(name="Time", value=f"```{loggingtime}```", inline=True)
+    loggingembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await client.get_guild(859934506159833178).get_channel(881913733532758036).send(embed=loggingembed)
 #endregion
 
 #tasks
@@ -696,7 +710,7 @@ async def on_message(message):
         #region
 
         #code for help command
-        elif command[0:5] == "help " or command[0:2] == "h " or command == "help" or command == "h":
+        elif command[0:5] == "help " or command[0:2] == "h " or command == "help" or command == "h" or content == "s.":
 
             #firstly checks if the cooldown has been met
             if (currentuser.cooldowns.help + timedelta(seconds=helpcooldown) <= datetime.now()) or message.author.id == 457517248786202625:
@@ -713,6 +727,9 @@ async def on_message(message):
                 helpcommand = command[4:].strip()
             else:
                 helpcommand = command[1:].strip()
+
+            if content == "s.":
+                helpcommand = ""
 
             #if 's.help' is run return list of commands
             if helpcommand == "":
@@ -1112,23 +1129,24 @@ async def on_message(message):
             guilds = client.guilds
             servernum = len(guilds)
             usernum = len(client.users)
+            numberofcommandsrun = total_commands_run
 
             owner = await client.fetch_user(457517248786202625)
             ownername = "{}#{}".format(owner.name, owner.discriminator)
-            owneravatar = owner.avatar_url 
+            owneravatar = owner.avatar_url
         
             aboutembed=discord.Embed(title="About <:info:881883500515590144>", colour=embedcolour)
             aboutembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
             aboutembed.set_thumbnail(url=client.user.avatar_url)
-            aboutembed.add_field(name="Name", value="Sai", inline=True)
+            aboutembed.add_field(name="Name\t\t\tCommands Run*", value=f"Saiㅤㅤㅤㅤ`{numberofcommandsrun}`", inline=True)
             aboutembed.add_field(name="Time", value="Uptime: `{0}`\nCreated: `Sunday, 27 June 2021`".format(uptime), inline=True)
             aboutembed.add_field(name="Servers", value="Sai is in `{0}` servers".format(servernum), inline=False)
             aboutembed.add_field(name="Users", value="Sai can see `{0}` users".format(usernum), inline=True)
-            aboutembed.add_field(name="Version", value="<:sai:881902408786120715> Sai ({0})\n<:python:881906567325302844> Python (3.9.7)\n<:discordpy:881907255639941151> discord.py (1.7.3)".format(version), inline=True)
+            aboutembed.add_field(name="Version", value="<:sai:921879377455743057> Sai ({0})\n<:python:881906567325302844> Python (3.9.7)\n<:discordpy:881907255639941151> discord.py (1.7.3)".format(version), inline=True)
             aboutembed.add_field(name="Libraries", value="```{0}```".format(libraries), inline=False)
             aboutembed.add_field(name="Invite the bot", value="[Invite Here!](https://discord.com/api/oauth2/authorize?client_id=858663143931641857&permissions=8&scope=bot)", inline=True)
             aboutembed.add_field(name="Colour", value="Hex - #d6d6d6\nRGB - 214, 214, 214", inline=True)
-            aboutembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+            aboutembed.set_footer(text="Command run by {0}#{1} | *This is an approximate number due to the upcoming message access restrictions, and is updated each version.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
             await message.channel.send(embed=aboutembed)
                        
         #code for links command
@@ -1151,10 +1169,11 @@ async def on_message(message):
             linksembed=discord.Embed(title="Links <:info:881883500515590144>", colour=embedcolour)
             linksembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
             linksembed.set_thumbnail(url=client.user.avatar_url)
-            linksembed.add_field(name="Invite Sai to your server:", value="[Click here to invite.](https://discord.com/api/oauth2/authorize?client_id=858663143931641857&permissions=8&scope=bot)", inline=True)
+            linksembed.add_field(name="Invite Sai to your server:", value="[Click here to invite.](https://discord.com/oauth2/authorize?client_id=858663143931641857&permissions=120729185406&scope=bot%20applications.commands)", inline=True)
             linksembed.add_field(name="Get support on Sai's official server:", value="[Click here to join.](https://discord.com/invite/BSFCCFKK7f)", inline=True)
             linksembed.add_field(name="Support me by voting for Sai on top.gg:", value="[Click here to vote.](https://top.gg/bot/858663143931641857)", inline=True)
-            linksembed.add_field(name="Other links:", value="<:python:881906567325302844> [Python](https://www.python.org)\n<:discordpy:881907255639941151> [Discord.py](https://discordpy.readthedocs.io/en/stable/#getting-started)", inline=False)
+            linksembed.add_field(name="Support me or get custom features on Patreon:", value="[Click here for Patreon](https://www.patreon.com/officialsaibot)", inline=True)
+            linksembed.add_field(name="Other links:", value="<:python:881906567325302844> [Python](https://www.python.org)\n<:discordpy:881907255639941151> [Discord.py](https://discordpy.readthedocs.io/en/stable/#getting-started)", inline=True)
             linksembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
             await message.channel.send(embed=linksembed)
 
@@ -1353,7 +1372,8 @@ async def on_message(message):
             channelnum = len(allchannels)
             textchannelnum = len([channel for channel in allchannels if channel.type == ChannelType.text])
             voicechannelnum = len([channel for channel in allchannels if channel.type == ChannelType.voice])
-
+            numberofcommandsrun = total_commands_run
+            
             #get bot resource info
             pid = os.getpid()
             saibotprocess = psutil.Process(pid)
@@ -1368,15 +1388,15 @@ async def on_message(message):
             statusembed=discord.Embed(title="Statistics <:info:881883500515590144>", colour=embedcolour)
             statusembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
             statusembed.set_thumbnail(url=client.user.avatar_url)
-            statusembed.add_field(name="Version", value="<:sai:881902408786120715> Sai v{0}".format(version), inline=False)
+            statusembed.add_field(name="Version\t\t\t\t\tCommands Run*", value=f"<:sai:921879377455743057> Sai v{version}ㅤㅤ`{numberofcommandsrun}`", inline=False)
             statusembed.add_field(name="Time", value="Uptime: `{0}`\nTime Started: `{1}`\nCreated: `Sunday, 27 June 2021`".format(uptime, start), inline=True)
-            statusembed.add_field(name="Channels", value="Sai is in a total of `{0}` channels*\n<:text_channel:881903452207341629> Text Channels: `{1}`\n<:voice_channel:881904408319897600> Voice Channels: `{2}`".format(channelnum, textchannelnum, voicechannelnum), inline=True)
+            statusembed.add_field(name="Channels", value="Sai is in a total of `{0}` channels†\n<:text_channel:881903452207341629> Text Channels: `{1}`\n<:voice_channel:881904408319897600> Voice Channels: `{2}`".format(channelnum, textchannelnum, voicechannelnum), inline=True)
             statusembed.add_field(name="Servers", value="Sai is in `{0}` servers".format(servernum), inline=False)
             statusembed.add_field(name="Users", value="Sai can see `{0}` users".format(usernum), inline=True)
             statusembed.add_field(name="Resources", value="CPU Usage: `{0}%`\nRAM Usage: `{1} MB`".format(cpupercent, ramusagemb), inline=True)
             statusembed.add_field(name="Commands", value="# of cmds: `{0}`\n# of cmds run since restart: `{1}`".format(commandnumber, commandsrun), inline=False)
             statusembed.add_field(name="Coding", value="Lines of code: `{0}`\n Libraries used: `{1}`".format(linesofcode, libraries))
-            statusembed.set_footer(text="Command run by {0}#{1}  |  *The total number of channels also counts stage channels, private channels, etc.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+            statusembed.set_footer(text="Command run by {0}#{1} | *This is an approximate number due to the upcoming message access restrictions, and is updated each version. †The total number of channels also counts stage channels, private channels, etc.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
             await message.channel.send(embed=statusembed)
         
         #code for testcount command
@@ -3368,7 +3388,7 @@ def get_current_user(author):
         currentuser = allcooldowns[-1]
     return currentuser
 
-#naruto
+# naruto
 #region
 
 @slash.slash(name="character",
@@ -3383,7 +3403,8 @@ def get_current_user(author):
                 )
              ])
 async def character(ctx: SlashContext, character_name: str):
-    #firstly checks if the cooldown has been met
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
     if (currentuser.cooldowns.character + timedelta(seconds=charactercooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
         currentuser.cooldowns.character = datetime.now()
@@ -3433,7 +3454,8 @@ async def character(ctx: SlashContext, character_name: str):
                 )
              ])
 async def information(ctx: SlashContext, character_name: str):
-    #firstly checks if the cooldown has been met
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
     if (currentuser.cooldowns.information + timedelta(seconds=informationcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
         currentuser.cooldowns.information = datetime.now()
@@ -3476,14 +3498,78 @@ async def information(ctx: SlashContext, character_name: str):
 
 #endregion
 
-#info
+# info
 #region
+
+@slash.slash(
+    name="about",
+    description="Get general information about Sai.",
+    guild_ids=[917125124770132038]
+)
+async def about(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.about + timedelta(seconds=aboutcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.about = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.about + timedelta(seaconds=aboutcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/about", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #create embed
+    uptime = datetime.now() - starttime
+    uptime = str(uptime).split(".")[0]
+    guilds = client.guilds
+    servernum = len(guilds)
+    usernum = len(client.users)
+    numberofcommandsrun = total_commands_run
+
+    owner = await client.fetch_user(457517248786202625)
+    ownername = "{}#{}".format(owner.name, owner.discriminator)
+    owneravatar = owner.avatar_url
+
+    aboutembed=discord.Embed(title=f"About {client.get_emoji(881883500515590144)}", colour=embedcolour)
+    aboutembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
+    aboutembed.set_thumbnail(url=client.user.avatar_url)
+    aboutembed.add_field(name="Name\t\t\tCommands Run*", value=f"Saiㅤㅤㅤㅤ`{numberofcommandsrun}`", inline=True)
+    aboutembed.add_field(name="Time", value="Uptime: `{0}`\nCreated: `Sunday, 27 June 2021`".format(uptime), inline=True)
+    aboutembed.add_field(name="Servers", value="Sai is in `{0}` servers".format(servernum), inline=False)
+    aboutembed.add_field(name="Users", value="Sai can see `{0}` users".format(usernum), inline=True)
+    aboutembed.add_field(name="Version", value=f"{client.get_emoji(921879377455743057)} Sai ({version})\n{client.get_emoji(881906567325302844)} Python (3.9.7)\n{client.get_emoji(881907255639941151)} discord.py (1.7.3)", inline=True)
+    aboutembed.add_field(name="Libraries", value="```{0}```".format(libraries), inline=False)
+    aboutembed.add_field(name="Invite the bot", value="[Invite Here!](https://discord.com/oauth2/authorize?client_id=858663143931641857&permissions=120729185406&scope=bot%20applications.commands)", inline=True)
+    aboutembed.add_field(name="Colour", value="Hex - #d6d6d6\nRGB - 214, 214, 214", inline=True)
+    aboutembed.set_footer(text="Command run by {0}#{1} | *This is an approximate number due to the upcoming message access restrictions, and is updated each version.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    
+    #create link buttons
+    buttons = [
+        create_button(
+            style=5,
+            label="Invite Sai",
+            emoji=client.get_emoji(921879377455743057),
+            url="https://discord.com/oauth2/authorize?client_id=858663143931641857&permissions=120729185406&scope=bot%20applications.commands"
+        ),
+        create_button(
+            style=5,
+            label="Download Python",
+            emoji=client.get_emoji(881906567325302844),
+            url="https://www.python.org/downloads/"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    
+    # send embed with buttons
+    await ctx.send(embed=aboutembed, components=buttons)
 
 @slash.slash(name="help", 
              description="The simplest way to get help for all commands, or specific commands themselves.", 
              guild_ids=[917125124770132038])
 async def help(ctx: SlashContext):
-    #firstly checks if the cooldown has been met
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
     if (currentuser.cooldowns.help + timedelta(seconds=helpcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
         currentuser.cooldowns.help = datetime.now()
@@ -3514,7 +3600,73 @@ async def help(ctx: SlashContext):
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=helpembed, components=menu)
     
+@slash.slash(
+    name="links",
+    description="A hub of all Sai's important links. You can support the creator and get support here!",
+    guild_ids=[917125124770132038]
+)
+async def links(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.about + timedelta(seconds=aboutcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.about = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.about + timedelta(seaconds=aboutcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/about", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    
+    owner = await client.fetch_user(457517248786202625)
+    ownername = "{}#{}".format(owner.name, owner.discriminator)
+    owneravatar = owner.avatar_url
 
+    # create buttons
+    buttons_1 = [
+        create_button(
+            style=5,
+            label="Invite Sai to Your Own Server",
+            emoji=client.get_emoji(921879377455743057),
+            url="https://discord.com/oauth2/authorize?client_id=858663143931641857&permissions=120729185406&scope=bot%20applications.commands"
+        ),
+        create_button(
+            style=5,
+            label="Get Support on Sai's Official Server",
+            emoji=client.get_emoji(921879377455743057),
+            url="https://discord.com/invite/BSFCCFKK7f"
+        )
+    ]
+    buttons_2 = [
+        create_button(
+            style=5,
+            label="Support Sai by Voting on top.gg",
+            emoji=client.get_emoji(924755341554647150),
+            url="https://top.gg/bot/858663143931641857"
+        ),
+        create_button(
+            style=5,
+            label="Support Sai on Patreon",
+            emoji=client.get_emoji(924753141768003614),
+            url="https://patreon.com/officialsaibot"
+        )
+    ]
+    buttons_3 = [
+        create_button(
+            style=5,
+            label="Download Python",
+            emoji=client.get_emoji(881906567325302844),
+            url="https://www.python.org/downloads/"
+        )
+    ]
+    buttons = [create_actionrow(*buttons_1), create_actionrow(*buttons_2), create_actionrow(*buttons_3)]
+
+    linksembed=discord.Embed(title=f"Links {client.get_emoji(881883500515590144)}", description="Using the links in the buttons below, you can get support from the official server, support the bot owner by voting or on Patreon, invite Sai into your own server, and more:", colour=embedcolour)
+    linksembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
+    linksembed.set_thumbnail(url=client.user.avatar_url)
+    linksembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=linksembed, components=buttons)
+    
 #endregion
 
 # utility
@@ -3523,8 +3675,8 @@ async def help(ctx: SlashContext):
 
 @slash.slash(name="votereminder", description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", guild_ids=[917125124770132038])
 async def votereminder(ctx: SlashContext):
-    #firstly checks if the cooldown has been met
-    #try:
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
     if (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
         currentuser.cooldowns.votereminder = datetime.now()
@@ -3545,9 +3697,6 @@ async def votereminder(ctx: SlashContext):
     voteremindembed = discord.Embed(title="Reminder Set.", description="A reminder has been set for 12 hours from now! A DM will be sent to you at the time, to prevent clogging up channels, so make sure you have your DMs open! If you want to vote now, you can do that here:\nhttps://top.gg/bot/858663143931641857", color=embedcolour)
     voteremindembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=voteremindembed, components=button)
-    #except Exception as e:
-       # await ctx.send(content=f"An error occured!\n```Send this error message to the bot developer\n{e}```")
-        #return
     await sleep(43200)
     await ctx.author.send("You can vote!")
 
@@ -3644,7 +3793,7 @@ async def information_select(ctx: ComponentContext):
 @slash.component_callback()
 async def help_home(ctx: ComponentContext):
     # if the button was clicked by someone else
-    original_author = ctx.origin_message.embeds[0].footer.text.replace("Command run by ", "")
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
     if original_author != str(ctx.author):
         await ctx.send(content="This command is not for you!", hidden=True)
         return
@@ -3918,15 +4067,21 @@ async def character(ctx: ComponentContext):
         await ctx.send(content="This command is not for you!", hidden=True)
         return
     # create back button
-    button = [
+    buttons = [
         create_button(
             style=ButtonStyle.primary,
             label="Help Home",
             emoji=client.get_emoji(881883309142077470),
             custom_id="help_home"
+        ),
+        create_button(
+            style=5,
+            label="Visit the Characters Page",
+            emoji=client.get_emoji(886208833393938452),
+            url="https://naruto.fandom.com/wiki/Category:Characters"
         )
     ]
-    button = [create_actionrow(*button)]
+    buttons = [create_actionrow(*buttons)]
     # create embed
     helpembed=discord.Embed(title="Help", description="Command specific help for: `character` <:naruto:886208833393938452>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
@@ -3936,9 +4091,42 @@ async def character(ctx: ComponentContext):
     helpembed.add_field(name="How to read the information!", value=" - On the top left of the message will be a list of aliases, which are in *italics*\n - On the top right of the message will be the debut episode, which is in **bold**. If the debut is in Naruto Shippuden or Boruto, the episode number will be the episode number plus the number of episodes in the preceding titles. e.g. A debut in episode 3 of Naruto Shippuden, will have the debut listed as **Episode #223**, since `220 + 3 = 223`.\n - Below the debut will be a list of emojis, of which there are four rows:\n­       + The first row denotes the character's highest achieved rank.\n­       + The second row denotes the character's clan\n­       + The third row denotes the character's nature types\n­       + The fourth and last row denotes the character's kekkei genkai.", inline=False)
     helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-    await ctx.edit_origin(embed=helpembed, components=button)
+    await ctx.edit_origin(embed=helpembed, components=buttons)
 @slash.component_callback()
 async def information(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    buttons = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        ),
+        create_button(
+            style=5,
+            label="Visit the Characters Page",
+            emoji=client.get_emoji(886208833393938452),
+            url="https://naruto.fandom.com/wiki/Category:Characters"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `information` <:naruto:886208833393938452>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `information` command is used to get very specific information and an image of any Naruto character! **BEWARE OF SPOILERS** For a list of all characters available, run 's.help characterlist'", inline=False)
+    helpembed.add_field(name="How to use it", value="```/information [character name] or [character alias]```For Example:```/information Sai```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(informationcooldown), inline=False)
+    helpembed.add_field(name="How to read the information!", value="On the 1st page:\n­ - Full Name\n­ - Aliases\n­ - Debut\nOn the 2nd page:\n­ - Kekkei Genkai and Emojis\n­ - Nature Types and Emojis\n­ - Clan and Emoji\n­ - Affiliations and Emojis\nOn the 3rd page:\n­ - Rank\n­ - Birth Date\n­ - Sex and Emoji\n­ - Height\n­ - Weight\nOn the 4th page:\n­ - Jutsu List\nOn the 5th page:\n­ - Team List\n­ - Family Members List", inline=False)
+    helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=buttons)
+@slash.component_callback()
+async def about(ctx: ComponentContext):
     # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
     if original_author != str(ctx.author):
@@ -3955,15 +4143,67 @@ async def information(ctx: ComponentContext):
     ]
     button = [create_actionrow(*button)]
     # create embed
-    helpembed=discord.Embed(title="Help", description="Command specific help for: `information` <:naruto:886208833393938452>", color=embedcolour)
+    helpembed=discord.Embed(title="Help", description=f"Command specific help for: `about` {client.get_emoji(881883500515590144)}", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `information` command is used to get very specific information and an image of any Naruto character! **BEWARE OF SPOILERS** For a list of all characters available, run 's.help characterlist'", inline=False)
-    helpembed.add_field(name="How to use it", value="```/information [character name] or [character alias]```For Example:```/information Sai```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(informationcooldown), inline=False)
-    helpembed.add_field(name="How to read the information!", value="On the 1st page:\n­ - Full Name\n­ - Aliases\n­ - Debut\nOn the 2nd page:\n­ - Kekkei Genkai and Emojis\n­ - Nature Types and Emojis\n­ - Clan and Emoji\n­ - Affiliations and Emojis\nOn the 3rd page:\n­ - Rank\n­ - Birth Date\n­ - Sex and Emoji\n­ - Height\n­ - Weight\nOn the 4th page:\n­ - Jutsu List\nOn the 5th page:\n­ - Team List\n­ - Family Members List", inline=False)
-    helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
+    helpembed.add_field(name="Description", value="The `about` command is used to get general information about the bot.", inline=False)
+    helpembed.add_field(name="How to use it", value="```s.about```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```about, abt```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(aboutcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def help(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description=f"Command specific help for: `help` {client.get_emoji(881883309142077470)}", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `help` command is useful for new users to discover all of Sai's commands, and how to use them.", inline=False)
+    helpembed.add_field(name="How to use it", value="```s.help (command)```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```help, h```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(helpcooldown), inline=False)
+    helpembed.add_field(name="Extra Info", value="When running the `help` command on a specific command, the 'How to use it' field may seem confusing at first. There are three types of brackets which may show up here:\n`()` means this parameter is optional\n`[]` means this paramter is necessary\n`{}` means the value inside is the default paramter passed into the command if there are no user-passed paramters", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def links(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description=f"Command specific help for: `links` {client.get_emoji(881883500515590144)}", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `links` command is useful for voting for Sai, inviting Sai to your own server, getting an invite to the Official Support Server for Sai, and more.", inline=False)
+    helpembed.add_field(name="How to use it", value="```s.links```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```links, server, invite, vote```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(linkscooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+#endregion
+
 #endregion
 
 #endregion
