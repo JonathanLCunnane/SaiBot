@@ -6,6 +6,7 @@ from discord.enums import ActivityType, ChannelType
 from discord.http import HTTPException
 from discord.ext import tasks
 from discord import Spotify
+from discord.message import Message
 from discord_slash import SlashCommand, SlashContext, ComponentContext
 from discord_slash.utils.manage_commands import create_option, create_choice
 from discord_slash.utils.manage_components import create_select, create_select_option, create_actionrow, create_button
@@ -109,7 +110,7 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.14.0"
+version = "1.14.1"
 linesofcode = "10137"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 3839
@@ -404,7 +405,7 @@ async def on_connect():
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: Message):
 
     #precommand stuff
     #region
@@ -1567,7 +1568,7 @@ async def on_message(message):
         #region
 
         #code for the cooldowns command
-        elif command == "cooldowns" or command == "cooldown" or command == "cd":
+        elif (command == "cooldowns" or command == "cooldown" or command == "cd") and message.author.id == 457517248786202625:
             # firstly check if the cooldown has been met (ironic lmfao)
             if (currentuser.cooldowns.cooldowns + timedelta(seconds=cooldownscooldown) <= datetime.now()) or message.author.id == 457517248786202625:
                 currentuser.cooldowns.cooldowns = datetime.now()
