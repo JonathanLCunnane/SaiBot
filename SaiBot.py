@@ -405,7 +405,7 @@ async def on_connect():
 
 
 @client.event
-async def on_message(message: Message):
+async def on_message(message):
 
     #precommand stuff
     #region
