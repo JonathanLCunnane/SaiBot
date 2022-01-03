@@ -110,10 +110,10 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.14.1"
-linesofcode = "10137"
+version = "1.14.2"
+linesofcode = "10314"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 3839
+total_commands_run = 4107
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 weeklytulaiigif = "https://tenor.com/view/you-have-failed-the-vibe-check-gif-21387145"
