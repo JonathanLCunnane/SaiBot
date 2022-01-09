@@ -110,10 +110,10 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.14.2"
-linesofcode = "10314"
+version = "1.14.3"
+linesofcode = "10600"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 4107
+total_commands_run = 4173
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 weeklytulaiigif = "https://tenor.com/view/you-have-failed-the-vibe-check-gif-21387145"
@@ -1106,7 +1106,7 @@ async def on_message(message):
 
                 helpembed=discord.Embed(title="Help", description="List of all accepted characters for Sai bot. If you want to request one to be added, ping me on the official Sai bot server.", color=embedcolour)
                 helpembed.set_thumbnail(url=client.user.avatar_url)
-                helpembed.add_field(name="<:naruto:886208833393938452> Characters:", value=f"**# of Characters: {charactercount}**\n\nFor the list of characters look into the attached .txt file named SaiCharacterlist.txt\n\nMake sure to dowload the full file to see all lines.\n\nHappy Sai'ing! <:sai:881902408786120715> ", inline=False)
+                helpembed.add_field(name="<:naruto:886208833393938452> Characters:", value=f"**# of Characters: {charactercount}**\n\nFor the list of characters look into the attached .txt file named SaiCharacterlist.txt\n\nMake sure to dowload the full file to see all lines.\n\nHappy Sai'ing! <:sai:921879377455743057>", inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | Note, any changes of case will not affect the parsing of your entered character.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed, file=discord.File(r".\SaiCharacterlist.txt"))
 
