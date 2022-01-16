@@ -110,13 +110,13 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.14.3"
-linesofcode = "10600"
+version = "1.14.4"
+linesofcode = "10840"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 4173
+total_commands_run = 4219
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/you-have-failed-the-vibe-check-gif-21387145"
+weeklytulaiigif = "https://media.discordapp.net/attachments/264445053596991498/929882241956466738/ezgif.com-gif-maker_1.gif"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -3668,13 +3668,53 @@ async def links(ctx: SlashContext):
     linksembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=linksembed, components=buttons)
     
+@slash.slash(
+    name="patreon",
+    description="One of the ways which you can support Sai! Run this command to get the link",
+    guild_ids=[917125124770132038]
+)
+async def patreon(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.patreon + timedelta(seconds=patreoncooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.patreon = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.patreon + timedelta(seaconds=patreoncooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/patreon", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #creates embed, button and sends
+    button = [create_button(
+            style=5,
+            label="Support Sai on Patreon",
+            emoji=client.get_emoji(924753141768003614),
+            url="https://patreon.com/officialsaibot"
+        )]
+    button = [create_actionrow(*button)]
+    patreonembed=discord.Embed(title="The best way to support Sai", description=f"If you are looking for a way to customise Sai for your server, or simply want to show your support for the bot, we have opened a Patreon page to do so, adding to the many ways you can support the bot! If you want other tiers to be included or anything along those lines, feel free to ping the owner ({str(client.get_user(457517248786202625))}) in [The Official Sai Support Server](https://discord.com/invite/BSFCCFKK7f).", color=0xd6d6d6)
+    patreonembed.set_author(name="Support Sai on Patreon:\nhttps://www.patreon.com/officialsaibot", icon_url=client.get_user(216303189073461248).avatar_url)
+    patreonembed.set_thumbnail(url=client.user.avatar_url)
+    patreonembed.add_field(name="Tier Ⅰ - Rasengan", value="- Advisor role\n- Tier Ⅰ Supporter role", inline=True)
+    patreonembed.add_field(name="Tier Ⅱ - Tailed Beast Ball", value="\n- Advisor role\n- Custom Bot Avatar\n- Custom Bot Name\n- Tier Ⅱ Supporter role", inline=True)
+    patreonembed.add_field(name="Tier Ⅲ - Tailed Beast Ball Rasenshuriken", value="- Advisor role\n- Custom Bot Avatar\n- Custom Bot Name\n- Up to 5 Server\n Specific Commands\n- Tier Ⅲ Supporter role", inline=True)
+    patreonembed.add_field(name="Become a Patron Now:", value="[Click here](https://www.patreon.com/officialsaibot) for the official Patreon page for Sai. (Note the roles refer to ones within the Official Sai Support Server)", inline=False)
+    patreonembed.set_footer(text="Command run by {0}#{1} | Have a great day!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=patreonembed, components=button)
+
 #endregion
 
 # utility
 #region
 
 
-@slash.slash(name="votereminder", description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", guild_ids=[917125124770132038])
+@slash.slash(
+    name="votereminder", 
+    description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", 
+    guild_ids=[917125124770132038]
+)
 async def votereminder(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
@@ -4147,8 +4187,8 @@ async def about(ctx: ComponentContext):
     helpembed=discord.Embed(title="Help", description=f"Command specific help for: `about` {client.get_emoji(881883500515590144)}", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name="Description", value="The `about` command is used to get general information about the bot.", inline=False)
-    helpembed.add_field(name="How to use it", value="```s.about```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```about, abt```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(aboutcooldown), inline=False)
+    helpembed.add_field(name="How to use it", value="```/about```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(aboutcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 @slash.component_callback()
@@ -4172,9 +4212,9 @@ async def help(ctx: ComponentContext):
     helpembed=discord.Embed(title="Help", description=f"Command specific help for: `help` {client.get_emoji(881883309142077470)}", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name="Description", value="The `help` command is useful for new users to discover all of Sai's commands, and how to use them.", inline=False)
-    helpembed.add_field(name="How to use it", value="```s.help (command)```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```help, h```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(helpcooldown), inline=False)
-    helpembed.add_field(name="Extra Info", value="When running the `help` command on a specific command, the 'How to use it' field may seem confusing at first. There are three types of brackets which may show up here:\n`()` means this parameter is optional\n`[]` means this paramter is necessary\n`{}` means the value inside is the default paramter passed into the command if there are no user-passed paramters", inline=False)
+    helpembed.add_field(name="How to use it", value="```/help```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(helpcooldown), inline=False)
+    helpembed.add_field(name="Extra Info", value="To get help for a specific command, firstly __**click help home and select a command category in the dropdown below.**__\nWhen running the `help` command on a specific command, the 'How to use it' field may seem confusing at first. There are three types of brackets which may show up here:\n`()` means this parameter is optional\n`[]` means this paramter is necessary\n`{}` means the value inside is the default paramter passed into the command if there are no user-passed paramters", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 @slash.component_callback()
@@ -4198,11 +4238,35 @@ async def links(ctx: ComponentContext):
     helpembed=discord.Embed(title="Help", description=f"Command specific help for: `links` {client.get_emoji(881883500515590144)}", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name="Description", value="The `links` command is useful for voting for Sai, inviting Sai to your own server, getting an invite to the Official Support Server for Sai, and more.", inline=False)
-    helpembed.add_field(name="How to use it", value="```s.links```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Info\n**Aliases:** ```links, server, invite, vote```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(linkscooldown), inline=False)
+    helpembed.add_field(name="How to use it", value="```/links```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(linkscooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
-
+@slash.component_callback()
+async def patreon(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `patreon` <:info:881883500515590144>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `patreon` command is used to get information on supporting Sai through Patreon!", inline=False)
+    helpembed.add_field(name="How to use it", value="```/patreon```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(patreoncooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
 #endregion
 
 #endregion
