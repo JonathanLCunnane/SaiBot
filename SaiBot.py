@@ -1,6 +1,9 @@
 #imports
 #region
+from multiprocessing import AuthenticationError
+from venv import create
 import discord
+from discord.user import User
 from discord.embeds import Embed
 from discord.enums import ActivityType, ChannelType
 from discord.http import HTTPException
@@ -110,13 +113,13 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.14.4"
-linesofcode = "10840"
+version = "1.15.0"
+linesofcode = "11472"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 4219
+total_commands_run = 4307
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://media.discordapp.net/attachments/264445053596991498/929882241956466738/ezgif.com-gif-maker_1.gif"
+weeklytulaiigif = "https://tenor.com/view/sir-tyler-sir-tylar-tylar-tyler-sir-tyler-wii-sports-gif-21162994"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -354,7 +357,7 @@ async def logslashcommand(ctx: SlashContext):
     """Logs the command in the given slash context `SlashContext`"""
     params = ""
     for param in ctx.args:
-        params += param + " "
+        params += str(param) + " "
     loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
     loggingembed=discord.Embed(title="Command Executed", colour=embedcolour)
     loggingembed.add_field(name="Command", value=f"```/{ctx.command} {params}```", inline=True)
@@ -436,7 +439,7 @@ async def on_message(message):
         await message.channel.send(f"{message.author.mention} Your application was successful, please be patient while it is reviewed!", delete_after=10)
 
     #else if prefix is recognised
-    elif content.startswith("s.") or content.startswith("S.") or (client.user.mentioned_in(message) and content.strip() == "<@!858663143931641857>"):
+    elif content.startswith("s.") or content.startswith("S.") or (client.user.mentioned_in(message) and content.strip().startswith("<@!858663143931641857>")):
 
         #if in a DM channel, send a friendly embed message with an invite
         if isinstance(message.channel, discord.channel.DMChannel):
@@ -471,8 +474,11 @@ async def on_message(message):
         commandsrun += 1
 
         #processes the command entered
-        if client.user.mentioned_in(message) and content.strip() == "<@!858663143931641857>":
-            command = "help"
+        if client.user.mentioned_in(message):
+            if content.strip() == "<@!858663143931641857>":
+                command = "help"
+            else:
+                command = content.strip()[22:].strip()
         else:
             command = content[2:].strip()
 
@@ -724,7 +730,7 @@ async def on_message(message):
                 return
 
             #finds the command that is being asked for help
-            if command[0:4] == "help":
+            if command[:4] == "help":
                 helpcommand = command[4:].strip()
             else:
                 helpcommand = command[1:].strip()
@@ -734,7 +740,7 @@ async def on_message(message):
 
             #if 's.help' is run return list of commands
             if helpcommand == "":
-                helpembed=discord.Embed(title="Help <:help:881883309142077470>", description="\n**Prefix - **`s.`\n\nHere is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, run **`s.help <command>`**", color=embedcolour)
+                helpembed=discord.Embed(title="Help <:help:881883309142077470>", description="\n**Prefix - **`s.` *or* `@Sai#9289`\n\nHere is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, run **`s.help <command>`**", color=embedcolour)
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="<:naruto:886208833393938452> Naruto", value="```character, information```", inline=False)
                 helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
@@ -1241,27 +1247,29 @@ async def on_message(message):
                 rolementions = " ".join(rolementions)
                 
                 #get activity
-                profileactivity = profilementionuser.activity
-                if profileactivity is None:
-                    profileactivitymsg = "Nothing!"
-                elif isinstance(profileactivity, Spotify):
-                    profileactivitymsg = "Listening to **{0}** by **{1}**".format(profileactivity.title, profileactivity.artist)
-                elif profileactivity.type == ActivityType.competing:
-                    profileactivitymsg = "Competing in **{0}**".format(profileactivity.name)
-                elif profileactivity.type == ActivityType.custom:
-                    profileactivitymsg = "Custom activity (Sai cannot show this because of custom emojis that could be used in this type of activity!)"
-                elif profileactivity.type == ActivityType.listening:
-                    profileactivitymsg = "Listening to **{0}**".format(profileactivity.name)
-                elif profileactivity.type == ActivityType.playing:
-                    profileactivitymsg = "Playing **{0}**".format(profileactivity.name)
-                elif profileactivity.type == ActivityType.streaming:
-                    profileactivitymsg = "Streaming **{0}**".format(profileactivity.name)
-                elif profileactivity.type == ActivityType.watching:
-                    profileactivitymsg = "Watching **{0}**".format(profileactivity.name)
-                elif profileactivity.type == ActivityType.unknown:
-                    profileactivitymsg = "Sai doesn't know : ("
-                else:
-                    profileactivitymsg = "Sai doesn't know : ("
+                profileactivitymsg = ""
+                for profileactivity in profilementionuser.activities:
+                    if profileactivity is None:
+                        profileactivitymsg = "Nothing!"
+                        break
+                    elif isinstance(profileactivity, Spotify):
+                        profileactivitymsg += "Listening to **{0}** by **{1}**\n".format(profileactivity.title, profileactivity.artist)
+                    elif profileactivity.type == ActivityType.competing:
+                        profileactivitymsg += "Competing in **{0}**\n".format(profileactivity.name)
+                    elif profileactivity.type == ActivityType.custom:
+                        profileactivitymsg += "Custom activity (Sai cannot show this because of custom emojis that could be used in this type of activity!)\n"
+                    elif profileactivity.type == ActivityType.listening:
+                        profileactivitymsg += "Listening to **{0}**\n".format(profileactivity.name)
+                    elif profileactivity.type == ActivityType.playing:
+                        profileactivitymsg += "Playing **{0}**\n".format(profileactivity.name)
+                    elif profileactivity.type == ActivityType.streaming:
+                        profileactivitymsg += "Streaming **{0}**\n".format(profileactivity.name)
+                    elif profileactivity.type == ActivityType.watching:
+                        profileactivitymsg += "Watching **{0}**\n".format(profileactivity.name)
+                    elif profileactivity.type == ActivityType.unknown:
+                        continue
+                if profileactivitymsg == "":
+                    profileactivitymsg = "Sai does not know :("
 
                 #get custom data from db
                 if profilementionuser.id == 858663143931641857:
@@ -1287,7 +1295,7 @@ async def on_message(message):
                 profileembed.add_field(name="­Name: ", value="User nickname: `{0}` \nUsername: `{1}#{2}`".format(profilementionuser.nick, profilementionuser.name, profilementionuser.discriminator), inline=False)
                 profileembed.add_field(name="Timings: ", value="Joined this server: <t:{0}:R> \nJoined discord: <t:{1}:R>".format(int(profilementionuser.joined_at.timestamp()//1), int(profilementionuser.created_at.timestamp()//1)), inline=False)
                 profileembed.add_field(name="Roles: ", value="Role number: `{0}`\nRoles: {1}".format(len(profilementionuser.roles) - 1, rolementions), inline=False)
-                profileembed.add_field(name="Activity: ", value=profileactivitymsg, inline=False)
+                profileembed.add_field(name="Activities: ", value=profileactivitymsg, inline=False)
                 profileembed.add_field(name="Custom: ", value=f"**Name:** {customprofile[1]}\n**Pronouns:** {customprofile[2]}\n**Age:** {customprofile[3]}\n**Nickname(s):** {customprofile[4]}\n**Favourite colour:** {customprofile[5]}\n**Likes:** {customprofile[6]}\n**Dislikes:** {customprofile[7]}\n**Hobbies:** {customprofile[8]}", inline=False)
                 profileembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=profileembed)
@@ -3375,7 +3383,7 @@ async def on_error(event, *args, **kwargs):
 #new events i.e. slash commands
 #region
 
-def get_current_user(author):
+def get_current_user(author) -> usercooldown:
     adduser = True
     for user in allcooldowns:
         if int(user.userID) == int(author.id):
@@ -3594,7 +3602,7 @@ async def help(ctx: SlashContext):
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, information```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
@@ -3704,6 +3712,119 @@ async def patreon(ctx: SlashContext):
     patreonembed.set_footer(text="Command run by {0}#{1} | Have a great day!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=patreonembed, components=button)
 
+@slash.slash(
+    name="profile",
+    description="See the detailed profile of a specific user, and any of their personalised information!",
+    options=[
+        create_option(
+            name="user",
+            description="The user in the server of the profile you would wish to see.",
+            option_type=6,
+            required=False
+        )
+    ],
+    guild_ids=[917125124770132038]
+)
+async def profile(ctx: SlashContext, user: User=None):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.profile + timedelta(seconds=profilecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.profile = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.profile + timedelta(seconds=profilecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/profile", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    #sets the user
+    if not user:
+        user = client.get_guild(ctx.guild_id).get_member(ctx.author_id)
+
+    #gets roles
+    rolelist = user.roles
+    rolementions = [role.mention for role in rolelist if role != ctx.guild.default_role]
+    rolementions = " ".join(rolementions)
+
+    #get activity
+    profileactivitymsg = ""
+    for profileactivity in user.activities:
+        if profileactivity is None:
+            profileactivitymsg = "Nothing!"
+            break
+        elif isinstance(profileactivity, Spotify):
+            profileactivitymsg += "Listening to **{0}** by **{1}**\n".format(profileactivity.title, profileactivity.artist)
+        elif profileactivity.type == ActivityType.competing:
+            profileactivitymsg += "Competing in **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.custom:
+            profileactivitymsg += f"{profileactivity}\n"
+        elif profileactivity.type == ActivityType.listening:
+            profileactivitymsg += "Listening to **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.playing:
+            profileactivitymsg += "Playing **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.streaming:
+            profileactivitymsg += "Streaming **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.watching:
+            profileactivitymsg += "Watching **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.unknown:
+            continue
+    if profileactivitymsg == "":
+        profileactivitymsg = "Sai does not know :("
+
+    #get custom data from db
+    if user.id == 858663143931641857:
+        profileid = "858663143931641857"
+    else:
+        profileid = str(ctx.guild.id) + str(user.id)
+
+    dbconnection = sqlite3.connect(database)
+    cursor = dbconnection.cursor()
+    cursor.execute(f"""SELECT * FROM profiles WHERE profileid="{profileid}" """)
+
+    customprofile = cursor.fetchall()
+    if customprofile == []:
+        customprofile = [["Not customised!"] * 9]
+
+    customprofile = [option for option in customprofile[0]]
+    for option in customprofile:
+        if str(option).lower() == "skip":
+            customprofile[customprofile.index(option)] = ""
+
+    # create embed and button
+    if user == ctx.author:
+        try:
+            button = create_button(
+                style=1,
+                label=f"Customise Profile for {ctx.guild.name}.",
+                custom_id="customise_profile",
+                emoji="🎨"
+            )
+        except:
+            button = create_button(
+                style=1,
+                label="Customise Profile for this server.",
+                custom_id="customise_profile",
+                emoji="🎨"
+            )
+    else:
+        button = create_button(
+                style=4,
+                label="You Cannot Customise this Profile.",
+                custom_id="customise_profile",
+                emoji="🎨",
+                disabled=True
+            )
+    button = [create_actionrow(*[button])]
+    profileembed=discord.Embed(title="Profile <:info:881883500515590144>", description="Information on requested user below: ", color=embedcolour)
+    profileembed.set_thumbnail(url=user.avatar_url)
+    profileembed.add_field(name="­Name: ", value="User nickname: `{0}` \nUsername: `{1}#{2}`".format(user.nick, user.name, user.discriminator), inline=False)
+    profileembed.add_field(name="Timings: ", value="Joined this server: <t:{0}:R> \nJoined discord: <t:{1}:R>".format(int(user.joined_at.timestamp()//1), int(user.created_at.timestamp()//1)), inline=False)
+    profileembed.add_field(name="Roles: ", value="Role number: `{0}`\nRoles: {1}".format(len(user.roles) - 1, rolementions), inline=False)
+    profileembed.add_field(name="Activities: ", value=profileactivitymsg, inline=False)
+    profileembed.add_field(name="Custom: ", value=f"**Name:** {customprofile[1]}\n**Pronouns:** {customprofile[2]}\n**Age:** {customprofile[3]}\n**Nickname(s):** {customprofile[4]}\n**Favourite colour:** {customprofile[5]}\n**Likes:** {customprofile[6]}\n**Dislikes:** {customprofile[7]}\n**Hobbies:** {customprofile[8]}", inline=False)
+    profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=profileembed, components=button)
+    
 #endregion
 
 # utility
@@ -3833,8 +3954,9 @@ async def information_select(ctx: ComponentContext):
 #region
 @slash.component_callback()
 async def help_home(ctx: ComponentContext):
-    # if the button was clicked by someone else
+    # if the button was clicked by someone else ### ADD ANY CUSTOM FOOTER MESSAGES HERE SO THEY ARE REMOVED ###
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    original_author = original_author.replace(" | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!", "")
     if original_author != str(ctx.author):
         await ctx.send(content="This command is not for you!", hidden=True)
         return
@@ -3852,7 +3974,7 @@ async def help_home(ctx: ComponentContext):
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, information```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
@@ -4267,7 +4389,209 @@ async def patreon(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(patreoncooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def profile(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `profile` <:info:881883500515590144>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `profile` command returns a list of information about mentioned user, or by default, the user that ran the command. You can also use this command to customise* your own profile!", inline=False)
+    helpembed.add_field(name="How to use it", value="To look at a certain user's profile:```/profile {Command user} or (Mentioned user)```To customise your own profile click the button called: ```🎨 Customise Profile for 'Server Name'```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(profilecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1} | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
 #endregion
+
+@slash.component_callback()
+async def customise_profile(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    
+    # disable the original button
+    try:
+        button = create_button(
+            style=1,
+            label=f"Customise Profile for {ctx.guild.name}.",
+            custom_id="customise_profile",
+            emoji="🎨",
+            disabled=True
+        )
+    except:
+        button = create_button(
+            style=1,
+            label="Customise Profile for this server.",
+            custom_id="customise_profile",
+            emoji="🎨",
+            disabled=True
+        )
+    button = [create_actionrow(*[button])]
+    await ctx.edit_origin(components=button)
+    
+    def check(waitformsg):
+        return ((waitformsg.author == ctx.author) and (waitformsg.channel == ctx.channel))
+    
+    #ask questions and gather answers
+    questionnumber = 0
+    profileid = str(ctx.guild.id) + str(ctx.author.id)
+
+    profileembed=discord.Embed(title="Profile Customisation", color=embedcolour)
+    profileembed.add_field(name="Important info", value="**Keep each answer under 115 characters long!**\nWhen responding to the questions, whatever you put in will be displayed on your profile, so keep it readable and understandable. You can use discord markdown symbols and put in whatever format you wish. If you do not want to have a certain field on your profile, type 'skip' as a response to the question Sai asks. Also note that other people won't be able to see your profile being customised, just so that the channel does not get clogged up! That's all for now, have a great day :) ", inline=False)
+    profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.channel.send(embed=profileembed)
+    
+    responses = []
+
+    while True:
+        currentquestion = customisationquestions[questionnumber]
+
+        try:
+            await ctx.send(currentquestion, hidden=True)
+            waitformsg = await client.wait_for("message", check=check, timeout=300)
+            responses.append(waitformsg.content)
+            await waitformsg.delete()
+
+            questionnumber += 1
+            if questionnumber >= len(customisationquestions):
+                await ctx.send("Profile customisation finished!", hidden=True)
+                break
+            elif len(waitformsg.content) > 115:
+                await ctx.send("Each of your answers have to be below 115 characters, run `/help`, select the `Info` category, and click on the `Profile` button for more information. Run the customisation command again to retry.", hidden=True)
+                return
+
+        except asyncio.TimeoutError:
+            await ctx.send("You did not send your answer fast enough!", hidden=True)
+            break
+    
+    #write to db
+    dbconnection = sqlite3.connect(database)
+    cursor = dbconnection.cursor()
+
+    cursor.execute(f"""INSERT OR REPLACE INTO profiles VALUES ("{profileid}", 
+                                                                "{responses[0]}",
+                                                                "{responses[1]}",
+                                                                "{responses[2]}",
+                                                                "{responses[3]}",
+                                                                "{responses[4]}",
+                                                                "{responses[5]}",
+                                                                "{responses[6]}",
+                                                                "{responses[7]}")""")
+
+    dbconnection.commit()
+    dbconnection.close()
+
+    button = create_button(
+        style=1,
+        label="View Your Newly Customised Profile",
+        custom_id="view_customised_profile",
+        emoji="🎨"
+    )
+    button = [create_actionrow(*[button])]
+    await ctx.send(content="All done! Run `/profile`, or click the button below to see the results.", components=button, hidden=True)
+@slash.component_callback()
+async def view_customised_profile(ctx: ComponentContext):
+    # firstly disable the 'see results' button
+    button = create_button(
+        style=1,
+        label="View Your Newly Customised Profile",
+        custom_id="view_customised_profile",
+        emoji="🎨",
+        disabled=True
+    )
+    button = [create_actionrow(*[button])]
+    await ctx.edit_origin(components=button)
+    # then run the code for the original profile to be listed
+    user = ctx.author
+    #gets roles
+    rolelist = user.roles
+    rolementions = [role.mention for role in rolelist if role != ctx.guild.default_role]
+    rolementions = " ".join(rolementions)
+
+    #get activity
+    profileactivitymsg = ""
+    for profileactivity in user.activities:
+        if profileactivity is None:
+            profileactivitymsg = "Nothing!"
+            break
+        elif isinstance(profileactivity, Spotify):
+            profileactivitymsg += "Listening to **{0}** by **{1}**\n".format(profileactivity.title, profileactivity.artist)
+        elif profileactivity.type == ActivityType.competing:
+            profileactivitymsg += "Competing in **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.custom:
+            profileactivitymsg += f"{profileactivity}\n"
+        elif profileactivity.type == ActivityType.listening:
+            profileactivitymsg += "Listening to **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.playing:
+            profileactivitymsg += "Playing **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.streaming:
+            profileactivitymsg += "Streaming **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.watching:
+            profileactivitymsg += "Watching **{0}**\n".format(profileactivity.name)
+        elif profileactivity.type == ActivityType.unknown:
+            continue
+    if profileactivitymsg == "":
+        profileactivitymsg = "Sai does not know :("
+    
+    #get custom data from db
+    if user.id == 858663143931641857:
+        profileid = "858663143931641857"
+    else:
+        profileid = str(ctx.guild.id) + str(user.id)
+
+    dbconnection = sqlite3.connect(database)
+    cursor = dbconnection.cursor()
+    cursor.execute(f"""SELECT * FROM profiles WHERE profileid="{profileid}" """)
+
+    customprofile = cursor.fetchall()
+    if customprofile == []:
+        customprofile = [["Not customised!"] * 9]
+
+    customprofile = [option for option in customprofile[0]]
+    for option in customprofile:
+        if str(option).lower() == "skip":
+            customprofile[customprofile.index(option)] = ""
+
+    # create embed and button
+    try:
+        button = create_button(
+            style=1,
+            label=f"Customise Profile for {ctx.guild.name} again.",
+            custom_id="customise_profile",
+            emoji="🎨",
+        )
+    except:
+        button = create_button(
+            style=1,
+            label="Customise Profile for this server again.",
+            custom_id="customise_profile",
+            emoji="🎨"
+        )
+    button = [create_actionrow(*[button])]
+    profileembed=discord.Embed(title="Profile <:info:881883500515590144>", description="Information on requested user below: ", color=embedcolour)
+    profileembed.set_thumbnail(url=user.avatar_url)
+    profileembed.add_field(name="­Name: ", value="User nickname: `{0}` \nUsername: `{1}#{2}`".format(user.nick, user.name, user.discriminator), inline=False)
+    profileembed.add_field(name="Timings: ", value="Joined this server: <t:{0}:R> \nJoined discord: <t:{1}:R>".format(int(user.joined_at.timestamp()//1), int(user.created_at.timestamp()//1)), inline=False)
+    profileembed.add_field(name="Roles: ", value="Role number: `{0}`\nRoles: {1}".format(len(user.roles) - 1, rolementions), inline=False)
+    profileembed.add_field(name="Activities: ", value=profileactivitymsg, inline=False)
+    profileembed.add_field(name="Custom: ", value=f"**Name:** {customprofile[1]}\n**Pronouns:** {customprofile[2]}\n**Age:** {customprofile[3]}\n**Nickname(s):** {customprofile[4]}\n**Favourite colour:** {customprofile[5]}\n**Likes:** {customprofile[6]}\n**Dislikes:** {customprofile[7]}\n**Hobbies:** {customprofile[8]}", inline=False)
+    profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=profileembed, components=button, hidden=True)
 
 #endregion
 
