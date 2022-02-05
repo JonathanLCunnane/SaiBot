@@ -106,13 +106,13 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###+
 commandnumber = 31
-version = "1.15.1"
-linesofcode = "11472"
+version = "1.15.2"
+linesofcode = "11980"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 4307
+total_commands_run = 4486
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/sir-tyler-sir-tylar-tylar-tyler-sir-tyler-wii-sports-gif-21162994"
+weeklytulaiigif = "https://media.discordapp.net/attachments/846127620926996570/938507417430405220/myAmungus.gif"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
