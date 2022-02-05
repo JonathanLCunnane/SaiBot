@@ -176,7 +176,7 @@ saiquotes = [
 temp = usercooldown(0)
 ### NARUTO ###
 charactercooldown = temp.get_cooldown_length("character")
-informationcooldown = temp.get_cooldown_length("character")
+informationcooldown = temp.get_cooldown_length("information")
 
 ### INFO ###
 aboutcooldown = temp.get_cooldown_length("about")
@@ -355,6 +355,8 @@ def parsetimestring(string):
     return time
 async def logslashcommand(ctx: SlashContext):
     """Logs the command in the given slash context `SlashContext`"""
+    global commandsrun
+    commandsrun += 1
     params = ""
     for param in ctx.args:
         params += str(param) + " "
@@ -3825,6 +3827,62 @@ async def profile(ctx: SlashContext, user: User=None):
     profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=profileembed, components=button)
     
+@slash.slash(
+    name="statistics",
+    description="Veiw the much more detailed information about the bot.",
+    guild_ids=[917125124770132038],
+)
+async def statistics(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.statistics + timedelta(seconds=statisticscooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.statistics = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.statistics + timedelta(seconds=statisticscooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/statistics", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    
+    #gets bot info   
+    uptime = datetime.now() - starttime
+    uptime = str(uptime).split(".")[0]
+    start = starttime.strftime("%#A, %#d %#B\n%H:%M:%S")
+    guilds = client.guilds
+    servernum = len(guilds)
+    usernum = len(client.users)
+    allchannels = list(client.get_all_channels())
+    channelnum = len(allchannels)
+    textchannelnum = len([channel for channel in allchannels if channel.type == ChannelType.text])
+    voicechannelnum = len([channel for channel in allchannels if channel.type == ChannelType.voice])
+    numberofcommandsrun = total_commands_run
+    
+    #get bot resource info
+    pid = os.getpid()
+    saibotprocess = psutil.Process(pid)
+
+    ramusagemb = ((saibotprocess.memory_info()[0] / 10000) // 1) / 100
+    cpupercent = (((saibotprocess.cpu_percent() / psutil.cpu_count()) * 100) // 1) / 100
+
+    owner = await client.fetch_user(457517248786202625)
+    ownername = "{}#{}".format(owner.name, owner.discriminator)
+    owneravatar = owner.avatar_url 
+
+    statusembed=discord.Embed(title="Statistics <:info:881883500515590144>", colour=embedcolour)
+    statusembed.set_author(name="Bot created by {0}".format(ownername), icon_url=owneravatar)
+    statusembed.set_thumbnail(url=client.user.avatar_url)
+    statusembed.add_field(name="Version\t\t\t\t\tCommands Run*", value=f"<:sai:921879377455743057> Sai v{version}ㅤㅤ`{numberofcommandsrun}`", inline=False)
+    statusembed.add_field(name="Time", value="Uptime: `{0}`\nTime Started: `{1}`\nCreated: `Sunday, 27 June 2021`".format(uptime, start), inline=True)
+    statusembed.add_field(name="Channels", value="Sai is in a total of `{0}` channels†\n<:text_channel:881903452207341629> Text Channels: `{1}`\n<:voice_channel:881904408319897600> Voice Channels: `{2}`".format(channelnum, textchannelnum, voicechannelnum), inline=True)
+    statusembed.add_field(name="Servers", value="Sai is in `{0}` servers".format(servernum), inline=False)
+    statusembed.add_field(name="Users", value="Sai can see `{0}` users".format(usernum), inline=True)
+    statusembed.add_field(name="Resources", value="CPU Usage: `{0}%`\nRAM Usage: `{1} MB`".format(cpupercent, ramusagemb), inline=True)
+    statusembed.add_field(name="Commands", value="# of cmds: `{0}`\n# of cmds run since restart: `{1}`".format(commandnumber, commandsrun), inline=False)
+    statusembed.add_field(name="Coding", value="Lines of code: `{0}`\n Libraries used: `{1}`".format(linesofcode, libraries))
+    statusembed.set_footer(text="Command run by {0}#{1} | *This is an approximate number due to the upcoming message access restrictions, and is updated each version. †The total number of channels also counts stage channels, private channels, etc.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=statusembed)
+
 #endregion
 
 # utility
@@ -4413,6 +4471,31 @@ async def profile(ctx: ComponentContext):
     helpembed.add_field(name="How to use it", value="To look at a certain user's profile:```/profile {Command user} or (Mentioned user)```To customise your own profile click the button called: ```🎨 Customise Profile for 'Server Name'```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(profilecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def statistics(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `statistics` <:info:881883500515590144>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `statistics` command is used to get much more specific information about the bot, including its number of channels, and its CPU and RAM usage, for anyone who is interested.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/statistics```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(statisticscooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 #endregion
 
