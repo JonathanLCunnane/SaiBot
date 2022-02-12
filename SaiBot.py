@@ -17,6 +17,7 @@ from asyncio import sleep
 import asyncio
 import psutil
 from math import ceil
+from threading import Thread
 
 import time
 timeone = time.time()
@@ -30,7 +31,7 @@ print(f"Character Import Time: {timetwo - timeone}\n\n")
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 client = discord.Client(intents=discord.Intents.all(), command_prefix="s.", help_command=False, token=TOKEN)
-slash = interactions.Client(token=TOKEN)
+slash = interactions.Client(str(TOKEN))
 
 #variables
 #region
@@ -351,15 +352,19 @@ async def logslashcommand(ctx: CommandContext):
     global commandsrun
     commandsrun += 1
     params = ""
-    for param in ctx.args:
-        params += str(param) + " "
-    loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
-    loggingembed=discord.Embed(title="Command Executed", colour=embedcolour)
-    loggingembed.add_field(name="Command", value=f"```/{ctx.command} {params}```", inline=True)
-    loggingembed.add_field(name="Server", value=f"```{ctx.guild.name} (id:{ctx.guild_id})```", inline=True)
-    loggingembed.add_field(name="Channel", value=f"```{ctx.channel.name} (id:{ctx.channel_id})```", inline=True)
-    loggingembed.add_field(name="Time", value=f"```{loggingtime}```", inline=True)
-    loggingembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    if ctx.data.values != None:
+        for param in ctx.data.values:
+            params += str(param) + " "
+    try:
+        loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
+        loggingembed=discord.Embed(title="Command Executed", colour=embedcolour)
+        loggingembed.add_field(name="Command", value=f"```/{ctx.data} {params}```", inline=True)
+        loggingembed.add_field(name="Server", value=f"```{slash.get_guild(ctx.guild_id).name} (id:{ctx.guild_id})```", inline=True)
+        loggingembed.add_field(name="Channel", value=f"```{client.get_guild(ctx.channel_id).name} (id:{ctx.channel_id})```", inline=True)
+        loggingembed.add_field(name="Time", value=f"```{loggingtime}```", inline=True)
+        loggingembed.set_footer(text="Command run by {0}#{1}".format(ctx.message.author.name, ctx.message.author.discriminator), icon_url=ctx.message.author.avatar_url)
+    except Exception as e:
+        print(f"l {e}")
     await client.get_guild(859934506159833178).get_channel(881913733532758036).send(embed=loggingembed)
 #endregion
 
@@ -382,7 +387,7 @@ async def beforeswitchstatus():
 #region
 
 
-@client.event
+@slash.event
 async def on_ready():
 
     #returns login message to console
@@ -393,7 +398,7 @@ async def on_ready():
     return
 
 
-@client.event
+@slash.event
 async def on_connect():
 
     #sets random status
@@ -402,7 +407,7 @@ async def on_connect():
     return
 
 
-@client.event
+@slash.event
 async def on_message(message):
 
     #precommand stuff
@@ -2965,7 +2970,7 @@ async def on_message(message):
                 pass
 
 
-@client.event
+@slash.event
 async def on_message_delete(message):
 
     #add message to the snipe dictionary if the message is not from a bot
@@ -2973,7 +2978,7 @@ async def on_message_delete(message):
         snipedict[message.channel.id] = message
 
 
-@client.event
+@slash.event
 async def on_message_edit(before, after):
 
     #add message to the edit snipe dictionary if the message is not from a bot
@@ -2981,7 +2986,7 @@ async def on_message_edit(before, after):
         editsnipedict[before.channel.id] = before
 
 
-@client.event
+@slash.event
 async def on_raw_reaction_add(payload):
     #get message from payload
     try:
@@ -3108,7 +3113,7 @@ async def on_raw_reaction_add(payload):
     dbconnection.close()
 
 
-@client.event
+@slash.event
 async def on_raw_reaction_remove(payload):
     #get message from payload
     try:
@@ -3283,7 +3288,7 @@ async def on_raw_reaction_remove(payload):
     dbconnection.close()
 
 
-@client.event
+@slash.event
 async def on_member_join(member):
 
     #if the server joined is the Sai bot server then send a dm
@@ -3297,7 +3302,7 @@ async def on_member_join(member):
             pass
 
 
-@client.event
+@slash.event
 async def on_guild_join(guild):
 
     #send the guild join welcome message
@@ -3342,7 +3347,7 @@ async def on_guild_join(guild):
     loggingembed.set_footer(text="Owner {0}#{1}".format(guild.owner.name, guild.owner.discriminator), icon_url=guild.owner.avatar_url)
     await client.get_guild(859934506159833178).get_channel(881913733532758036).send(embed=loggingembed)
 
-@client.event
+@slash.event
 async def on_guild_remove(guild):
     try:
         #code for logging the guild leave
@@ -3356,7 +3361,7 @@ async def on_guild_remove(guild):
     except:
         pass
 
-@client.event
+@slash.event
 async def on_error(event, *args, **kwargs):
     message = args[0]  
     print(f"error at {datetime.now()} with {message}")
@@ -3403,7 +3408,8 @@ def get_current_user(author) -> usercooldown:
                  description="The name of the desired character",
                  type=OptionType.STRING,
                  required=True
-             )]
+             )],
+             type=1,
 )
 async def character(ctx: CommandContext, character_name: str):
     #firstly checks if the cooldown has been met and logs the command
@@ -3455,7 +3461,8 @@ async def character(ctx: CommandContext, character_name: str):
                      type=3,
                      required=True
                 )
-             ])
+             ],
+             type=1,)
 async def information(ctx: CommandContext, character_name: str):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
@@ -3507,7 +3514,8 @@ async def information(ctx: CommandContext, character_name: str):
 @slash.command(
     name="about",
     description="Get general information about Sai.",
-    scope=[917125124770132038]
+    scope=[917125124770132038],
+    type=1,
 )
 async def about(ctx: CommandContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3569,7 +3577,8 @@ async def about(ctx: CommandContext):
 
 @slash.command(name="help", 
              description="The simplest way to get help for all commands, or specific commands themselves.", 
-             scope=917125124770132038)
+             scope=917125124770132038,
+             type=1,)
 async def help(ctx: CommandContext):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
@@ -3606,7 +3615,8 @@ async def help(ctx: CommandContext):
 @slash.command(
     name="links",
     description="A hub of all Sai's important links. You can support the creator and get support here!",
-    scope=[917125124770132038]
+    scope=[917125124770132038],
+    type=1,
 )
 async def links(ctx: CommandContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3673,7 +3683,8 @@ async def links(ctx: CommandContext):
 @slash.command(
     name="patreon",
     description="One of the ways which you can support Sai! Run this command to get the link",
-    scope=[917125124770132038]
+    scope=[917125124770132038],
+    type=1,
 )
 async def patreon(ctx: CommandContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3717,7 +3728,8 @@ async def patreon(ctx: CommandContext):
             required=False
         )
     ],
-    scope=[917125124770132038]
+    scope=[917125124770132038],
+    type=1,
 )
 async def profile(ctx: CommandContext, user: User=None):
     #firstly checks if the cooldown has been met and logs the command
@@ -3823,6 +3835,7 @@ async def profile(ctx: CommandContext, user: User=None):
     name="statistics",
     description="View much more detailed information about the bot.",
     scope=[917125124770132038],
+    type=1,
 )
 async def statistics(ctx: CommandContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3900,7 +3913,8 @@ async def statistics(ctx: CommandContext):
             required=False
         )
     ],
-    scope=[917125124770132038]
+    scope=[917125124770132038],
+    type=1,
 )
 async def testcount(ctx: CommandContext, member: User=None):
     #firstly checks if the cooldown has been met and logs the command
@@ -3925,7 +3939,8 @@ async def testcount(ctx: CommandContext, member: User=None):
 @slash.command(
     name="votereminder", 
     description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", 
-    scope=917125124770132038
+    scope=917125124770132038,
+    type=1,
 )
 async def votereminder(ctx: CommandContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4719,4 +4734,6 @@ if __name__ == "__main__":
     #start the bot if run from the file not imported
     switchstatus.start()
     client.run(TOKEN)
+    print("HI")
     slash.start()
+    
