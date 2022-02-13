@@ -3594,7 +3594,7 @@ async def help(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("help", timeleft, ctx.author)
-        await ctx.channel.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed)
         return
     # create menu
     menu = create_select(placeholder="Select a Category...", custom_id="help_category",
@@ -3735,7 +3735,7 @@ async def patreon(ctx: SlashContext):
     ],
     guild_ids=[917125124770132038]
 )
-async def profile(ctx: SlashContext, user: User=None):
+async def profile(ctx: SlashContext, member: User=None):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
@@ -3748,17 +3748,17 @@ async def profile(ctx: SlashContext, user: User=None):
         await ctx.send(embed=cooldownembed)
         return
     #sets the user
-    if not user:
-        user = client.get_guild(ctx.guild_id).get_member(ctx.author_id)
+    if not member:
+        member = client.get_guild(ctx.guild_id).get_member(ctx.author_id)
 
     #gets roles
-    rolelist = user.roles
+    rolelist = member.roles
     rolementions = [role.mention for role in rolelist if role != ctx.guild.default_role]
     rolementions = " ".join(rolementions)
 
     #get activity
     profileactivitymsg = ""
-    for profileactivity in user.activities:
+    for profileactivity in member.activities:
         if profileactivity is None:
             profileactivitymsg = "Nothing!"
             break
@@ -3782,10 +3782,10 @@ async def profile(ctx: SlashContext, user: User=None):
         profileactivitymsg = "Sai does not know :("
 
     #get custom data from db
-    if user.id == 858663143931641857:
+    if member.id == 858663143931641857:
         profileid = "858663143931641857"
     else:
-        profileid = str(ctx.guild.id) + str(user.id)
+        profileid = str(ctx.guild.id) + str(member.id)
 
     dbconnection = sqlite3.connect(database)
     cursor = dbconnection.cursor()
@@ -3801,7 +3801,7 @@ async def profile(ctx: SlashContext, user: User=None):
             customprofile[customprofile.index(option)] = ""
 
     # create embed and button
-    if user == ctx.author:
+    if member == ctx.author:
         try:
             button = create_button(
                 style=1,
@@ -3826,10 +3826,10 @@ async def profile(ctx: SlashContext, user: User=None):
             )
     button = [create_actionrow(*[button])]
     profileembed=discord.Embed(title="Profile <:info:881883500515590144>", description="Information on requested user below: ", color=embedcolour)
-    profileembed.set_thumbnail(url=user.avatar_url)
-    profileembed.add_field(name="­Name: ", value="User nickname: `{0}` \nUsername: `{1}#{2}`".format(user.nick, user.name, user.discriminator), inline=False)
-    profileembed.add_field(name="Timings: ", value="Joined this server: <t:{0}:R> \nJoined discord: <t:{1}:R>".format(int(user.joined_at.timestamp()//1), int(user.created_at.timestamp()//1)), inline=False)
-    profileembed.add_field(name="Roles: ", value="Role number: `{0}`\nRoles: {1}".format(len(user.roles) - 1, rolementions), inline=False)
+    profileembed.set_thumbnail(url=member.avatar_url)
+    profileembed.add_field(name="­Name: ", value="User nickname: `{0}` \nUsername: `{1}#{2}`".format(member.nick, member.name, member.discriminator), inline=False)
+    profileembed.add_field(name="Timings: ", value="Joined this server: <t:{0}:R> \nJoined discord: <t:{1}:R>".format(int(member.joined_at.timestamp()//1), int(member.created_at.timestamp()//1)), inline=False)
+    profileembed.add_field(name="Roles: ", value="Role number: `{0}`\nRoles: {1}".format(len(member.roles) - 1, rolementions), inline=False)
     profileembed.add_field(name="Activities: ", value=profileactivitymsg, inline=False)
     profileembed.add_field(name="Custom: ", value=f"**Name:** {customprofile[1]}\n**Pronouns:** {customprofile[2]}\n**Age:** {customprofile[3]}\n**Nickname(s):** {customprofile[4]}\n**Favourite colour:** {customprofile[5]}\n**Likes:** {customprofile[6]}\n**Dislikes:** {customprofile[7]}\n**Hobbies:** {customprofile[8]}", inline=False)
     profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
@@ -3891,35 +3891,95 @@ async def statistics(ctx: SlashContext):
     statusembed.set_footer(text="Command run by {0}#{1} | *This is an approximate number due to the upcoming message access restrictions, and is updated each version. †The total number of channels also counts stage channels, private channels, etc.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=statusembed)
 
-@slash.slash(
-    name="testcount",
-    description="Displays the number of times a user has tested in the Sai Support Server.",
-    options = [
+@slash.subcommand(
+    base="testcount",
+    #base_description="Displays the number of times a user has tested in the Sai Support Server.",
+    name="all",
+    description="Lists all of the testers and their test count.",
+    guild_ids=[917125124770132038]
+)
+async def testcount_all(ctx: SlashContext):
+    #if the user is not in the guild send a message to join the Sai Support Server
+    if not (ctx.guild_id == 859934506159833178 or ctx.guild_id == 917125124770132038):
+
+        testcountembed=discord.Embed(title="Test Count Command <:info:881883500515590144>", colour=embedcolour)
+        testcountembed.set_thumbnail(url=client.user.avatar_url)
+        testcountembed.add_field(name="You can't run this command here!", value="This command shows the amount of times a user has tested on the [Sai Support Server](https://top.gg/servers/859934506159833178). This command is only available there for this reason. [Click here to join Sai's Official Support Server](https://top.gg/servers/859934506159833178)".format(version), inline=False)
+        testcountembed.set_footer(text="Command run by {0}#{1} | Run 's.help testcount' for more information on this command.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=testcountembed)
+    
+    #then checks if the cooldown has been met and logs the command.
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.testcount + timedelta(seconds=statisticscooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.testcount = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.testcount + timedelta(seconds=testcountcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/testcount", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #start database conection
+    dbconnection = sqlite3.connect(database)
+    cursor = dbconnection.cursor()
+
+    # command was /testcount all so...
+    fetchtestcountpermember = "SELECT * FROM saisupportstats ORDER BY testcount DESC"
+    cursor.execute(fetchtestcountpermember)
+    saisupportstatslist = cursor.fetchall()
+
+    #create and send embed      
+    testcountembed=discord.Embed(title="Test Counter:", colour=embedcolour)
+    testcountembedfieldvalue = ""
+
+    for member in saisupportstatslist:
+
+        #if member who has a test score has exited the guild, i.e. the get_member returns None, do not display the user test count
+        if ctx.guild.get_member(member[0]) == None:
+            continue
+        testcountembedfieldvalue += (str(ctx.guild.get_member(member[0])) + " - " + str(member[1]) + "\n")
+
+    testcountembedfieldvalue.strip("\n")
+
+    #if there are no tests
+    if testcountembedfieldvalue == "":
+        testcountembedfieldvalue = "Quite a lot of nothing."
+
+    testcountembed.add_field(name="# of tests per user: ", value=testcountembedfieldvalue, inline=False)
+    testcountembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=testcountembed)
+    
+    #close database connection
+    dbconnection.commit()
+    dbconnection.close()
+
+@slash.subcommand(
+    base="testcount",
+    #base_description="Displays the number of times a user has tested in the Sai Support Server.",
+    name="tester",
+    description="Lists the testcount of a specific tester.",
+    options=[
         {
-            "name":"all",
-            "description":"Lists all of the testers and their test count.",
-            "type":1,
-            "required":False
-        },
-        {
-            "name":"tester",
-            "description":"Lists the testcount of a specific tester.",
-            "type":1,
-            "options":[
-                {
-                    "name":"member",
-                    "description":"The member of which you want to see the testcount of.",
-                    "type":6,
-                    "required":True
-                }
-            ],
+            "name":"member",
+            "description":"The member of which you want to see the testcount of.",
+            "type":6,
             "required":False
         }
     ],
     guild_ids=[917125124770132038]
 )
-async def testcount(ctx: SlashContext, member: User=None):
-    #firstly checks if the cooldown has been met and logs the command.
+async def testcount_tester(ctx: SlashContext, member: User=None):
+    #if the user is not in the guild send a message to join the Sai Support Server
+    if not (ctx.guild_id == 859934506159833178 or ctx.guild_id == 917125124770132038):
+
+        testcountembed=discord.Embed(title="Test Count Command <:info:881883500515590144>", colour=embedcolour)
+        testcountembed.set_thumbnail(url=client.user.avatar_url)
+        testcountembed.add_field(name="You can't run this command here!", value="This command shows the amount of times a user has tested on the [Sai Support Server](https://top.gg/servers/859934506159833178). This command is only available there for this reason. [Click here to join Sai's Official Support Server](https://top.gg/servers/859934506159833178)".format(version), inline=False)
+        testcountembed.set_footer(text="Command run by {0}#{1} | Run 's.help testcount' for more information on this command.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=testcountembed)
+    
+    #then checks if the cooldown has been met and logs the command.
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
     if (currentuser.cooldowns.testcount + timedelta(seconds=statisticscooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
@@ -3931,12 +3991,40 @@ async def testcount(ctx: SlashContext, member: User=None):
         await ctx.send(embed=cooldownembed)
         return
     # run command
-    if ctx.kwargs != None: member = ctx.kwargs["member"]
-    else: member = None
-    # if command was /testcount all
-    if not member:
-        pass
+    if member == None: member = client.get_guild(ctx.guild_id).get_member(ctx.author_id)
+    #start database conection
+    dbconnection = sqlite3.connect(database)
+    cursor = dbconnection.cursor()
 
+    # command was /testcount tester [Member]
+    fetchtestcountpermember = "SELECT * FROM saisupportstats WHERE memberid={0}".format(member.id)
+    cursor.execute(fetchtestcountpermember)
+    saisupportstatslist = cursor.fetchall()
+
+    #create and send embed      
+    testcountembed=discord.Embed(title="Test Counter:", colour=embedcolour)
+    testcountembedfieldvalue = ""
+
+    for member in saisupportstatslist:
+
+        #if member who has a test score has exited the guild, i.e. the get_member returns None, do not display the user test count
+        if ctx.guild.get_member(member[0]) == None:
+            continue
+        testcountembedfieldvalue += (str(ctx.guild.get_member(member[0])) + " - " + str(member[1]) + "\n")
+
+    testcountembedfieldvalue.strip("\n")
+
+    #if there are no tests
+    if testcountembedfieldvalue == "":
+        testcountembedfieldvalue = "Quite a lot of nothing."
+
+    testcountembed.add_field(name="# of tests per user: ", value=testcountembedfieldvalue, inline=False)
+    testcountembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=testcountembed)
+    
+    #close database connection
+    dbconnection.commit()
+    dbconnection.close()
 #endregion
 
 # utility
@@ -4552,6 +4640,31 @@ async def statistics(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(statisticscooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def testcount(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `testcount` <:info:881883500515590144>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `testcount` command is used to get the amount of times a user/users have tested in the Sai Support Server. It can only be used here because of the fact that testing goes on in this server. [Click here to join the Sai Support Server.](https://top.gg/servers/859934506159833178)", inline=False)
+    helpembed.add_field(name="How to use it", value="To get the testcount for one members:```/testcount tester {Command Member} or (Mentioned Member or Member ID)```To get the testcount for all members:```/testcount all```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(testcountcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
 #endregion
 
 @slash.component_callback()
@@ -4592,7 +4705,7 @@ async def customise_profile(ctx: ComponentContext):
     profileembed=discord.Embed(title="Profile Customisation", color=embedcolour)
     profileembed.add_field(name="Important info", value="**Keep each answer under 115 characters long!**\nWhen responding to the questions, whatever you put in will be displayed on your profile, so keep it readable and understandable. You can use discord markdown symbols and put in whatever format you wish. If you do not want to have a certain field on your profile, type 'skip' as a response to the question Sai asks. Also note that other people won't be able to see your profile being customised, just so that the channel does not get clogged up! That's all for now, have a great day :) ", inline=False)
     profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-    await ctx.channel.send(embed=profileembed)
+    await ctx.send(embed=profileembed)
     
     responses = []
 
