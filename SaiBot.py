@@ -107,15 +107,15 @@ snipedict = {}
 editsnipedict = {}
 allcooldowns = []
 
-### UPDATE THESE BEFORE BOT UPDATE ###+
+### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 31
-version = "1.15.2"
+version = "1.15.3"
 linesofcode = "11980"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 4486
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://media.discordapp.net/attachments/846127620926996570/938507417430405220/myAmungus.gif"
+weeklytulaiigif = "https://tenor.com/view/caca-buzz-lightyear-caca-buzz-lightyear-buzz-caca-caca-dance-gif-19362350"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
