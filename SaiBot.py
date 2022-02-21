@@ -33,7 +33,7 @@ print(f"Character Import Time: {timetwo - timeone}\n\n")
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 client = discord.Client(intents=discord.Intents.all(), command_prefix="s.", help_command=False, token=TOKEN)
-slash = SlashCommand(client)
+slash = SlashCommand(client, sync_commands=True)
 
 #variables
 #region
@@ -109,10 +109,10 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 31
-version = "1.15.3"
-linesofcode = "11980"
+version = "1.15.4"
+linesofcode = "12635"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 4486
+total_commands_run = 4688
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 weeklytulaiigif = "https://tenor.com/view/caca-buzz-lightyear-caca-buzz-lightyear-buzz-caca-caca-dance-gif-19362350"
@@ -235,7 +235,7 @@ def getcooldownembed(commandname, timeleft, user):
     cooldownembed = discord.Embed(title = "Cooldown triggered", description = "Slow down, you still have {0} before you can run the `{1}` command again.".format(timeleft, commandname), color=embedcolour)
     cooldownembed.set_footer(text="Command run by {0}#{1}".format(user.name, user.discriminator), icon_url=user.avatar_url)
     return cooldownembed
-def formattimedelta(timedelta):
+def formattimedelta(timedelta, removebackticks=False):
     """returns a formatted timedelta in the format D days, H hours, M minutes, S seconds"""
     days = timedelta.days
     seconds = timedelta.seconds
@@ -243,20 +243,24 @@ def formattimedelta(timedelta):
     hours = seconds//3600
     minutes = (seconds//60)%60
     seconds = seconds - (hours*3600 + minutes*60)
+    timedeltastring = ""
     if seconds == 1 and minutes == 0 and hours == 0 and days == 0:
-        return f"`{seconds}` second"
+        timedeltastring = f"`{seconds}` second"
     elif minutes == 0 and hours == 0 and days == 0:
-        return f"`{seconds}` seconds"
+        timedeltastring = f"`{seconds}` seconds"
     elif minutes == 1 and hours == 0 and days == 0:
-        return f"`{minutes}` minute, `{seconds}` seconds"
+        timedeltastring = f"`{minutes}` minute, `{seconds}` seconds"
     elif hours == 0 and days == 0:
-        return f"`{minutes}` minutes, `{seconds}` seconds"
+        timedeltastring = f"`{minutes}` minutes, `{seconds}` seconds"
     elif days == 0:
-        return f"`{hours}` hours, `{minutes}` minutes, `{seconds}` seconds"
+        timedeltastring = f"`{hours}` hours, `{minutes}` minutes, `{seconds}` seconds"
     elif days == 1:
-        return f"`{days}` day, `{hours}` hours, `{minutes}` minutes, `{seconds}` seconds"    
+        timedeltastring = f"`{days}` day, `{hours}` hours, `{minutes}` minutes, `{seconds}` seconds"    
     else:
-        return f"`{days}` days, `{hours}` hours, `{minutes}` minutes, `{seconds}` seconds"    
+        timedeltastring = f"`{days}` days, `{hours}` hours, `{minutes}` minutes, `{seconds}` seconds"    
+    if removebackticks:
+        return timedeltastring.replace("`", "")
+    return timedeltastring
 def isint(number):
     """returns true if number is an int, otherwise returns false"""
     try:
@@ -862,6 +866,17 @@ async def on_message(message):
             #utility
             #region
             
+            
+            #if 's.help cooldowns' is run
+            elif helpcommand == "cooldowns" or helpcommand == "cooldown" or helpcommand == "cd":
+                helpembed=discord.Embed(title="Help", description="Command specific help for: `cooldowns` <:utility:881883277424746546>", color=embedcolour)
+                helpembed.set_thumbnail(url=client.user.avatar_url)
+                helpembed.add_field(name="Description", value="The `cooldowns` command returns a very detailed list of different cooldown related user information. It lists the command name, your current cooldown for that command, the general cooldown, the last time it was run, and if it is runnable right now.", inline=False)
+                helpembed.add_field(name="How to use it", value="```s.cooldowns```", inline=False)
+                helpembed.add_field(name="About", value="**Category:** Utility\n**Aliases:** ```cooldowns, cooldown, cd```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(cooldownscooldown), inline=False)
+                helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+                await message.channel.send(embed=helpembed)
+
             #if 's.help editsnipe' is run
             elif helpcommand == "editsnipe" or helpcommand == "es":
                 helpembed=discord.Embed(title="Help", description="Command specific help for: `editsnipe` <:utility:881883277424746546>", color=embedcolour)
@@ -1610,18 +1625,18 @@ async def on_message(message):
                 cooldown_command = "s." + cooldown
                 cooldown_length = currentuser.get_cooldown_length(cooldown)
                 if time == datetime.utcfromtimestamp(0):
-                    cooldown_left = formattimedelta(zero_timedelta)
+                    cooldown_left = formattimedelta(zero_timedelta, True)
                 else:
                     cooldown_left = (time + timedelta(seconds=cooldown_length)) - datetime.now()
                     if cooldown_left < zero_timedelta:
-                        cooldown_left = formattimedelta(zero_timedelta)
+                        cooldown_left = formattimedelta(zero_timedelta, True)
                     else:
-                        cooldown_left = formattimedelta(cooldown_left)
-                if cooldown_left == formattimedelta(zero_timedelta):
+                        cooldown_left = formattimedelta(cooldown_left, True)
+                if cooldown_left == formattimedelta(zero_timedelta, True):
                     runnable = "Yes"
                 else:
                     runnable = "No"                
-                table += f"{cooldown_command:^17}|{cooldown_left:^38}|{formattimedelta(timedelta(seconds=cooldown_length)):^38}|{time_last_run:^10}|{runnable:^10}\n"
+                table += f"{cooldown_command:^17}|{cooldown_left:^38}|{formattimedelta(timedelta(seconds=cooldown_length), True):^38}|{time_last_run:^10}|{runnable:^10}\n"
             # add table to field
             cooldownsembed.set_thumbnail(url=client.user.avatar_url)
             cooldownsembed.add_field(name=f"Cooldowns for {str(message.author)}:", value="­")
@@ -3611,7 +3626,7 @@ async def help(ctx: SlashContext):
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, information```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
@@ -4030,12 +4045,100 @@ async def testcount_tester(ctx: SlashContext, member: User=None):
 # utility
 #region
 
+@slash.slash(
+    name="editsnipe",
+    description="Returns the last edited message.",
+    guild_ids=[917125124770132038]
+)
+async def editsnipe(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.editsnipe = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/editsnipe", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # execute the command
+    try:
+        #get edited msg
+        editsnipedmsg = editsnipedict[ctx.channel_id]
+
+        #send before edited msg
+        editsnipeembed=discord.Embed(description=editsnipedmsg.content, color=embedcolour)
+        editsnipeembed.set_author(name=str(editsnipedmsg.author), icon_url=editsnipedmsg.author.avatar_url)
+        editsnipeembed.set_footer(text="Sniped by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=editsnipeembed)
+
+    except KeyError:
+        #send msg if ther eis nothing to snipe
+        editsnipedmsg = "There is nothing to snipe 🤔"
+        await ctx.send(editsnipedmsg)
+
+@slash.slash(
+    name="cooldowns",
+    description="Provides a full, informative list of all your cooldowns.",
+    guild_ids=[917125124770132038]
+)
+async def cooldowns(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.cooldowns + timedelta(seconds=cooldownscooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.cooldowns = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.cooldowns + timedelta(seconds=cooldownscooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/cooldowns", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    # create and then attempt to return an embed
+    cooldownsembed = discord.Embed(title=f"Cooldowns", description="Above is a table of your cooldowns for each of the commands. The first column shows the command in question, and the columns show, in order the cooldown left for a certain user, the generic cooldown length, the time the command was last run, and if the command is runnable now.", color=embedcolour)
+    # fetch cooldowns for the user
+    column_name_one = "Command"
+    column_name_two = "Cooldown"
+    column_name_three = "General Cooldown"
+    column_name_four = "Last Run"
+    column_name_five = "Runnable"
+    empty = ""
+    table = f"{column_name_one:^17}|{column_name_two:^38}|{column_name_three:^38}|{column_name_four:^10}|{column_name_five:^10}\n{empty:_^17} {empty:_^38} {empty:_^38} {empty:_^10} {empty:_^10}\n"
+    zero_timedelta = timedelta(0)
+    for cooldown, time in currentuser:
+        time_last_run = time.strftime("%H:%M:%S")
+        if str(time_last_run) == "00:00:00":
+            time_last_run = "Never"
+        cooldown_command = "/" + cooldown
+        cooldown_length = currentuser.get_cooldown_length(cooldown)
+        if time == datetime.utcfromtimestamp(0):
+            cooldown_left = formattimedelta(zero_timedelta, True)
+        else:
+            cooldown_left = (time + timedelta(seconds=cooldown_length)) - datetime.now()
+            if cooldown_left < zero_timedelta:
+                cooldown_left = formattimedelta(zero_timedelta, True)
+            else:
+                cooldown_left = formattimedelta(cooldown_left, True)
+        if cooldown_left == formattimedelta(zero_timedelta, True):
+            runnable = "Yes"
+        else:
+            runnable = "No"                
+        table += f"{cooldown_command:^17}|{cooldown_left:^38}|{formattimedelta(timedelta(seconds=cooldown_length), True):^38}|{time_last_run:^10}|{runnable:^10}\n"
+    # add table to field
+    cooldownsembed.set_thumbnail(url=client.user.avatar_url)
+    cooldownsembed.add_field(name=f"Cooldowns for {str(ctx.author)}:", value="­")
+    cooldownsembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    cooldownsfile = open("FullCooldownsTable.txt", "w")
+    with cooldownsfile as f:
+        f.write(table)
+    await ctx.send(embed=cooldownsembed, file=discord.File(r".\FullCooldownsTable.txt"))
 
 @slash.slash(
     name="votereminder", 
     description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", 
-    guild_ids=[917125124770132038],
-    
+    guild_ids=[917125124770132038]
 )
 async def votereminder(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4176,7 +4279,7 @@ async def help_home(ctx: ComponentContext):
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, information```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
@@ -4277,6 +4380,11 @@ async def help_category(ctx: ComponentContext):
             ),
             create_button(
                 style=ButtonStyle.secondary,
+                label="Cooldowns",
+                custom_id="cooldowns"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
                 label="Editsnipe",
                 custom_id="editsnipe"
             ),
@@ -4289,14 +4397,15 @@ async def help_category(ctx: ComponentContext):
                 style=ButtonStyle.secondary,
                 label="Nickname",
                 custom_id="nickname"
-            ),
+            )
+            
+        ]
+        buttons_two = [
             create_button(
                 style=ButtonStyle.secondary,
                 label="Ping",
                 custom_id="ping"
-            )
-        ]
-        buttons_two = [
+            ),
             create_button(
                 style=ButtonStyle.secondary,
                 label="Rescue",
@@ -4665,6 +4774,57 @@ async def testcount(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(testcountcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def editsnipe(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `editsnipe` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `editsnipe` command returns the latest edited message.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/editsnipe```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(editsnipecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+@slash.component_callback()
+async def cooldowns(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `cooldowns` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `cooldowns` command returns a very detailed list of different cooldown related user information. It lists the command name, your current cooldown for that command, the general cooldown, the last time it was run, and if it is runnable right now.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/cooldowns```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(cooldownscooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
 #endregion
 
 @slash.component_callback()
