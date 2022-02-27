@@ -4,7 +4,7 @@ import discord
 from discord.user import User
 from discord.enums import ActivityType, ChannelType
 from discord.ext import tasks
-from discord import Spotify
+from discord import Spotify, TextChannel, Embed
 #import interactions
 #from interactions import ComponentContext, SlashContext, SelectMenu, SelectOption, Button, ButtonStyle, Option, OptionType, ActionRow
 import os
@@ -4046,40 +4046,6 @@ async def testcount_tester(ctx: SlashContext, member: User=None):
 #region
 
 @slash.slash(
-    name="editsnipe",
-    description="Returns the last edited message.",
-    guild_ids=[917125124770132038]
-)
-async def editsnipe(ctx: SlashContext):
-    #firstly checks if the cooldown has been met and logs the command
-    await logslashcommand(ctx)
-    currentuser = get_current_user(ctx.author)
-    if (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
-        currentuser.cooldowns.editsnipe = datetime.now()
-    else:
-        timeleft = (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown)) - datetime.now()
-        timeleft = formattimedelta(timeleft)
-        cooldownembed = getcooldownembed("/editsnipe", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
-        return
-
-    # execute the command
-    try:
-        #get edited msg
-        editsnipedmsg = editsnipedict[ctx.channel_id]
-
-        #send before edited msg
-        editsnipeembed=discord.Embed(description=editsnipedmsg.content, color=embedcolour)
-        editsnipeembed.set_author(name=str(editsnipedmsg.author), icon_url=editsnipedmsg.author.avatar_url)
-        editsnipeembed.set_footer(text="Sniped by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=editsnipeembed)
-
-    except KeyError:
-        #send msg if ther eis nothing to snipe
-        editsnipedmsg = "There is nothing to snipe 🤔"
-        await ctx.send(editsnipedmsg)
-
-@slash.slash(
     name="cooldowns",
     description="Provides a full, informative list of all your cooldowns.",
     guild_ids=[917125124770132038]
@@ -4134,6 +4100,129 @@ async def cooldowns(ctx: SlashContext):
     with cooldownsfile as f:
         f.write(table)
     await ctx.send(embed=cooldownsembed, file=discord.File(r".\FullCooldownsTable.txt"))
+
+
+@slash.slash(
+    name="editsnipe",
+    description="Returns the last edited message.",
+    guild_ids=[917125124770132038]
+)
+async def editsnipe(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.editsnipe = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/editsnipe", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # execute the command
+    try:
+        #get edited msg
+        editsnipedmsg = editsnipedict[ctx.channel_id]
+
+        #send before edited msg
+        editsnipeembed=discord.Embed(description=editsnipedmsg.content, color=embedcolour)
+        editsnipeembed.set_author(name=str(editsnipedmsg.author), icon_url=editsnipedmsg.author.avatar_url)
+        editsnipeembed.set_footer(text="Sniped by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=editsnipeembed)
+
+    except KeyError:
+        #send msg if ther eis nothing to snipe
+        editsnipedmsg = "There is nothing to snipe 🤔"
+        await ctx.send(editsnipedmsg)
+
+
+@slash.slash(
+    name="event",
+    description="Lets you keep track of attendance to an event",
+    options=[
+        {
+            "name":"channel",
+            "description":"The channel in which the event attendance checker will be placed.",
+            "type":7,
+            "required":True
+        },
+        {
+            "name":"title",
+            "description":"The title of the event to be displayed.",
+            "type":3,
+            "required":True
+        },
+        {
+            "name":"description",
+            "description":"The description of the event to be displayed.",
+            "type":3,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def event(ctx: SlashContext, channel: TextChannel, title: str, description: str="No Description."):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.event + timedelta(seconds=eventcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.event = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.event + timedelta(seconds=eventcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    # execute command by setting up the base embed and commiting a value to the db
+    eventguildicon = ctx.guild.icon_url
+
+    # if the user does not have admin permissions
+    if not ctx.author.permissions_in(ctx.channel).administrator:
+        await ctx.send("❌ Event Creation Failed. You are not an administrator.")
+        return
+
+    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
+    if channel.guild != ctx.guild or (not isinstance(channel, TextChannel)):
+        eventembed = discord.Embed(title="Event Cmd Error: ", color=embedcolour)
+        eventembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.\n*(You cannot create events via Sai cross-guild.)*")
+        eventembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=eventembed)
+            await ctx.send("❌ Event Creation Failed. See DM's for more details.")
+        except:
+            await ctx.send(embed=eventembed)
+        return
+
+    #create event embed and buttons
+    buttons = [
+        create_button(
+            style=3,
+            label="Attending",
+            custom_id="attending_event"
+        ),
+        create_button(
+            style=2,
+            label="Unsure",
+            custom_id="unsure_event"
+        ),
+        create_button(
+            style=4,
+            label="Not Attending",
+            custom_id="notattending_event"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    eventembed=discord.Embed(title=title, description=description, color=embedcolour)
+    eventembed.set_thumbnail(url=eventguildicon)
+    eventembed.add_field(name="­\n  ✅ Attending", value="> ­", inline=False)
+    eventembed.add_field(name="­\n  ❔ Unsure", value="> ­", inline=False)
+    eventembed.add_field(name="­\n  ❌ Not Attending", value="> ­", inline=False)
+    eventembed.add_field(name="­­\n\nHow to choose preference/status­: ", value="Simply click the button below with the corresponding emoji and text. If you want to change your choice, click another button. If you want to remove your choice, simply re-click the button of the group which you are in currently.", inline=False)
+    eventembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await channel.send(embed=eventembed, components=buttons)
+    await ctx.send("✅ Event Created Successfully.")
+
 
 @slash.slash(
     name="votereminder", 
@@ -4284,6 +4373,8 @@ async def help_home(ctx: ComponentContext):
     helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=menu)
+
+
 @slash.component_callback()
 async def help_category(ctx: ComponentContext):
     apart = ctx.values[0].split()
@@ -4532,6 +4623,8 @@ async def help_category(ctx: ComponentContext):
         helpembed.set_thumbnail(url=client.user.avatar_url)
         helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
+
+
 @slash.component_callback()
 async def character(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4565,6 +4658,8 @@ async def character(ctx: ComponentContext):
     helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
+
+
 @slash.component_callback()
 async def information(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4598,6 +4693,8 @@ async def information(ctx: ComponentContext):
     helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
+
+
 @slash.component_callback()
 async def about(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4623,6 +4720,8 @@ async def about(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(aboutcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def help(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4649,6 +4748,8 @@ async def help(ctx: ComponentContext):
     helpembed.add_field(name="Extra Info", value="To get help for a specific command, firstly __**click help home and select a command category in the dropdown below.**__\nWhen running the `help` command on a specific command, the 'How to use it' field may seem confusing at first. There are three types of brackets which may show up here:\n`()` means this parameter is optional\n`[]` means this paramter is necessary\n`{}` means the value inside is the default paramter passed into the command if there are no user-passed paramters", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def links(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4674,6 +4775,8 @@ async def links(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(linkscooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def patreon(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4699,6 +4802,8 @@ async def patreon(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(patreoncooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def profile(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4724,6 +4829,8 @@ async def profile(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(profilecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def statistics(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4749,6 +4856,8 @@ async def statistics(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(statisticscooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def testcount(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4774,31 +4883,8 @@ async def testcount(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(testcountcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
-@slash.component_callback()
-async def editsnipe(ctx: ComponentContext):
-    # if the button was clicked by someone else
-    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
-    if original_author != str(ctx.author):
-        await ctx.send(content="This command is not for you!", hidden=True)
-        return
-    # create back button
-    button = [
-        create_button(
-            style=ButtonStyle.primary,
-            label="Help Home",
-            emoji=client.get_emoji(881883309142077470),
-            custom_id="help_home"
-        )
-    ]
-    button = [create_actionrow(*button)]
-    # create embed
-    helpembed=discord.Embed(title="Help", description="Command specific help for: `editsnipe` <:utility:881883277424746546>", color=embedcolour)
-    helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `editsnipe` command returns the latest edited message.", inline=False)
-    helpembed.add_field(name="How to use it", value="```/editsnipe```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(editsnipecooldown), inline=False)
-    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-    await ctx.edit_origin(embed=helpembed, components=button)
+
+
 @slash.component_callback()
 async def cooldowns(ctx: ComponentContext):
     # if the button was clicked by someone else
@@ -4824,6 +4910,61 @@ async def cooldowns(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(cooldownscooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def editsnipe(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `editsnipe` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `editsnipe` command returns the latest edited message.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/editsnipe```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(editsnipecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def event(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `event` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `event` command is used for finding attendance to an event, by sending a member reactable message to the desired channel with the user-defined title and description. Available to members with admin perms or higher only.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/event [channel ID] or [channel mention] [Event Title] (Event Description)```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(eventcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
 
 #endregion
 
@@ -4915,6 +5056,8 @@ async def customise_profile(ctx: ComponentContext):
     )
     button = [create_actionrow(*[button])]
     await ctx.send(content="All done! Run `/profile`, or click the button below to see the results.", components=button, hidden=True)
+
+
 @slash.component_callback()
 async def view_customised_profile(ctx: ComponentContext):
     # firstly disable the 'see results' button
@@ -5005,6 +5148,48 @@ async def view_customised_profile(ctx: ComponentContext):
     await ctx.send(embed=profileembed, components=button, hidden=True)
 
 #endregion
+
+#endregion
+
+# utility
+#region
+
+
+@slash.component_callback()
+async def attending_event(ctx: ComponentContext):
+    # edit event to add to attending
+    await edit_event(ctx.origin_message.embeds[0], 0, ctx)
+
+
+@slash.component_callback()
+async def unsure_event(ctx: ComponentContext):
+    # edit event to add to attending
+    await edit_event(ctx.origin_message.embeds[0], 1, ctx)
+
+
+@slash.component_callback()
+async def notattending_event(ctx: ComponentContext):
+    # edit event to add to attending
+    await edit_event(ctx.origin_message.embeds[0], 2, ctx)
+
+
+async def edit_event(event_embed: Embed, to_join: int, ctx: ComponentContext):
+    # A to_join of 0 represents 'attending', 1 represents 'unsure', and 2 represents 'not_attending'
+    embed_dict = event_embed.to_dict()
+    for field_num in range(0, 3):
+        curr_value = embed_dict["fields"][field_num]["value"]
+        if field_num == to_join:
+            # add to repective field
+            if f"<@!{ctx.author_id}>," not in curr_value: 
+                embed_dict["fields"][field_num]["value"] += f"<@!{ctx.author_id}>,"
+            else:
+                embed_dict["fields"][field_num]["value"] = curr_value.replace(f"<@!{ctx.author_id}>,", "")
+        else:
+            # else remove from existing field
+            embed_dict["fields"][field_num]["value"] = curr_value.replace(f"<@!{ctx.author_id}>,", "")
+    await ctx.edit_origin(embed=Embed.from_dict(embed_dict))
+        
+
 
 #endregion
 
