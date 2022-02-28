@@ -446,10 +446,9 @@ async def on_message(message):
         owner = await client.fetch_user(457517248786202625)
         await owner.send(embed=applicationembed)
         await message.channel.send(f"{message.author.mention} Your application was successful, please be patient while it is reviewed!", delete_after=10)
-
+    
     #else if prefix is recognised
-    elif content.startswith("s.") or content.startswith("S.") or (client.user.mentioned_in(message) and content.strip().startswith("<@!858663143931641857>")):
-
+    elif content.startswith("s.") or content.startswith("S.") or content.startswith("<@!858663143931641857>") or content.startswith("<@858663143931641857>"):
         #if in a DM channel, send a friendly embed message with an invite
         if isinstance(message.channel, discord.channel.DMChannel):
             dmembed=discord.Embed(title="Hello there user! <:info:881883500515590144>", description="You can't give me commands in DM's! Make sure to [invite Sai to your own server by clicking here](https://discord.com/oauth2/authorize?client_id=858663143931641857&permissions=120729185406&scope=bot) to run the commands for yourself! Also, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f) for any other support, questions, or suggestions for the bot!", color=embedcolour)
@@ -484,13 +483,16 @@ async def on_message(message):
 
         #processes the command entered
         if client.user.mentioned_in(message):
-            if content.strip() == "<@!858663143931641857>":
+            if content.strip() == "<@!858663143931641857>" or content.strip() == "<@858663143931641857>":
                 command = "help"
             else:
-                command = content.strip()[22:].strip()
+                if content.strip().startswith("<@858663143931641857>"):
+                    command = content.strip()[21:].strip()
+                else:
+                    command = content.strip()[22:].strip()
         else:
             command = content[2:].strip()
-
+        
         
         #code for logging the command
         loggingtime = datetime.utcnow().strftime("%#A, %#d %#B\n%H:%M:%S:%f")
