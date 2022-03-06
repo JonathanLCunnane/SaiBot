@@ -4260,7 +4260,51 @@ async def votereminder(ctx: SlashContext):
 
 #endregion
 
+# moderation and admin
+#region
 
+
+
+
+
+#endregion
+
+# fun
+#region
+
+
+@slash.slash(
+    name="eightball",
+    description="Sai will decide your fate",
+    options=[
+        {
+            "name":"question",
+            "description":"The question which you want to ask Sai!",
+            "type":3,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def eightball(ctx: SlashContext, question: str):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.eightball + timedelta(seconds=eightballcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.eightball = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.eightball + timedelta(seconds=eightballcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/eightball", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    # send the response.
+    if question == "deez nuts":
+        await ctx.send("https://tenor.com/view/its-time-to-stop-stop-clock-time-gif-5001372")
+        return
+    await ctx.send("<@{0}> {1}".format(ctx.author_id, choice(eightballreplies)))
+
+#endregion
 # component callbacks
 #region
 
@@ -4968,6 +5012,32 @@ async def event(ctx: ComponentContext):
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
+@slash.component_callback()
+async def eight_ball(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `8ball` <:fun:881899126286061609>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `8ball` command lets Sai give a response to your yes/no question", inline=False)
+    helpembed.add_field(name="How to use it", value="```/8ball [question]```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(eightballcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
 #endregion
 
 @slash.component_callback()
@@ -5151,8 +5221,6 @@ async def view_customised_profile(ctx: ComponentContext):
 
 #endregion
 
-#endregion
-
 # utility
 #region
 
@@ -5192,6 +5260,8 @@ async def edit_event(event_embed: Embed, to_join: int, ctx: ComponentContext):
     await ctx.edit_origin(embed=Embed.from_dict(embed_dict))
         
 
+
+#endregion
 
 #endregion
 
