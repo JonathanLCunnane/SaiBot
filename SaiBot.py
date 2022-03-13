@@ -115,7 +115,7 @@ libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 4804
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/hamster-gif-24376112"
+weeklytulaiigif = "https://tenor.com/view/mark-zuckerberg-bug-bugs-insect-insects-gif-24007881"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
