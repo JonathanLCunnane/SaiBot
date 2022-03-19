@@ -2998,7 +2998,9 @@ async def on_message_delete(message):
     #add message to the snipe dictionary if the message is not from a bot
     if not message.author.bot:
         snipedict[message.channel.id] = message
-
+    elif message.author == client.user:
+        if message.channel.id in snipedict.keys():
+            snipedict.pop(message.channel.id, None)
 
 @client.event
 async def on_message_edit(before, after):
@@ -3006,6 +3008,10 @@ async def on_message_edit(before, after):
     #add message to the edit snipe dictionary if the message is not from a bot
     if not before.author.bot:
         editsnipedict[before.channel.id] = before
+    elif before.author == client.user:
+        if before.channel.id in editsnipedict.keys():
+            editsnipedict.pop(before.channel.id, None)
+            
 
 
 @client.event
@@ -4236,12 +4242,12 @@ async def nickname_reset(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
-    if (currentuser.cooldowns.event + timedelta(seconds=eventcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
-        currentuser.cooldowns.event = datetime.now()
+    if (currentuser.cooldowns.nickname + timedelta(seconds=nicknamecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.nickname = datetime.now()
     else:
-        timeleft = (currentuser.cooldowns.event + timedelta(seconds=eventcooldown)) - datetime.now()
+        timeleft = (currentuser.cooldowns.nickname + timedelta(seconds=nicknamecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
-        cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
+        cooldownembed = getcooldownembed("/nickname", timeleft, ctx.author)
         await ctx.send(embed=cooldownembed)
         return
 
@@ -4254,8 +4260,8 @@ async def nickname_reset(ctx: SlashContext):
 
     try:
         #changes nickname
-        prev_nick = ctx.author.nick
-        await ctx.author.edit(nick=ctx.author.name, reason="Sai changed this users nickname using the s.nickname command.")
+        prev_nick = ctx.author.name
+        await ctx.author.edit(nick=ctx.author.name, reason="Sai changed this users nickname using the /nickname command.")
         await ctx.send(f"Success! Nickname changed to {ctx.author.name} from {prev_nick}.", hidden=True)
     except:
         #if the nickname is not valid
@@ -4283,12 +4289,12 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
-    if (currentuser.cooldowns.event + timedelta(seconds=eventcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
-        currentuser.cooldowns.event = datetime.now()
+    if (currentuser.cooldowns.nickname + timedelta(seconds=nicknamecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.nickname = datetime.now()
     else:
-        timeleft = (currentuser.cooldowns.event + timedelta(seconds=eventcooldown)) - datetime.now()
+        timeleft = (currentuser.cooldowns.nickname + timedelta(seconds=nicknamecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
-        cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
+        cooldownembed = getcooldownembed("/nickname", timeleft, ctx.author)
         await ctx.send(embed=cooldownembed)
         return
 
@@ -4301,7 +4307,7 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
     try:
         #changes nickname
         prev_nick = ctx.author.nick
-        await ctx.author.edit(nick=new_nickname, reason="Sai changed this users nickname using the s.nickname command.")
+        await ctx.author.edit(nick=new_nickname, reason="Sai changed this users nickname using the /nickname command.")
         await ctx.send(f"Success! Nickname changed to {new_nickname} from {prev_nick}.", hidden=True)
     except:
         #if the nickname is not valid
@@ -4309,6 +4315,60 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
         nickembed.add_field(name="User Error/Permissions Error: ", value="You cannot choose this as your nickname. Make sure your nickname only includes valid unicode characters and are between 1 and 32 characters. \nThis error could also occur if Sai's top role is below yours in the role hierarchy.")
         nickembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         await ctx.send(embed=nickembed, hidden=True)
+
+@slash.slash(
+    name="ping",
+    description="Finds your latency to Sai bot.",
+    guild_ids=[917125124770132038]
+)
+async def ping(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.ping + timedelta(seconds=pingcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.ping = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.ping + timedelta(seconds=pingcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/ping", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    response = await ctx.send("Currently Pinging... ")
+
+    latencytimedelta = response.created_at - ctx.created_at
+    latency = latencytimedelta.days * 24 * 60 * 60 * 1000
+    latency += latencytimedelta.seconds * 1000
+    latency += latencytimedelta.microseconds / 1000
+
+    pingembed = discord.Embed(title="Pong!", description="Your current ping to Sai bot is: {0} ms".format(latency), color=embedcolour)
+    pingembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await response.edit(content=None, embed=pingembed)
+
+@slash.slash(
+    name="rescue",
+    description="Nullifies any snipe and editsnipe commands. (smh 🙄)",
+    guild_ids=[917125124770132038]
+)
+async def rescue(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.rescue + timedelta(seconds=rescuecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.rescue = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.rescue + timedelta(seconds=rescuecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/rescue", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    rescuemessage = await ctx.send("­")
+    await rescuemessage.edit(content = "rescued, better luck next time")
+    await rescuemessage.delete()
+    if randint(1, 100) == 100:
+        await ctx.send("You have been rescued, but I saw everything <:byakugan:885589380721410069> 👄 <:byakugan:885589380721410069>", hidden=True)
+        print("Someone just got rescue egged ;)")
 
 @slash.slash(
     name="votereminder", 
@@ -5097,6 +5157,87 @@ async def event(ctx: ComponentContext):
 
 
 @slash.component_callback()
+async def nickname(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `nickname` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `nickname` command is used to set or reset your own nickame.", inline=False)
+    helpembed.add_field(name="How to use it", value="To set your nickname:```/nickname (new nickname)```To reset your nickname:```/nickname reset```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(nicknamecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def ping(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `ping` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `ping` command is used to find your latency in `ms` to the Sai bot.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/ping```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(pingcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def rescue(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `rescue` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `rescue` nulls the effects of the `snipe` and `editsnipe` commands easily, if you need a quick rescue without manually deleting/editing another message respectively ;)", inline=False)
+    helpembed.add_field(name="How to use it", value="```/rescue```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(rescuecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
 async def eight_ball(ctx: ComponentContext):
     # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
@@ -5123,31 +5264,6 @@ async def eight_ball(ctx: ComponentContext):
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
-@slash.component_callback()
-async def nickname(ctx: ComponentContext):
-    # if the button was clicked by someone else
-    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
-    if original_author != str(ctx.author):
-        await ctx.send(content="This command is not for you!", hidden=True)
-        return
-    # create back button
-    button = [
-        create_button(
-            style=ButtonStyle.primary,
-            label="Help Home",
-            emoji=client.get_emoji(881883309142077470),
-            custom_id="help_home"
-        )
-    ]
-    button = [create_actionrow(*button)]
-    # create embed
-    helpembed=discord.Embed(title="Help", description="Command specific help for: `nickname` <:utility:881883277424746546>", color=embedcolour)
-    helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `nickname` command is used to set or reset your own nickame.", inline=False)
-    helpembed.add_field(name="How to use it", value="To set your nickname:```/nickname (new nickname)```To reset your nickname:```/nickname reset```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(nicknamecooldown), inline=False)
-    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-    await ctx.edit_origin(embed=helpembed, components=button)
 
 #endregion
 
