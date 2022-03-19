@@ -3910,7 +3910,7 @@ async def statistics(ctx: SlashContext):
 
 @slash.subcommand(
     base="testcount",
-    #base_description="Displays the number of times a user has tested in the Sai Support Server.",
+    base_description="Displays the number of times a user has tested in the Sai Support Server.",
     name="all",
     description="Lists all of the testers and their test count.",
     guild_ids=[917125124770132038]
@@ -3973,7 +3973,7 @@ async def testcount_all(ctx: SlashContext):
 
 @slash.subcommand(
     base="testcount",
-    #base_description="Displays the number of times a user has tested in the Sai Support Server.",
+    base_description="Displays the number of times a user has tested in the Sai Support Server.",
     name="tester",
     description="Lists the testcount of a specific tester.",
     options=[
@@ -4176,12 +4176,12 @@ async def event(ctx: SlashContext, channel: TextChannel, title: str, description
         cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
         await ctx.send(embed=cooldownembed)
         return
-    # execute command by setting up the base embed and commiting a value to the db
+    # execute command by setting up the base embed
     eventguildicon = ctx.guild.icon_url
 
     # if the user does not have admin permissions
     if not ctx.author.permissions_in(ctx.channel).administrator:
-        await ctx.send("❌ Event Creation Failed. You are not an administrator.")
+        await ctx.send("❌ Event Creation Failed. You are not an administrator.", hidden=True)
         return
 
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
@@ -4200,17 +4200,17 @@ async def event(ctx: SlashContext, channel: TextChannel, title: str, description
     buttons = [
         create_button(
             style=3,
-            label="Attending",
+            label="✅ Attending",
             custom_id="attending_event"
         ),
         create_button(
             style=2,
-            label="Unsure",
+            label="❔ Unsure",
             custom_id="unsure_event"
         ),
         create_button(
             style=4,
-            label="Not Attending",
+            label="❌ Not Attending",
             custom_id="notattending_event"
         )
     ]
@@ -4225,6 +4225,90 @@ async def event(ctx: SlashContext, channel: TextChannel, title: str, description
     await channel.send(embed=eventembed, components=buttons)
     await ctx.send("✅ Event Created Successfully.")
 
+@slash.subcommand(
+    base="nickname",
+    base_description="Allows you to change or reset your nickname.",
+    name="reset",
+    description="Resets your nickname to the default nickname, your username.",
+    guild_ids=[917125124770132038]
+)
+async def nickname_reset(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.event + timedelta(seconds=eventcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.event = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.event + timedelta(seconds=eventcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # if the user does not have admin permissions
+    if not ctx.author.permissions_in(ctx.channel).change_nickname:
+        await ctx.send("❌ Nickname Change Failed. You do not have the change nickname permission.", hidden=True)
+        return
+
+    # change nickname
+
+    try:
+        #changes nickname
+        prev_nick = ctx.author.nick
+        await ctx.author.edit(nick=ctx.author.name, reason="Sai changed this users nickname using the s.nickname command.")
+        await ctx.send(f"Success! Nickname changed to {ctx.author.name} from {prev_nick}.", hidden=True)
+    except:
+        #if the nickname is not valid
+        nickembed = discord.Embed(title="Nickname Cmd Error: ", color=embedcolour)
+        nickembed.add_field(name="User Error/Permissions Error: ", value="You cannot choose this as your nickname. Make sure your nickname only includes valid unicode characters and are between 1 and 32 characters. \nThis error could also occur if Sai's top role is below yours in the role hierarchy.")
+        nickembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=nickembed, hidden=True)
+
+@slash.subcommand(
+    base="nickname",
+    base_description="Allows you to change or reset your nickname.",
+    name="change",
+    description="Changes your nickname. (Restrictions: 1-32 characters long, unicode characters accepted.)",
+    options=[
+        {
+            "name":"new_nickname",
+            "description":"The nickname that you want to change to",
+            "type":3,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def nickname_change(ctx: SlashContext, new_nickname: str):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.event + timedelta(seconds=eventcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.event = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.event + timedelta(seconds=eventcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # if the user does not have admin permissions
+    if not ctx.author.permissions_in(ctx.channel).change_nickname:
+        await ctx.send("❌ Nickname Change Failed. You do not have the change nickname permission.", hidden=True)
+        return
+
+    # change nickname
+    try:
+        #changes nickname
+        prev_nick = ctx.author.nick
+        await ctx.author.edit(nick=new_nickname, reason="Sai changed this users nickname using the s.nickname command.")
+        await ctx.send(f"Success! Nickname changed to {new_nickname} from {prev_nick}.", hidden=True)
+    except:
+        #if the nickname is not valid
+        nickembed = discord.Embed(title="Nickname Cmd Error: ", color=embedcolour)
+        nickembed.add_field(name="User Error/Permissions Error: ", value="You cannot choose this as your nickname. Make sure your nickname only includes valid unicode characters and are between 1 and 32 characters. \nThis error could also occur if Sai's top role is below yours in the role hierarchy.")
+        nickembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=nickembed, hidden=True)
 
 @slash.slash(
     name="votereminder", 
@@ -5035,6 +5119,33 @@ async def eight_ball(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `8ball` command lets Sai give a response to your yes/no question", inline=False)
     helpembed.add_field(name="How to use it", value="```/8ball [question]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(eightballcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def nickname(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `nickname` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `nickname` command is used to set or reset your own nickame.", inline=False)
+    helpembed.add_field(name="How to use it", value="To set your nickname:```/nickname (new nickname)```To reset your nickname:```/nickname reset```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(nicknamecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
