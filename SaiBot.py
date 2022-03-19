@@ -3479,6 +3479,7 @@ async def character(ctx: SlashContext, character_name: str):
     characterembed.set_footer(text="Command run by {0}#{1} | Run 's.help character' for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=characterembed)
 
+
 @slash.slash(name="information",
              description="Get the specific information of any character in naruto.",
              guild_ids=[917125124770132038],
@@ -3603,6 +3604,7 @@ async def about(ctx: SlashContext):
     # send embed with buttons
     await ctx.send(embed=aboutembed, components=buttons)
 
+
 @slash.slash(name="help", 
              description="The simplest way to get help for all commands, or specific commands themselves.", 
              guild_ids=[917125124770132038],
@@ -3639,7 +3641,8 @@ async def help(ctx: SlashContext):
     helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=helpembed, components=menu)
-    
+
+
 @slash.slash(
     name="links",
     description="A hub of all Sai's important links. You can support the creator and get support here!",
@@ -3708,6 +3711,7 @@ async def links(ctx: SlashContext):
     linksembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=linksembed, components=buttons)
     
+
 @slash.slash(
     name="patreon",
     description="One of the ways which you can support Sai! Run this command to get the link",
@@ -3744,6 +3748,7 @@ async def patreon(ctx: SlashContext):
     patreonembed.add_field(name="Become a Patron Now:", value="[Click here](https://www.patreon.com/officialsaibot) for the official Patreon page for Sai. (Note the roles refer to ones within the Official Sai Support Server)", inline=False)
     patreonembed.set_footer(text="Command run by {0}#{1} | Have a great day!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=patreonembed, components=button)
+
 
 @slash.slash(
     name="profile",
@@ -3857,7 +3862,8 @@ async def profile(ctx: SlashContext, member: User=None):
     profileembed.add_field(name="Custom: ", value=f"**Name:** {customprofile[1]}\n**Pronouns:** {customprofile[2]}\n**Age:** {customprofile[3]}\n**Nickname(s):** {customprofile[4]}\n**Favourite colour:** {customprofile[5]}\n**Likes:** {customprofile[6]}\n**Dislikes:** {customprofile[7]}\n**Hobbies:** {customprofile[8]}", inline=False)
     profileembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=profileembed, components=button)
-    
+
+
 @slash.slash(
     name="statistics",
     description="View much more detailed information about the bot.",
@@ -3913,6 +3919,7 @@ async def statistics(ctx: SlashContext):
     statusembed.add_field(name="Coding", value="Lines of code: `{0}`\n Libraries used: `{1}`".format(linesofcode, libraries))
     statusembed.set_footer(text="Command run by {0}#{1} | *This is an approximate number due to the upcoming message access restrictions, and is updated each version. †The total number of channels also counts stage channels, private channels, etc.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=statusembed)
+
 
 @slash.subcommand(
     base="testcount",
@@ -3976,6 +3983,7 @@ async def testcount_all(ctx: SlashContext):
     #close database connection
     dbconnection.commit()
     dbconnection.close()
+
 
 @slash.subcommand(
     base="testcount",
@@ -4048,6 +4056,7 @@ async def testcount_tester(ctx: SlashContext, member: User=None):
     #close database connection
     dbconnection.commit()
     dbconnection.close()
+
 #endregion
 
 # utility
@@ -4231,6 +4240,7 @@ async def event(ctx: SlashContext, channel: TextChannel, title: str, description
     await channel.send(embed=eventembed, components=buttons)
     await ctx.send("✅ Event Created Successfully.")
 
+
 @slash.subcommand(
     base="nickname",
     base_description="Allows you to change or reset your nickname.",
@@ -4269,6 +4279,7 @@ async def nickname_reset(ctx: SlashContext):
         nickembed.add_field(name="User Error/Permissions Error: ", value="You cannot choose this as your nickname. Make sure your nickname only includes valid unicode characters and are between 1 and 32 characters. \nThis error could also occur if Sai's top role is below yours in the role hierarchy.")
         nickembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         await ctx.send(embed=nickembed, hidden=True)
+
 
 @slash.subcommand(
     base="nickname",
@@ -4316,6 +4327,7 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
         nickembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         await ctx.send(embed=nickembed, hidden=True)
 
+
 @slash.slash(
     name="ping",
     description="Finds your latency to Sai bot.",
@@ -4345,6 +4357,7 @@ async def ping(ctx: SlashContext):
     pingembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await response.edit(content=None, embed=pingembed)
 
+
 @slash.slash(
     name="rescue",
     description="Nullifies any snipe and editsnipe commands. (smh 🙄)",
@@ -4369,6 +4382,40 @@ async def rescue(ctx: SlashContext):
     if randint(1, 100) == 100:
         await ctx.send("You have been rescued, but I saw everything <:byakugan:885589380721410069> 👄 <:byakugan:885589380721410069>", hidden=True)
         print("Someone just got rescue egged ;)")
+
+
+@slash.slash(
+    name="snipe",
+    description="Retrieves the last deleted message.",
+    guild_ids=[917125124770132038]
+)
+async def snipe(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.snipe + timedelta(seconds=snipecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.snipe = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.snipe + timedelta(seconds=snipecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/snipe", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    try:
+        #get sniped msg
+        snipedmsg = snipedict[ctx.channel.id]
+
+        #send sniped msg
+        snipeembed=discord.Embed(description=snipedmsg.content, color=embedcolour)
+        snipeembed.set_author(name=str(snipedmsg.author), icon_url=snipedmsg.author.avatar_url)
+        snipeembed.set_footer(text="Sniped by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=snipeembed)
+
+    except KeyError:
+        #send msg if ther eis nothing to snipe
+        snipedmsg = "There is nothing to snipe 🤔"
+        await ctx.send(snipedmsg)
 
 @slash.slash(
     name="votereminder", 
@@ -4449,6 +4496,7 @@ async def eightball(ctx: SlashContext, question: str):
     await ctx.send("<@{0}> {1}".format(ctx.author_id, choice(eightballreplies)))
 
 #endregion
+
 # component callbacks
 #region
 
@@ -5233,6 +5281,33 @@ async def rescue(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `rescue` nulls the effects of the `snipe` and `editsnipe` commands easily, if you need a quick rescue without manually deleting/editing another message respectively ;)", inline=False)
     helpembed.add_field(name="How to use it", value="```/rescue```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(rescuecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def snipe(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `snipe` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `snipe` command returns the latest edited message.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/snipe```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(snipecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
