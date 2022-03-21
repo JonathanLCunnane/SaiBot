@@ -39,16 +39,13 @@ slash = SlashCommand(client, sync_commands=True)
 #region
 alltimezones = {"GMT":0, 
                 "UTC":0, 
-                "ECT":1, 
                 "BST":1, 
                 "EET":2, 
-                "ART":2, 
                 "EAT":3, 
                 "MET":3.5, 
                 "NET":4, 
                 "PLT":5, 
                 "IST":5.5, 
-                "VST":7, 
                 "CTT":8, 
                 "JST":9, 
                 "ACT":9.5, 
@@ -59,15 +56,11 @@ alltimezones = {"GMT":0,
                 "HST":-10, 
                 "AST":-9, 
                 "PST":-8, 
-                "PNT":-7, 
                 "MST":-7, 
                 "CST":-6, 
                 "EST":-5, 
-                "IET":-5, 
                 "PRT":-4, 
                 "CNT":-3.5, 
-                "AGT":-3, 
-                "BET":-3, 
                 "CAT":-1}
 embedcolour = 0xd6d6d6
 database = r".\SaiDatabase.db"
@@ -4417,6 +4410,102 @@ async def snipe(ctx: SlashContext):
         snipedmsg = "There is nothing to snipe 🤔"
         await ctx.send(snipedmsg)
 
+
+@slash.slash(
+    name="time",
+    description="A command to find the time in your timezone. If you do not know your timezone, use the selector.",
+    options=[
+        {
+            "name":"timezone",
+            "description":"Enter a timezone here if you know which timezone you want to see the time for.",
+            "type":3,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def timecmd(ctx: SlashContext, timezone: str=None):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.time + timedelta(seconds=timecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.time = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.time + timedelta(seconds=timecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/time", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    timezones=[timezone]
+    components=[]
+    # if timezone is none create the selector.
+    if timezone == None or timezone == "Selector":
+        options = []
+        for curr_timezone, utcplus in alltimezones.items():
+            if utcplus > 0:
+                options.append(
+                    create_select_option(
+                        label=curr_timezone,
+                        description=f"This timezone is UTC +{utcplus}",
+                        value=curr_timezone,
+                        emoji="⏲️"
+                    )
+                )
+            elif utcplus < 0:
+                options.append(
+                    create_select_option(
+                        label=curr_timezone,
+                        description=f"This timezone is UTC {utcplus}",
+                        value=curr_timezone,
+                        emoji="⏲️"
+                    )
+                )
+            else:
+                options.append(
+                    create_select_option(
+                        label=curr_timezone,
+                        description=f"This timezone is equivalent to UTC",
+                        value=curr_timezone,
+                        emoji="⏲️"
+                    )
+                )
+
+        select_menu = create_select(
+            placeholder="Select a timezone.",
+            custom_id="time_select",
+            options=options
+        )
+        wiki_button = [create_button(
+            label="Click for Timezones Wiki.",
+            style=5,
+            emoji="⏰",
+            url="https://en.wikipedia.org/wiki/List_of_time_zones_by_country"
+        )]
+        components = [create_actionrow(*wiki_button), create_actionrow(select_menu)]
+        timeembed=discord.Embed(title="Time <:clock:881899619364253706>", color=embedcolour)
+        timeembed.add_field(name="Timezone Selector", value="Select the timezone that you want to view using the selector below.")
+        timeembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=timeembed, components=components)
+        return
+    # else if timezone is all then show all timezones
+    elif timezone.upper() == "ALL":
+        timezones = [timezone for timezone in alltimezones]
+    for timezone in timezones:
+        if timezone.upper() not in alltimezones:
+            await ctx.send("<@{0}>, make sure the timezones are in the correct format or are in the bot's timezone list. If you are trying to list all timezones use 'all' as the timezone.".format(ctx.author_id), hidden=True)
+            return
+
+    #create embed for time command
+    timeembed=discord.Embed(title="Time <:clock:881899619364253706>", color=embedcolour)
+    for curr_timezone in timezones:
+        nowtime = datetime.utcnow() + timedelta(hours = alltimezones[curr_timezone.upper()])
+        nowtime = nowtime.strftime("%#A, %#d %#B\n%H:%M:%S")
+        timeembed.add_field(name=curr_timezone.upper(), value="`{0}`".format(nowtime), inline=True)
+    timeembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=timeembed)
+
+
 @slash.slash(
     name="votereminder", 
     description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", 
@@ -4588,6 +4677,7 @@ async def help_home(ctx: ComponentContext):
     # if the button was clicked by someone else ### ADD ANY CUSTOM FOOTER MESSAGES HERE SO THEY ARE REMOVED ###
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
     original_author = original_author.replace(" | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!", "")
+    original_author = original_author.replace(" | For Sai's accepted timezones, run 's.help timezones'", "")
     if original_author != str(ctx.author):
         await ctx.send(content="This command is not for you!", hidden=True)
         return
@@ -4748,7 +4838,7 @@ async def help_category(ctx: ComponentContext):
             create_button(
                 style=ButtonStyle.secondary,
                 label="Time",
-                custom_id="time"
+                custom_id="help_time"
             ),
             create_button(
                 style=ButtonStyle.secondary,
@@ -5313,6 +5403,33 @@ async def snipe(ctx: ComponentContext):
 
 
 @slash.component_callback()
+async def help_time(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `time` <:utility:881883277424746546>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `time` command is used for finding the time in one or a variety of timezones.", inline=False)
+    helpembed.add_field(name="How to use it", value="To display desired timezone:```/time {Selector} or (timezone)``` *Note: the 'timezone selector' shows when the timezone is set to 'Selector' or no timezone is entered. Here you can also access the timezone Wikipedia page.*\nTo display all timezones:```/time all```*Note 2: timezones should be written in their shortened form (e.g. IST, BST, GMT, est, pst, ast)*", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(timecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1} | For Sai's accepted timezones, run 's.help timezones'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
 async def eight_ball(ctx: ComponentContext):
     # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
@@ -5561,6 +5678,16 @@ async def edit_event(event_embed: Embed, to_join: int, ctx: ComponentContext):
             embed_dict["fields"][field_num]["value"] = curr_value.replace(f"<@!{ctx.author_id}>,", "")
     await ctx.edit_origin(embed=Embed.from_dict(embed_dict))
         
+
+@slash.component_callback()
+async def time_select(ctx: ComponentContext):
+    timezone = ctx.selected_options[0]
+    timeembed=discord.Embed(title="Time <:clock:881899619364253706>", color=embedcolour)
+    nowtime = datetime.utcnow() + timedelta(hours = alltimezones[timezone.upper()])
+    nowtime = nowtime.strftime("%#A, %#d %#B\n%H:%M:%S")
+    timeembed.add_field(name=timezone.upper(), value="`{0}`".format(nowtime), inline=True)
+    timeembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=timeembed, hidden=True)
 
 
 #endregion
