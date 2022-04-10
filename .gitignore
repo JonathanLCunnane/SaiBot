@@ -343,3 +343,6 @@ healthchecksdb
 .env
 AdminInformation.txt
 FullCooldownsTable.txt
+
+# ffmpeg.exe is too large so dont commit it
+ffmpeg.exe

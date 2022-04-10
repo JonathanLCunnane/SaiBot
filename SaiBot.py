@@ -4,7 +4,7 @@ import discord
 from discord.user import User
 from discord.enums import ActivityType, ChannelType
 from discord.ext import tasks
-from discord import Spotify, TextChannel, Embed
+from discord import Spotify, TextChannel, Embed, FFmpegPCMAudio
 #import interactions
 #from interactions import ComponentContext, SlashContext, SelectMenu, SelectOption, Button, ButtonStyle, Option, OptionType, ActionRow
 import os
@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 from random import choice, randrange, randint
 import sqlite3
-from re import search
+from re import S, search
 from asyncio import sleep
 import asyncio
 import psutil
@@ -3531,7 +3531,7 @@ async def information(ctx: SlashContext, character_name: str):
 #endregion
 
 # info
-#region
+#region--
 
 @slash.slash(
     name="about",
@@ -4586,6 +4586,93 @@ async def eightball(ctx: SlashContext, question: str):
 
 #endregion
 
+# custom
+#region
+
+
+# the following leave join and clap commands are unique to Mike's server role for his CS podcast.
+@slash.slash(
+    name="join",
+    description="Sai will join vc.",
+    guild_ids=[956299604872298496]
+)
+async def join(ctx: SlashContext):
+    await logslashcommand(ctx)
+    author_role_ids = [role.id for role in ctx.author.roles]
+    if 956303221138268242 not in author_role_ids:
+        await ctx.send("Sorry you can't do this.", hidden=True)
+        return
+    voice = ctx.author.voice
+    if voice:
+        try:
+            channel = voice.channel
+            client_voice_channels = [curr_voice.channel for curr_voice in client.voice_clients]
+            if channel in client_voice_channels:
+                await ctx.send("I am already in that vc.", hidden=True)
+                return
+            await channel.connect()
+            await ctx.send("I have joined vc!")
+        except Exception as e:
+            await ctx.send(f"Sai does not have the correct permissions to join this channel. If you are sure this is not the problem, send this error message to jlc#8474:```{e}```", hidden=True)
+    else:
+        await ctx.send(f"Sai does not know what vc to join. Go into a vc and Sai can join you there.", hidden=True)
+
+
+@slash.slash(
+    name="leave",
+    description="Sai will leave vc.",
+    guild_ids=[956299604872298496]
+)
+async def leave(ctx: SlashContext):
+    await logslashcommand(ctx)
+    author_role_ids = [role.id for role in ctx.author.roles]
+    if 956303221138268242 not in author_role_ids:
+        await ctx.send("Sorry you can't do this!", hidden=True)
+        return
+    voice = ctx.author.voice
+    if voice:
+        try:
+            channel = voice.channel
+            client_voice_channels = [curr_voice.channel for curr_voice in client.voice_clients]
+            if channel not in client_voice_channels:
+                await ctx.send("Join the vc I am in to disconnect me.", hidden=True)
+                return
+            curr_voice_client = client.voice_clients[client_voice_channels.index(channel)]
+            await curr_voice_client.disconnect()
+            await ctx.send("I have left vc!")
+        except Exception as e:
+            await ctx.send(f"Sai does not have the correct permissions to leave this channel. If you are sure this is not the problem, send this error message to jlc#8474:```{e}```", hidden=True)
+    else:
+        await ctx.send("Join vc to disconnect me.", hidden=True)
+
+
+@slash.slash(
+    name="clap",
+    description="Sai will play a clap sound in the vc they are currently in.",
+    guild_ids=[956299604872298496]
+)
+async def clap(ctx: SlashContext):
+    await logslashcommand(ctx)
+    author_role_ids = [role.id for role in ctx.author.roles]
+    if 956303221138268242 not in author_role_ids:
+        await ctx.send("Sorry you can't do this!", hidden=True)
+        return
+    voice = ctx.author.voice
+    if voice:
+        channel = voice.channel
+        client_voice_channels = [curr_voice.channel for curr_voice in client.voice_clients]
+        if channel not in client_voice_channels:
+            await ctx.send("Join the vc I am in to play the clap sound.", hidden=True)
+            return
+        curr_voice_client = client.voice_clients[client_voice_channels.index(channel)]
+        if curr_voice_client.is_playing():
+            await ctx.send("Im already clapping give me a break...", hidden=True)
+        else:
+            curr_voice_client.play(FFmpegPCMAudio(executable="ffmpeg.exe", source="clapping.mp3"))
+            await ctx.send("*Clap clap clap...*")
+
+
+#endregion
 # component callbacks
 #region
 
