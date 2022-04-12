@@ -2,6 +2,7 @@
 #region
 import discord
 from discord.user import User
+from discord.member import Member
 from discord.enums import ActivityType, ChannelType
 from discord.ext import tasks
 from discord import Spotify, TextChannel, Embed, FFmpegPCMAudio
@@ -102,7 +103,7 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 31
-version = "1.16.2"
+version = "1.16.3"
 linesofcode = "14091"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 6108
@@ -4544,7 +4545,80 @@ async def votereminder(ctx: SlashContext):
 #region
 
 
+@slash.slash(
+    name="ban",
+    description="This command bans the selected user. A reason can be included",
+    options=[
+        {
+            "name":"user",
+            "description":"The user you want to ban",
+            "type":6,
+            "required":True
+        },
+        {
+            "name":"reason",
+            "description":"The reason that you want to ban specified user.",
+            "type":3,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.ban + timedelta(seconds=bancooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.ban = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.ban + timedelta(seconds=bancooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/ban", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return 
+    
+    #gets server owner who can ban or kick anyone
+    owner = ctx.guild.get_member(int(ctx.guild.owner_id))
+    
+    #firstly check if Sai can ban
+    sai = ctx.guild.get_member(int(client.user.id))
 
+    if sai.top_role <= user.top_role:
+        banmessage = "Sai cant ban users above or at the same level as himself! ❌"
+        await ctx.send(banmessage)
+        return
+    
+    #check that the user is above in heirarchy and not owner (owner can ban anyone)
+    if (user.top_role >= ctx.author.top_role and (not (ctx.author == owner))) or user == owner:
+        if randint(1,1000) == 1:
+            banmessage = "Your sexy jutsu is not powerful enough to ban this user. ❌"
+        else:
+            banmessage = "You cant ban users above or at the same level as you! ❌"
+        await ctx.send(banmessage)
+        return
+
+    if reason != "No reason given.":
+        banembed = discord.Embed(title="You were banned from {0}.".format(str(ctx.guild)), colour=embedcolour)
+        banembed.add_field(name="Reason: ", value=reason)
+        banembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await user.send(embed=banembed)
+        except:
+            pass
+        await ctx.send("{0} was banned. Reason: {1}. ✅".format(str(user), reason))
+    else:
+        banembed = discord.Embed(title="You were banned from {0}.".format(str(ctx.guild)), colour=embedcolour)
+        banembed.add_field(name="Reason: ", value="No reason given.")
+        banembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await user.send(embed=banembed)
+        except:
+            pass
+        await ctx.send("{0} was banned. Reason: No reason given. ✅".format(str(user)))
+    
+    #ban the user and react to message
+    banreason = reason
+    await user.ban(reason=banreason)
 
 
 #endregion
@@ -4673,6 +4747,7 @@ async def clap(ctx: SlashContext):
 
 
 #endregion
+
 # component callbacks
 #region
 
@@ -5513,6 +5588,33 @@ async def help_time(ctx: ComponentContext):
     helpembed.add_field(name="How to use it", value="To display desired timezone:```/time {Selector} or (timezone)``` *Note: the 'timezone selector' shows when the timezone is set to 'Selector' or no timezone is entered. Here you can also access the timezone Wikipedia page.*\nTo display all timezones:```/time all```*Note 2: timezones should be written in their shortened form (e.g. IST, BST, GMT, est, pst, ast)*", inline=False)
     helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(timecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | For Sai's accepted timezones, run 's.help timezones'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def ban(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `ban` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `ban` command is used to ban a specified user. Note that to run this command you need to have user banning perms.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/ban [user ID] or [user mention] (reason)```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(bancooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
