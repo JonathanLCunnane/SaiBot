@@ -4551,13 +4551,13 @@ async def votereminder(ctx: SlashContext):
     options=[
         {
             "name":"user",
-            "description":"The user you want to ban",
+            "description":"The user you want to ban.",
             "type":6,
             "required":True
         },
         {
             "name":"reason",
-            "description":"The reason that you want to ban specified user.",
+            "description":"The reason that you want to ban the specified user.",
             "type":3,
             "required":False
         }
@@ -4583,13 +4583,18 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
     #firstly check if Sai can ban
     sai = ctx.guild.get_member(int(client.user.id))
 
+    # firstly check if the reason length is too long
+    if len(reason) > 500:
+        await ctx.send("The reason can be no longer than 500 characters.", hidden=True)
+        return
+
     if sai.top_role <= user.top_role:
         banmessage = "Sai cant ban users above or at the same level as himself! ❌"
         await ctx.send(banmessage)
         return
     
     #check that the user is above in heirarchy and not owner (owner can ban anyone)
-    if (user.top_role >= ctx.author.top_role and (not (ctx.author == owner))) or user == owner:
+    if (user.top_role >= ctx.author.top_role and ctx.author != owner) or user == owner:
         if randint(1,1000) == 1:
             banmessage = "Your sexy jutsu is not powerful enough to ban this user. ❌"
         else:
@@ -4618,7 +4623,94 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
     
     #ban the user and react to message
     banreason = reason
-    await user.ban(reason=banreason)
+    try:
+        await user.ban(reason=banreason)
+    except Exception as e:
+        await ctx.send(f"Ban failed, send this message to the bot developer jlc#8474: {e}.")
+
+
+@slash.slash(
+    name="kick",
+    description="This command bans the selected user. A reason can be included",
+    options=[
+        {
+            "name":"user",
+            "description":"The user you want to kick.",
+            "type":6,
+            "required":True
+        },
+        {
+            "name":"reason",
+            "description":"The reason that you want to kick the specified user.",
+            "type":3,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.kick + timedelta(seconds=kickcooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.kick = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.kick + timedelta(seconds=kickcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/kick", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return 
+
+    #gets server owner who can ban or kick anyone
+    owner = ctx.guild.get_member(int(ctx.guild.owner_id))
+    
+    #firstly check if Sai can kick
+    sai = ctx.guild.get_member(int(client.user.id))
+
+    # firstly check if the reason length is too long
+    if len(reason) > 500:
+        await ctx.send("The reason can be no longer than 500 characters.", hidden=True)
+        return
+
+    if sai.top_role <= user.top_role:
+        banmessage = "Sai cant kick users above or at the same level as himself! ❌"
+        await ctx.send(banmessage)
+        return
+     
+    #check that the user is above in heirarchy and not the owner (owner can kick anyone)
+    if (user.top_role >= ctx.author.top_role and ctx.author != owner) or user == owner:
+        if randint(1,1000) == 1:
+            kickmessage = "Your sexy jutsu is not powerful enough to kick this user ❌"
+        else:
+            kickmessage = "You cant kick users above or at the same level as you! ❌"
+        await ctx.send(kickmessage)
+        return
+
+    if reason != "No reason given.":
+        kickembed = discord.Embed(title="You were kicked from {0}.".format(str(ctx.guild)), colour=embedcolour)
+        kickembed.add_field(name="Reason: ", value=reason)
+        kickembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await user.send(embed=kickembed)
+        except:
+            pass
+        await ctx.send("{0} was kicked. Reason: {1}".format(str(user), reason))
+    else:
+        kickembed = discord.Embed(title="You were kicked from {0}.".format(str(ctx.guild)), colour=embedcolour)
+        kickembed.add_field(name="Reason: ", value="No reason given.")
+        kickembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await user.send(embed=kickembed)
+        except:
+            pass
+        await ctx.send("{0} was kicked. Reason: No reason given.".format(str(user)))
+    
+    #kick the user
+    kickreason = reason
+    try:
+        await user.kick(reason=kickreason)
+    except Exception as e:
+        ctx.send(f"Kick failed, send this message to the bot developer jlc#8474: {e}.")
 
 
 #endregion
@@ -5617,6 +5709,31 @@ async def ban(ctx: ComponentContext):
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
+@slash.component_callback()
+async def kick(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `kick` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `kick` command is used to kick a specific user. Note that to run this command you need to have user kicking perms.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/kick [user ID] or [user mention] (reason)```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(kickcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
 
 @slash.component_callback()
 async def eight_ball(ctx: ComponentContext):
@@ -5643,6 +5760,8 @@ async def eight_ball(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(eightballcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
+
+
 
 
 
@@ -5880,6 +5999,7 @@ async def time_select(ctx: ComponentContext):
 
 
 #endregion
+
 
 #endregion
 
