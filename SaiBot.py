@@ -4764,7 +4764,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
         lockdownembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         try:
             await ctx.author.send(embed=lockdownembed)
-            await ctx.send("❌ Lockdown Failed. See DM's for more details.")
+            await ctx.send("❌ Lockdown Failed. See DM's for more details.", hidden=True)
         except:
             await ctx.send(embed=lockdownembed, hidden=True)
         return
@@ -4779,7 +4779,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
 
     lockdownoverwrite.send_messages = False
     await channel.set_permissions(channel.guild.default_role, overwrite=lockdownoverwrite)
-    await ctx.send("Success! ✅", hidden=True)
+    await ctx.send(f"Channel with ID:{channel.id} was successfully locked down.")
 
 
 @slash.slash(
@@ -4826,12 +4826,13 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
         messageembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         try:
             await ctx.author.send(embed=messageembed)
-            await ctx.send("❌ Message failed to send.")
+            await ctx.send("❌ Message failed to send. See DM's for more information.", hidden=True)
         except:
             await ctx.send(embed=messageembed, hidden=True)
         return
 
-    channel.send(content=message)
+    await channel.send(content=message)
+    await ctx.send(content="Message sent! ✅", hidden=True)
     return
 
 
@@ -5887,6 +5888,33 @@ async def lockdown(ctx: ComponentContext):
 
 
 @slash.component_callback()
+async def message(ctx: ComponentContext):
+# if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `message` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `message` command is used to make Sai send a message to a specific channel. Note that to run this command you need to have admin perms or higher.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/message [channel ID] or [channel mention] | [message]```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(messagecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
 async def eight_ball(ctx: ComponentContext):
     # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
@@ -5911,9 +5939,6 @@ async def eight_ball(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(eightballcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
-
-
-
 
 
 #endregion
