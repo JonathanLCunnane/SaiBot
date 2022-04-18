@@ -982,7 +982,7 @@ async def on_message(message):
             elif helpcommand == "lockdown" or helpcommand == "lock" or helpcommand == "shush" or helpcommand == "shutup":
                 helpembed=discord.Embed(title="Help", description="Command specific help for: `lockdown` <:moderation_and_admin:881897640948826133>", color=embedcolour)
                 helpembed.set_thumbnail(url=client.user.avatar_url)
-                helpembed.add_field(name="Description", value="The `lockdown` command is used to prevent users from sending messages on a channel, essentially muting them on the specified channel. Note that to run this command you need to have manage permission permissions.", inline=False)
+                helpembed.add_field(name="Description", value="The `lockdown` command is used to prevent users from sending messages on a channel, essentially muting them on the specified channel. Note that to run this command you need to have manage permissions permission.", inline=False)
                 helpembed.add_field(name="How to use it", value="```s.lockdown {current channel} (channel ID or channel mention)```", inline=False)
                 helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Aliases:** ```lockdown, lock, shush, shutup```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(lockdowncooldown), inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
@@ -3532,7 +3532,7 @@ async def information(ctx: SlashContext, character_name: str):
 #endregion
 
 # info
-#region--
+#region
 
 @slash.slash(
     name="about",
@@ -4739,19 +4739,24 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
         await ctx.send(embed=cooldownembed)
         return 
 
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_permissions:
+        await ctx.send("❌ Lockdown Failed. You are do not have the manage permissions permission.", hidden=True)
+        return
+
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
     if not channel:
         channel = ctx.channel
 
     if channel.guild != ctx.guild or (not isinstance(channel, TextChannel)):
-        eventembed = discord.Embed(title="Event Cmd Error: ", color=embedcolour)
-        eventembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
-        eventembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        lockdownembed = discord.Embed(title="Lockdown Cmd Error: ", color=embedcolour)
+        lockdownembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
+        lockdownembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         try:
-            await ctx.author.send(embed=eventembed)
-            await ctx.send("❌ Event Creation Failed. See DM's for more details.")
+            await ctx.author.send(embed=lockdownembed)
+            await ctx.send("❌ Lockdown Failed. See DM's for more details.")
         except:
-            await ctx.send(embed=eventembed, hidden=True)
+            await ctx.send(embed=lockdownembed, hidden=True)
         return
 
     #lockdown the channel and provide conformation by a hidden message
@@ -4767,6 +4772,49 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
     await ctx.send("Success! ✅", hidden=True)
 
 
+@slash.slash(
+    name="message",
+    description="Sends a message as Sai in a channel of your choice.",
+    options=[
+        {
+            "name":"channel",
+            "description":"The channel to send the message in.",
+            "type":7,
+            "required":True
+        },
+        {
+            "name":"message",
+            "description":"The body of the message to send.",
+            "type":3,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def message(ctx: SlashContext, channel: TextChannel, message: str):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.message + timedelta(seconds=messagecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.message = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.message + timedelta(seconds=messagecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/message", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return 
+
+    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
+    if channel.guild != ctx.guild or (not isinstance(channel, TextChannel)):
+        eventembed = discord.Embed(title="Event Cmd Error: ", color=embedcolour)
+        eventembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.\n*(You cannot create events via Sai cross-guild.)*")
+        eventembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=eventembed)
+            await ctx.send("❌ Event Creation Failed. See DM's for more details.")
+        except:
+            await ctx.send(embed=eventembed)
+        return
 
 
 
@@ -5814,7 +5862,7 @@ async def lockdown(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title="Help", description="Command specific help for: `lockdown` <:moderation_and_admin:881897640948826133>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `lockdown` command is used to prevent users from sending messages on a channel, essentially muting them on the specified channel. Note that to run this command you need to have manage permission permissions.", inline=False)
+    helpembed.add_field(name="Description", value="The `lockdown` command is used to prevent users from sending messages on a channel, essentially muting them on the specified channel. Note that to run this command you need to have manage permissions permission.", inline=False)
     helpembed.add_field(name="How to use it", value="```/lockdown {current channel} (channel ID or channel mention)```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(lockdowncooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
