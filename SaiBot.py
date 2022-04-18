@@ -4577,6 +4577,11 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
         await ctx.send(embed=cooldownembed)
         return 
     
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).ban_members:
+        await ctx.send("❌ Ban Failed. You are do not have the ban members permission.", hidden=True)
+        return
+
     #gets server owner who can ban or kick anyone
     owner = ctx.guild.get_member(int(ctx.guild.owner_id))
     
@@ -4660,6 +4665,11 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
         cooldownembed = getcooldownembed("/kick", timeleft, ctx.author)
         await ctx.send(embed=cooldownembed)
         return 
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).kick_members:
+        await ctx.send("❌ Kick Failed. You are do not have the kick members permission.", hidden=True)
+        return
 
     #gets server owner who can ban or kick anyone
     owner = ctx.guild.get_member(int(ctx.guild.owner_id))
@@ -4804,18 +4814,25 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
         await ctx.send(embed=cooldownembed)
         return 
 
-    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
-    if channel.guild != ctx.guild or (not isinstance(channel, TextChannel)):
-        eventembed = discord.Embed(title="Event Cmd Error: ", color=embedcolour)
-        eventembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.\n*(You cannot create events via Sai cross-guild.)*")
-        eventembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-        try:
-            await ctx.author.send(embed=eventembed)
-            await ctx.send("❌ Event Creation Failed. See DM's for more details.")
-        except:
-            await ctx.send(embed=eventembed)
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).administrator:
+        await ctx.send("❌ Message Failed to send. You are do not have the administrator permission.", hidden=True)
         return
 
+    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
+    if (channel.guild != ctx.guild and ctx.author_id != 457517248786202625) or (not isinstance(channel, TextChannel)):
+        messageembed = discord.Embed(title="Message Cmd Error: ", color=embedcolour)
+        messageembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
+        messageembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=messageembed)
+            await ctx.send("❌ Message failed to send.")
+        except:
+            await ctx.send(embed=messageembed, hidden=True)
+        return
+
+    channel.send(content=message)
+    return
 
 
 #endregion
