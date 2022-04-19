@@ -4944,7 +4944,26 @@ async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: st
     await ctx.send(embed=decideembed)
     
 
+@slash.slash(
+    name="gif",
+    description="Returns a random Sai gif",
+    guild_ids=[917125124770132038]
+)
+async def gif(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.gif + timedelta(seconds=gifcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.gif = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.gif + timedelta(seconds=gifcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/gif", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
 
+    randomgif = choice(saigifs)
+    await ctx.send(randomgif)
 
 
 @slash.slash(
@@ -5360,7 +5379,7 @@ async def help_category(ctx: ComponentContext):
             create_button(
                 style=ButtonStyle.secondary,
                 label="Message",
-                custom_id="message"
+                custom_id="message_help"
             )
         ]
         buttons_two = [
@@ -5993,7 +6012,7 @@ async def lockdown(ctx: ComponentContext):
 
 
 @slash.component_callback()
-async def message(ctx: ComponentContext):
+async def message_help(ctx: ComponentContext):
 # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
     if original_author != str(ctx.author):
@@ -6042,7 +6061,34 @@ async def decide(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `decide` command returns a random choice from the entered choices.", inline=False)
     helpembed.add_field(name="How to use it", value="```/decide (choice#1), (choice#2), ... , (choice#n)```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(decidecooldown), inline=False)
-    helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def gif(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `gif` <:fun:881899126286061609>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `gif` command returns a random Sai gif.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/gif```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(gifcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
