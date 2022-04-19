@@ -4927,14 +4927,17 @@ async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: st
     for curr_choice in choices:
         if not (curr_choice == "" or curr_choice == None):
             choicecount += 1
+    # remove all None and "" values
+    choices = list(filter(lambda curr_choice: (not(curr_choice == None or curr_choice == "")), choices))
+    print(choices)
 
     #if 0 or 1 choice(s) is entered send a message
     
     if choicecount == 0:
-        await ctx.send("<@{0}> You need to enter at least 2 choices <:facepalm:860913056040747088>".format(message.author.id))
+        await ctx.send("<@{0}> You need to enter at least 2 choices <:facepalm:860913056040747088>".format(ctx.author.id))
         return
     elif choicecount == 1:
-        await ctx.send("<@{0}> I'm not sure what to choose, seems too hard 😗".format(message.author.id))
+        await ctx.send("<@{0}> I'm not sure what to choose, seems too hard 😗".format(ctx.author.id))
         return
 
     #create and send embed
