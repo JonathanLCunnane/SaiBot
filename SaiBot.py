@@ -4843,6 +4843,111 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
 
 
 @slash.slash(
+    name="decide",
+    description="Sai will return a random choice from any of the inputted choices.",
+    options=[
+        {
+            "name":"choice1",
+            "description":"One of the choices",
+            "type":3,
+            "required":True
+        },
+        {
+            "name":"choice2",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice3",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice4",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice5",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice6",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice7",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice8",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice9",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"choice10",
+            "description":"One of the choices",
+            "type":3,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: str=None, choice4: str=None, choice5: str=None, choice6: str=None, choice7: str=None, choice8: str=None, choice9: str=None, choice10: str=None):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.decide + timedelta(seconds=decidecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.decide = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.decide + timedelta(seconds=decidecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/decide", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+    
+    choices = [choice1, choice2, choice3, choice4, choice5, choice6, choice7, choice8, choice9, choice10]
+    choicecount = 0
+    for curr_choice in choices:
+        if not (curr_choice == "" or curr_choice == None):
+            choicecount += 1
+
+    #if 0 or 1 choice(s) is entered send a message
+    
+    if choicecount == 0:
+        await ctx.send("<@{0}> You need to enter at least 2 choices <:facepalm:860913056040747088>".format(message.author.id))
+        return
+    elif choicecount == 1:
+        await ctx.send("<@{0}> I'm not sure what to choose, seems too hard 😗".format(message.author.id))
+        return
+
+    #create and send embed
+    decideembed = discord.Embed(title="The Decision: ", color=embedcolour)
+    decideembed.add_field(name="Sai's decision was: ", value="­\n{0}\n­".format(choice(choices)))
+    decideembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=decideembed)
+    
+
+
+
+
+@slash.slash(
     name="eightball",
     description="Sai will decide your fate",
     options=[
@@ -5911,6 +6016,33 @@ async def message(ctx: ComponentContext):
     helpembed.add_field(name="How to use it", value="```/message [channel ID] or [channel mention] | [message]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(messagecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def decide(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `decide` <:fun:881899126286061609>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `decide` command returns a random choice from the entered choices.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/decide (choice#1), (choice#2), ... , (choice#n)```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(decidecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
