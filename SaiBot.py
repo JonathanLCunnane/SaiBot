@@ -5489,7 +5489,7 @@ async def help_category(ctx: ComponentContext):
         buttons_two = [
             create_button(
                 style=ButtonStyle.secondary,
-                label="eightball",
+                label="Eightball",
                 custom_id="eight_ball"
             )
         ]
