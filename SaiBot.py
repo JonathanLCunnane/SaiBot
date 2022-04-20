@@ -3632,7 +3632,7 @@ async def help(ctx: SlashContext):
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, eightball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=helpembed, components=menu)
 
@@ -5246,7 +5246,7 @@ async def help_home(ctx: ComponentContext):
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```decide, gif, quote, tulaiiisabigman, eightball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=menu)
 
@@ -5489,7 +5489,7 @@ async def help_category(ctx: ComponentContext):
         buttons_two = [
             create_button(
                 style=ButtonStyle.secondary,
-                label="8ball",
+                label="eightball",
                 custom_id="eight_ball"
             )
         ]
@@ -6211,10 +6211,10 @@ async def eight_ball(ctx: ComponentContext):
     ]
     button = [create_actionrow(*button)]
     # create embed
-    helpembed=discord.Embed(title="Help", description="Command specific help for: `8ball` <:fun:881899126286061609>", color=embedcolour)
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `eightball` <:fun:881899126286061609>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `8ball` command lets Sai give a response to your yes/no question", inline=False)
-    helpembed.add_field(name="How to use it", value="```/8ball [question]```", inline=False)
+    helpembed.add_field(name="Description", value="The `eightball` command lets Sai give a response to your yes/no question", inline=False)
+    helpembed.add_field(name="How to use it", value="```/eightball [question]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(eightballcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
