@@ -3708,7 +3708,7 @@ async def links(ctx: SlashContext):
 
 @slash.slash(
     name="patreon",
-    description="One of the ways which you can support Sai! Run this command to get the link",
+    description="One of the ways which you can support Sai! Run this command to get the link.",
     guild_ids=[917125124770132038],
     
 )
@@ -4150,7 +4150,7 @@ async def editsnipe(ctx: SlashContext):
 
 @slash.slash(
     name="event",
-    description="Lets you keep track of attendance to an event",
+    description="Lets you keep track of attendance to an event.",
     options=[
         {
             "name":"channel",
@@ -4547,7 +4547,7 @@ async def votereminder(ctx: SlashContext):
 
 @slash.slash(
     name="ban",
-    description="This command bans the selected user. A reason can be included",
+    description="This command bans the selected user. A reason can be included.",
     options=[
         {
             "name":"user",
@@ -4636,7 +4636,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
 
 @slash.slash(
     name="kick",
-    description="This command bans the selected user. A reason can be included",
+    description="This command bans the selected user. A reason can be included.",
     options=[
         {
             "name":"user",
@@ -4949,7 +4949,7 @@ async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: st
 
 @slash.slash(
     name="gif",
-    description="Returns a random Sai gif",
+    description="Returns a random Sai gif.",
     guild_ids=[917125124770132038]
 )
 async def gif(ctx: SlashContext):
@@ -4970,8 +4970,30 @@ async def gif(ctx: SlashContext):
 
 
 @slash.slash(
+    name="quote",
+    description="Returns a random Sai quote.",
+    guild_ids=[917125124770132038]
+)
+async def quote(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.quote + timedelta(seconds=quotecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.quote = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.quote + timedelta(seconds=quotecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/quote", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #sends a random Sai quote
+    await ctx.send(f"\"{choice(saiquotes)}\"")
+
+
+@slash.slash(
     name="eightball",
-    description="Sai will decide your fate",
+    description="Sai will decide your fate.",
     options=[
         {
             "name":"question",
@@ -6091,6 +6113,33 @@ async def gif(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `gif` command returns a random Sai gif.", inline=False)
     helpembed.add_field(name="How to use it", value="```/gif```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(gifcooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def quote(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `quote` <:fun:881899126286061609>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `quote` command returns a random Sai quote.\n**Note: If you havent finished Naruto and Naruto Shippuden be wary when clicking on spoilers :)**", inline=False)
+    helpembed.add_field(name="How to use it", value="```/quote```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(quotecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
