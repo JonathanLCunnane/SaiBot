@@ -3,6 +3,7 @@
 import discord
 from discord.user import User
 from discord.member import Member
+from discord.role import Role
 from discord.enums import ActivityType, ChannelType
 from discord.ext import tasks
 from discord import Spotify, TextChannel, Embed, FFmpegPCMAudio
@@ -4876,6 +4877,144 @@ async def purge(ctx: SlashContext, purgenum: int):
         return
     await ctx.channel.purge(limit=purgenum)
     await ctx.send(f"Purged {purgenum} messages.", delete_after=1)
+
+
+@slash.subcommand(
+    base="role",
+    base_description="Gives various functionality for dealing with roles.",
+    name="add",
+    description="Give a role to a user.",
+    options=[
+        {
+            "name":"user",
+            "description":"The user which you want to give the role to.",
+            "type":6,
+            "required":True
+        },
+        {
+            "name":"role",
+            "description":"The role which you want to give.",
+            "type":8,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def role_add(ctx: SlashContext, user: Member, role: Role):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.role + timedelta(seconds=rolecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.role = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_roles:
+        await ctx.send("❌ Role Add Failed. You are do not have the manage roles permission.", hidden=True)
+        return
+    
+    saiuser = await ctx.guild.fetch_member(858663143931641857)
+
+    #get owner who can give or take any role
+    owner = ctx.guild.get_member(int(ctx.guild.owner.id))
+    
+    userchanging = ctx.author
+    usertochange = user
+    roletochange = role
+
+    #if Sai's top role is not above the role to give, react with an appropriate message
+    if userchanging.top_role <= roletochange and ctx.author != owner:
+        await ctx.send("You cant give this role to anyone! ❌")
+        return
+    if saiuser.top_role <= roletochange:
+        await ctx.send("Sai cant give this role to anyone! Make sure Sai is above this role in the Hierarchy... ❌")
+        return
+
+    #check if the user already has the role
+    if roletochange in usertochange.roles:
+        await ctx.send("The user already has this role! ❌")
+        return
+    
+    #give specified role to specified user
+    await usertochange.add_roles(roletochange, reason="Sai gave the role as per {0}'s request".format(str(userchanging)))
+    await ctx.send(content="Success! ✅", hidden=True)
+
+
+@slash.subcommand(
+    base="role",
+    base_description="Gives various functionality for dealing with roles.",
+    name="remove",
+    description="Takes a role from a user.",
+    options=[
+        {
+            "name":"user",
+            "description":"The user which you want to take the role from.",
+            "type":6,
+            "required":True
+        },
+        {
+            "name":"role",
+            "description":"The role which you want to take.",
+            "type":8,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def role_remove(ctx: SlashContext, user: Member, role: Role):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.role + timedelta(seconds=rolecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.role = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_roles:
+        await ctx.send("❌ Role Remove Failed. You are do not have the manage roles permission.", hidden=True)
+        return
+    
+    saiuser = await ctx.guild.fetch_member(858663143931641857)
+
+    #get owner who can give or take any role
+    owner = ctx.guild.get_member(int(ctx.guild.owner.id))
+    
+    userchanging = ctx.author
+    usertochange = user
+    roletochange = role
+
+    #if Sai's top role is not above the role to give, react with an appropriate message
+    if userchanging.top_role <= roletochange and ctx.author != owner:
+        #if the user running command is not the same as the user to change and the role is the same level, they cannot change the role so send this message
+        if userchanging == usertochange and userchanging.top_role == roletochange:
+            pass
+        else:
+            await ctx.send("You cant remove this role! ❌")
+            return
+    if saiuser.top_role <= roletochange:
+        if saiuser == userchanging and saiuser.top_role == roletochange:
+            pass
+        await ctx.send("Sai cant remove this role from anyone! Make sure Sai is above this role in the Hierarchy... ❌")
+        return
+
+    #check if the user doesnt have the role
+    if not (roletochange in usertochange.roles):
+        await ctx.send("The user does not have this role! ❌")
+        return
+    
+    #give specified role to specified user
+    await usertochange.remove_roles(roletochange, reason="Sai removed the role as per {0}'s request".format(str(userchanging)))
+    await ctx.send(content="Success! ✅", hidden=True)
 
 
 #endregion
