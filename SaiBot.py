@@ -1014,7 +1014,7 @@ async def on_message(message):
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="Description", value="The `role` command is a very powerful command which has multiple uses. \n  -  Firstly, it can add or remove roles from a user.\n  -  Secondly, it can display information about a specific role.\n  -  Thirdly, it can display information about all roles. \n  -  Lastly, it can display information about all the roles of a specific user.\nNote that to run this command you need to have manage roles perms.", inline=False)
                 helpembed.add_field(name="How to use it", value="To add/remove a role: ```s.role add/give [user mention] or [user ID] [role mention] or [role ID]``````s.role remove/take [user mention] or [user ID] [role mention] or [role ID]```To get info about all roles: ```s.role information/info list/all```To get info about a singular role: ```s.role information/info [role mention] or [role ID]```To get all role info about a singular user: ```s.role information/info {command user} or [user mention] or [user ID]```", inline=False)
-                helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Aliases:** ```role, r```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(rolecooldown), inline=False)
+                helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Aliases:** ```role```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(rolecooldown), inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | This command is experimental, so if any bugs occur ping me on the Sai bot official server.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed)
             
@@ -6528,6 +6528,7 @@ async def time_select(ctx: ComponentContext):
 #endregion
 
 #endregion
+
 
 if __name__ == "__main__":
     #start the bot if run from the file not imported
