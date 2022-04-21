@@ -2300,6 +2300,9 @@ async def on_message(message):
             if (not isint(purgenum)):
                 await message.channel.send("<@{0}> Enter a correct number of messages to delete.".format(int(message.author.id)), delete_after=3)
                 return
+            if int(purgenum) <= 0:
+                await message.channel.send("<@{0}> Enter a correct number of messages to delete.".format(int(message.author.id)), delete_after=3)
+                return
 
             purgenum = int(purgenum)
 
@@ -4836,6 +4839,45 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
     return
 
 
+@slash.slash(
+    name="purge",
+    description="Deletes the last sent messages in the current channel up to a certain number.",
+    options=[
+        {
+            "name":"purgenum",
+            "description":"The number of (most recent) messages to delete.",
+            "type":4,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def purge(ctx: SlashContext, purgenum: int):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.message + timedelta(seconds=messagecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.message = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.message + timedelta(seconds=messagecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/message", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return 
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_messages:
+        await ctx.send("❌ Purge Failed. You are do not have the manage messages permission.", hidden=True)
+        return
+
+    # purges messages
+    if purgenum <= 0:
+        await ctx.send("❌ Purge Failed. Enter a positive number of messages to be purged.", hidden=True)
+        return
+    await ctx.channel.purge(limit=purgenum)
+    await ctx.send(f"Purged {purgenum} messages.", delete_after=1)
+
+
 #endregion
 
 # fun
@@ -6060,7 +6102,7 @@ async def lockdown(ctx: ComponentContext):
 
 @slash.component_callback()
 async def message_help(ctx: ComponentContext):
-# if the button was clicked by someone else
+    # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
     if original_author != str(ctx.author):
         await ctx.send(content="This command is not for you!", hidden=True)
@@ -6081,6 +6123,33 @@ async def message_help(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `message` command is used to make Sai send a message to a specific channel. Note that to run this command you need to have admin perms or higher.", inline=False)
     helpembed.add_field(name="How to use it", value="```/message [channel ID] or [channel mention] | [message]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(messagecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def purge(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `purge` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `purge` command is used to bulk delete a range of messages. Note that to run this command you need to have manage messages perms.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/purge [number of messages to delete]```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(purgecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
