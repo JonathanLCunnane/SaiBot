@@ -4776,7 +4776,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
 
     lockdownoverwrite.send_messages = False
     await channel.set_permissions(channel.guild.default_role, overwrite=lockdownoverwrite)
-    await ctx.send(f"Channel with ID:{channel.id} was successfully locked down.")
+    await ctx.send(f"Channel <#{channel.id}> *(ID:{channel.id})* was successfully locked down.")
 
 
 @slash.slash(
@@ -5323,6 +5323,65 @@ async def slowmode_off(ctx: SlashContext, channel: TextChannel=None):
     await ctx.send(content="Success ✅", hidden=True)
 
 
+@slash.slash(
+    name="unlockdown",
+    description="Undo the effect of the /lockdown command.",
+    options=[
+        {
+            "name":"channel",
+            "description":"The channel to revert. Default is the current channel.",
+            "type":7,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def unlockdown(ctx: SlashContext, channel: TextChannel=None):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.unlockdown + timedelta(seconds=unlockdowncooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.unlockdown = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.unlockdown + timedelta(seconds=unlockdowncooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/unlockdown", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return 
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_permissions:
+        await ctx.send("❌ Unlockdown Failed. You do not have the `Manage Permissions` permission.", hidden=True)
+        return
+
+    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
+    if not channel:
+        channel = ctx.channel
+
+    if channel.guild != ctx.guild or (not isinstance(channel, TextChannel)):
+        unlockdownembed = discord.Embed(title="Unlockdown Cmd Error: ", color=embedcolour)
+        unlockdownembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
+        unlockdownembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=unlockdownembed)
+            await ctx.send("❌ Unlockdown Failed. See DM's for more details.", hidden=True)
+        except:
+            await ctx.send(embed=unlockdownembed, hidden=True)
+        return
+
+    # unlock the channel and provide conformation by a reaction
+    unlockdownoverwrite = channel.overwrites_for(ctx.guild.default_role)
+
+    #if the channel is not locked
+    if unlockdownoverwrite.send_messages == None or unlockdownoverwrite.send_messages == True:
+        await ctx.send("This channel is not locked! ❌", hidden=True)
+        return
+
+    unlockdownoverwrite.send_messages = None
+    await channel.set_permissions(ctx.guild.default_role, overwrite=unlockdownoverwrite)
+    await ctx.send(f"Channel <#{channel.id}> *(ID:{channel.id})* was successfully unlocked.")
+
+
 #endregion
 
 # fun
@@ -5710,10 +5769,11 @@ async def information_select(ctx: ComponentContext):
 @slash.component_callback()
 async def help_home(ctx: ComponentContext):
     # if the button was clicked by someone else ### ADD ANY CUSTOM FOOTER MESSAGES HERE SO THEY ARE REMOVED ###
-    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "")
     original_author = original_author.replace(" | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!", "")
     original_author = original_author.replace(" | For Sai's accepted timezones, run 's.help timezones'", "")
-    if original_author != str(ctx.author):
+    original_author = original_author.replace(" | For accepted time formats, run 's.help timeformats'", "")
+    if original_author[15:] != str(ctx.author):
         await ctx.send(content="This command is not for you!", hidden=True)
         return
     # create menu
@@ -6648,8 +6708,35 @@ async def slowmode(ctx: ComponentContext):
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name="Description", value="The `slowmode` command allows a user to toggle on and off slowmode for channels, and set a desired duration. Note that to run this command you need to have manage channel perms.", inline=False)
     helpembed.add_field(name="How to use it", value="General command notation for turning on slowmode:```/slowmode on {current channel} or (desired channel mention or ID) {30seconds} or (desired slowmode time <MAX 6 HOURS>)```General command notation for turning off slowmode:```/slowmode off {current channel} or (channel mention or ID)```\nExamples:\nSlowmode current channel for certain time -```/slowmode on hours:minutes:seconds```Slowmode certain channel for default time -```/slowmode on #channel-name```Slowmode certain channel for certain time -```/slowmode on channelID minutes:seconds```Slowmode current channel for default time -```/slowmode on```Turn off slowmode for current channel -```/slowmode off```Turn off slowmode for certain channel -```/slowmode off #channel-name```\n (This list of examples is not exhaustive, so experiment!)", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Aliases:** ```slowmode, slow, sm```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(slowmodecooldown), inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds\n".format(slowmodecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | For accepted time formats, run 's.help timeformats'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def unlockdown(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `lockdown` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `unlockdown` command is used to reverse the effects of the `lockdown` command. Note that to run this command you need to have the manage permissions permission.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/unlockdown {current channel} (channel ID or channel mention)```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(unlockdowncooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
