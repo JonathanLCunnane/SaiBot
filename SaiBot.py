@@ -4577,7 +4577,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
     
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).ban_members:
-        await ctx.send("❌ Ban Failed. You are do not have the `Ban Members` permission.", hidden=True)
+        await ctx.send("❌ Ban Failed. You do not have the `Ban Members` permission.", hidden=True)
         return
 
     #gets server owner who can ban or kick anyone
@@ -4665,7 +4665,7 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).kick_members:
-        await ctx.send("❌ Kick Failed. You are do not have the `Kick Members` permission.", hidden=True)
+        await ctx.send("❌ Kick Failed. You do not have the `Kick Members` permission.", hidden=True)
         return
 
     #gets server owner who can ban or kick anyone
@@ -4747,7 +4747,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_permissions:
-        await ctx.send("❌ Lockdown Failed. You are do not have the `Manage Permissions` permission.", hidden=True)
+        await ctx.send("❌ Lockdown Failed. You do not have the `Manage Permissions` permission.", hidden=True)
         return
 
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
@@ -4812,7 +4812,7 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).administrator:
-        await ctx.send("❌ Message Failed to send. You are do not have the `Administrator` permission.", hidden=True)
+        await ctx.send("❌ Message Failed to send. You do not have the `Administrator` permission.", hidden=True)
         return
 
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
@@ -4860,7 +4860,7 @@ async def purge(ctx: SlashContext, purgenum: int):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_messages:
-        await ctx.send("❌ Purge Failed. You are do not have the `Manage Messages` permission.", hidden=True)
+        await ctx.send("❌ Purge Failed. You do not have the `Manage Messages` permission.", hidden=True)
         return
 
     # purges messages
@@ -4907,7 +4907,7 @@ async def role_add(ctx: SlashContext, user: Member, role: Role):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_roles:
-        await ctx.send("❌ Role Add Failed. You are do not have the `Manage Roles` permission.", hidden=True)
+        await ctx.send("❌ Role Add Failed. You do not have the `Manage Roles` permission.", hidden=True)
         return
     
     saiuser = await ctx.guild.fetch_member(858663143931641857)
@@ -4973,7 +4973,7 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_roles:
-        await ctx.send("❌ Role Remove Failed. You are do not have the `Manage Roles` permission.", hidden=True)
+        await ctx.send("❌ Role Remove Failed. You do not have the `Manage Roles` permission.", hidden=True)
         return
     
     saiuser = await ctx.guild.fetch_member(858663143931641857)
@@ -5002,6 +5002,192 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
     #give specified role to specified user
     await usertochange.remove_roles(roletochange, reason="Sai removed the role as per {0}'s request".format(str(userchanging)))
     await ctx.send(content=f"Success! ✅ {str(usertochange)} got the role @{str(roletochange)} removed.")
+
+
+@slash.subcommand(
+    base="role",
+    base_description="Gives various functionality for dealing with roles.",
+    name="all_info",
+    description="Lists all of the roles and information about them.",
+    guild_ids=[917125124770132038]
+)
+async def role_all_info(ctx: SlashContext):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.role + timedelta(seconds=rolecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.role = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_roles:
+        await ctx.send("❌ Role Information Listing Failed. You do not have the `Manage Roles` permission.", hidden=True)
+        return
+    
+    #list all role info for the selected server
+    roleembed = discord.Embed(title="All Role Information: ", color=embedcolour)
+
+    await ctx.channel.trigger_typing()
+    #if there will be less that 25 fields:
+    if len(ctx.guild.roles) <= 25:
+        for role in ctx.guild.roles:
+            if not role.is_default():
+                roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+        roleembed.set_footer(text="Command run by {0}#{1} | Page 1 of 1".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=roleembed)
+        return
+    #if there is more than 25 fields create a menu where you can react to change the page number
+    else:
+        pagenum = 0
+        pages = ceil(len(ctx.guild.roles) / 25) - 1
+        
+        for role in ctx.guild.roles[0:25]:
+            if not role.is_default():
+                roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+            else:
+                roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format("@everyone", len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+        roleembed.set_footer(text="Command run by {0}#{1} | Page {2} of {3}".format(ctx.author.name, ctx.author.discriminator, (pagenum + 1), (pages + 1)), icon_url=ctx.author.avatar_url)
+        
+        # create buttons and send embed
+        buttons = [
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="⬅️",
+                custom_id="role_back_arrow",
+                disabled=True
+            ),
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="➡️",
+                custom_id="role_forward_arrow"
+            )
+        ]
+        buttons = [create_actionrow(*buttons)]
+        await ctx.send(embed=roleembed, components=buttons)
+
+
+@slash.subcommand(
+    base="role",
+    base_description="Gives various functionality for dealing with roles.",
+    name="user_info",
+    description="Lists all of the roles for a specific user and information about them.",
+    options=[
+        {
+            "name":"user",
+            "description":"The user who's roles that you want to get information about.",
+            "type":6,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def role_user_info(ctx: SlashContext, user: Member=None):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.role + timedelta(seconds=rolecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.role = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_roles:
+        await ctx.send("❌ Role Information Listing Failed. You do not have the `Manage Roles` permission.", hidden=True)
+        return
+    
+    # make sure user is not none
+    if not user:
+        user = ctx.guild.get_member(ctx.author_id)
+
+    #list all role info for the selected server
+    roleembed = discord.Embed(title=f"User Role Information for `@{str(user)}` *(ID:{user.id})*: ", color=embedcolour)
+
+    await ctx.channel.trigger_typing()
+    #if there will be less that 25 fields:
+    if len(user.roles) <= 25:
+        for role in user.roles:
+            if not role.is_default():
+                roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+        roleembed.set_footer(text="Command run by {0}#{1} | Page 1 of 1".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=roleembed)
+        return
+    #if there is more than 25 fields create a menu where you can react to change the page number
+    else:
+        pagenum = 0
+        pages = ceil(len(user.roles) / 25) - 1
+        
+        for role in user.roles[0:25]:
+            if not role.is_default():
+                roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+            else:
+                roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format("@everyone", len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+        roleembed.set_footer(text="Command run by {0}#{1} | Page {2} of {3}".format(ctx.author.name, ctx.author.discriminator, (pagenum + 1), (pages + 1)), icon_url=ctx.author.avatar_url)
+        
+        # create buttons and send embed
+        buttons = [
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="⬅️",
+                custom_id="role_back_arrow",
+                disabled=True
+            ),
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="➡️",
+                custom_id="role_forward_arrow"
+            )
+        ]
+        buttons = [create_actionrow(*buttons)]
+        await ctx.send(embed=roleembed, components=buttons)
+
+
+@slash.subcommand(
+    base="role",
+    base_description="Gives various functionality for dealing with roles.",
+    name="role_info",
+    description="Lists all of the roles for a specific user and information about them.",
+    options=[
+        {
+            "name":"role",
+            "description":"The role that you want to get information about.",
+            "type":8,
+            "required":True
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def role_role_info(ctx: SlashContext, role: Role):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.role + timedelta(seconds=rolecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.role = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_roles:
+        await ctx.send("❌ Role Information Listing Failed. You do not have the `Manage Roles` permission.", hidden=True)
+        return
+    
+    #list all role info for the selected server
+    roleembed = discord.Embed(title=f"Role Information for `@{str(role)}` *(ID:{role.id})*: ", color=embedcolour)
+    roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+    roleembed.set_footer(text="Command run by {0}#{1} | Page 1 of 1".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=roleembed)
 
 
 #endregion
@@ -6247,7 +6433,7 @@ async def message_help(ctx: ComponentContext):
     helpembed=discord.Embed(title="Help", description="Command specific help for: `message` <:moderation_and_admin:881897640948826133>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
     helpembed.add_field(name="Description", value="The `message` command is used to make Sai send a message to a specific channel. Note that to run this command you need to have admin perms or higher.", inline=False)
-    helpembed.add_field(name="How to use it", value="```/message [channel ID] or [channel mention] | [message]```", inline=False)
+    helpembed.add_field(name="How to use it", value="```/message [channel ID] or [channel mention] [message]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(messagecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
@@ -6276,6 +6462,33 @@ async def purge(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `purge` command is used to bulk delete a range of messages. Note that to run this command you need to have manage messages perms.", inline=False)
     helpembed.add_field(name="How to use it", value="```/purge [number of messages to delete]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(purgecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def role(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `role` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `role` command is a very powerful command which has multiple uses. \n  -  Firstly, it can add or remove roles from a user.\n  -  Secondly, it can display information about a specific role.\n  -  Thirdly, it can display information about all roles. \n  -  Lastly, it can display information about all the roles of a specific user.\nNote that to run this command you need to have manage roles perms.", inline=False)
+    helpembed.add_field(name="How to use it", value="To add/remove a role: ```/role add [user mention] or [user ID] [role mention] or [role ID]``````/role remove [user mention] or [user ID] [role mention] or [role ID]```To get info about all roles: ```/role all_info```To get info about a singular role: ```/role role_info [role mention] or [role ID]```To get all role info about a singular user: ```/role user_info {command user} or [user mention] or [user ID]```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(rolecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
@@ -6650,6 +6863,171 @@ async def time_select(ctx: ComponentContext):
 
 #endregion
 
+# moderation and admin
+#region
+
+
+@slash.component_callback()
+async def role_forward_arrow(ctx: ComponentContext):
+    # check if the role command is in list all or user mode
+    # if user mode get required user
+    title = ctx.origin_message.embeds[0].to_dict()["title"]
+    usermode = False
+    if title[:4] == "User":
+        user = ctx.guild.get_member(int(title.split("*")[1][4:-1]))
+        usermode = True
+
+    footer = ctx.origin_message.embeds[0].to_dict()["footer"]
+    # check the user clicking the arrow is the intended user.
+    original_author = footer["text"][15:-14].strip()
+    if original_author[-1] == "|":
+        original_author = original_author[:-2]
+    if str(ctx.author) != original_author:
+        await ctx.send("This command is not for you!", hidden=True)
+        return
+    # get page info
+    pageinfo = footer["text"][-13:].strip().replace("| ", "").replace("Page", "").split("of")
+    pageinfo = [int(n.strip()) for n in pageinfo]
+
+    pages = pageinfo[1] - 1
+    pagenum = pageinfo[0] - 1
+    
+    pagenum += 1
+
+    roleembed = discord.Embed(title=title, color=embedcolour)
+    roleembed.set_footer(text="Command run by {0}#{1} | Page {2} of {3}".format(ctx.author.name, ctx.author.discriminator, (pagenum + 1), (pages + 1)), icon_url=ctx.author.avatar_url)
+
+    startroleindex = pagenum*25
+    endroleindex = (pagenum*25)+25
+
+    # get correct roles and rolecount
+    if usermode:
+        rolecount = len(user.roles)
+        roles = user.roles
+    else:
+        rolecount = len(ctx.guild.roles)
+        roles = ctx.guild.roles
+
+    if endroleindex > rolecount:
+        endroleindex = ((pagenum*25)+25) - (rolecount - endroleindex)
+
+    for role in roles[startroleindex:endroleindex]:
+        if not role.is_default():
+            roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+        else:
+            roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format("@everyone", len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+    
+    if pagenum >= pages:
+        # disable buttons to be disabled
+        buttons = [
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="⬅️",
+                custom_id="role_back_arrow"
+            ),
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="➡️",
+                custom_id="role_forward_arrow",
+                disabled=True
+            )
+        ]
+    else:
+        # enable buttons to be enabled
+        buttons = [
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="⬅️",
+                custom_id="role_back_arrow"
+            ),
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="➡️",
+                custom_id="role_forward_arrow"
+            )
+        ]
+    buttons = [create_actionrow(*buttons)]
+    await ctx.edit_origin(embed=roleembed, components=buttons)
+
+
+@slash.component_callback()
+async def role_back_arrow(ctx: ComponentContext):
+    # check if the role command is in list all or user mode
+    # if user mode get required user
+    title = ctx.origin_message.embeds[0].to_dict()["title"]
+    usermode = False
+    if title[:4] == "User":
+        user = ctx.guild.get_member(int(title.split("*")[1][4:-1]))
+        usermode = True
+
+    footer = ctx.origin_message.embeds[0].to_dict()["footer"]
+    # check the user clicking the arrow is the intended user.
+    original_author = footer["text"][15:-14].strip()
+    if original_author[-1] == "|":
+        original_author = original_author[:-2]
+    if str(ctx.author) != original_author:
+        await ctx.send("This command is not for you!", hidden=True)
+        return
+    # get page info
+    pageinfo = footer["text"][-13:].strip().replace("| ", "").replace("Page", "").split("of")
+    pageinfo = [int(n.strip()) for n in pageinfo]
+
+    pages = pageinfo[1] - 1
+    pagenum = pageinfo[0] - 1
+
+    pagenum -= 1
+    roleembed = discord.Embed(title=title, color=embedcolour)
+    roleembed.set_footer(text="Command run by {0}#{1} | Page {2} of {3}".format(ctx.author.name, ctx.author.discriminator, (pagenum + 1), (pages + 1)), icon_url=ctx.author.avatar_url)
+
+    startroleindex = pagenum*25
+    endroleindex = (pagenum*25)+25
+
+    # get correct roles
+    if usermode:
+        roles = user.roles
+    else:
+        roles = ctx.guild.roles
+
+    for role in roles[startroleindex:endroleindex]:
+        if not role.is_default():
+            roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+        else:
+            roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format("@everyone", len(role.members), role.created_at.strftime("%#x"), role.mentionable))
+    
+    if pagenum <= 0:
+        # disable buttons to be disabled
+        buttons = [
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="⬅️",
+                custom_id="role_back_arrow",
+                disabled=True
+            ),
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="➡️",
+                custom_id="role_forward_arrow"
+            )
+        ]
+    else:
+        # enable buttons to be enabled
+        buttons = [
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="⬅️",
+                custom_id="role_back_arrow"
+            ),
+            create_button(
+                style=ButtonStyle.primary,
+                emoji="➡️",
+                custom_id="role_forward_arrow"
+            )
+        ]
+    buttons = [create_actionrow(*buttons)]
+    await ctx.edit_origin(embed=roleembed, components=buttons)
+
+
+#endregion
 
 #endregion
 
