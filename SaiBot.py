@@ -2404,16 +2404,10 @@ async def on_message(message):
                     if roleparams[0] == "remove" or roleparams[0] == "take":
                         #if Sai's top role is not above the role to give, react with an appropriate message
                         if userchanging.top_role <= roletochange and (not (message.author == owner)):
-                            #if the user running command is not the same as the user to change and the role is the same level, they cannot change the role so send this message
-                            if userchanging == usertochange and userchanging.top_role == roletochange:
-                                pass
-                            else:
-                                await message.channel.send("You cant remove this role!")
-                                await message.add_reaction("❌")
-                                return
+                            await message.channel.send("You cant remove this role!")
+                            await message.add_reaction("❌")
+                            return
                         if saiuser.top_role <= roletochange:
-                            if saiuser == userchanging and saiuser.top_role == roletochange:
-                                pass
                             await message.channel.send("Sai cant remove this role from anyone! Make sure Sai is above this role in the Hierarchy...")
                             await message.add_reaction("❌")
                             return
@@ -4942,7 +4936,7 @@ async def role_add(ctx: SlashContext, user: Member, role: Role):
     
     #give specified role to specified user
     await usertochange.add_roles(roletochange, reason="Sai gave the role as per {0}'s request".format(str(userchanging)))
-    await ctx.send(content="Success! ✅", hidden=True)
+    await ctx.send(content=f"Success! ✅ {str(usertochange)} got given the role @{str(roletochange)}.")
 
 
 @slash.subcommand(
@@ -4996,14 +4990,9 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
     #if Sai's top role is not above the role to give, react with an appropriate message
     if userchanging.top_role <= roletochange and ctx.author != owner:
         #if the user running command is not the same as the user to change and the role is the same level, they cannot change the role so send this message
-        if userchanging == usertochange and userchanging.top_role == roletochange:
-            pass
-        else:
-            await ctx.send("You cant remove this role! ❌")
-            return
+        await ctx.send("You cant remove this role! ❌")
+        return
     if saiuser.top_role <= roletochange:
-        if saiuser == userchanging and saiuser.top_role == roletochange:
-            pass
         await ctx.send("Sai cant remove this role from anyone! Make sure Sai is above this role in the Hierarchy... ❌")
         return
 
@@ -5014,7 +5003,7 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
     
     #give specified role to specified user
     await usertochange.remove_roles(roletochange, reason="Sai removed the role as per {0}'s request".format(str(userchanging)))
-    await ctx.send(content="Success! ✅", hidden=True)
+    await ctx.send(content=f"Success! ✅ {str(usertochange)} got the role @{str(roletochange)} removed.")
 
 
 #endregion
