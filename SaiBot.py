@@ -5592,6 +5592,98 @@ async def eightball(ctx: SlashContext, question: str):
 
 #endregion
 
+# misc
+#region
+
+
+@slash.slash(
+    name="characterlist",
+    description="The list of all currently accepted characters for Sai's 'Naruto' commands.",
+    guild_ids=[917125124770132038]
+)
+async def characterlist(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.help + timedelta(seconds=helpcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.help = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("help", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # send help embed
+    characterlist = Characters.list()
+    charactercount = characterlist[0]
+    characterlist = characterlist[1:]
+
+    # open SaiCharacterlist.txt files, write the Characters.list() list to the file and then add it to the embed as a text file.
+    characterlistfile = open("SaiCharacterlist.txt", "w")
+    with characterlistfile as f: 
+        for character in characterlist:
+            f.write(str(characterlist.index(character) + 1) + ". " + character + ",\n")
+
+    helpembed=discord.Embed(title="Help", description="List of all accepted characters for Sai bot. If you want to request one to be added, ping me on the official Sai bot server.", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="<:naruto:886208833393938452> Characters:", value=f"**# of Characters: {charactercount}**\n\nFor the list of characters look into the attached .txt file named SaiCharacterlist.txt\n\nMake sure to dowload the full file to see all lines.\n\nHappy Sai'ing! <:sai:921879377455743057>", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1} | Note, any changes of case will not affect the parsing of your entered character.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=helpembed, file=discord.File(r".\SaiCharacterlist.txt"))
+
+
+@slash.slash(
+    name="timeformats",
+    description="The list of all currently accepted time formats throughout Sai's commands.",
+    guild_ids=[917125124770132038]
+)
+async def timeformats(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.help + timedelta(seconds=helpcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.help = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("help", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # send help embed
+    helpembed=discord.Embed(title="Help", description="List of all accepted timeformats for Sai bot. If you want to request one to be added, ping me on the official Sai bot server.", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="<:clock:881899619364253706> Timeformats: ", value="`H:M:S` -> e.g. 12:15:34 means *12 hours 15 minutes and 34 seconds*\n`M:S` -> e.g. 15:34 means *15 minutes and 34 seconds*\n`S` -> e.g. 34 means *34 seconds*\n`HhMmSs` -> e.g. 8h56m23s means *8 hours 56 minutes and 23 seconds*\n`HhMm` -> e.g. 8h56m means *8 hours and 56 minutes*\n`HhSs` -> e.g. 8h23s means *8 hours and 23 seconds*\n`Hh` -> e.g. 8h means *8 hours*\n`MmSs` -> e.g. 56m23s means *56 minutes and 23 seconds*\n`MmSs` -> e.g. 56m23s means *56 minutes and 23 seconds*\n`Mm` -> e.g. 56m means *56 minutes*\n`Ss` -> e.g. 23s means *23 seconds*", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1} | Note, any spaces or changes of case will not affect the parsing of your entered time string.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=helpembed)
+
+@slash.slash(
+    name="timezones",
+    description="The list of all currently accepted timezones throughout Sai's commands.",
+    guild_ids=[917125124770132038]
+)
+async def timezones(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.help + timedelta(seconds=helpcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.help = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("help", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    # send help embed
+    helpembed=discord.Embed(title="Help", description="List of all accepted timezones for Sai bot. If you want to request one to be added, ping me on the official Sai bot server.", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="<:clock:881899619364253706> Timezones: ", value="`GMT` -> UTC + 0\n`UTC` -> UTC + 0\n`ECT` -> UTC + 1\n`BST` -> UTC + 1\n`EET` -> UTC + 2\n`ART` -> UTC + 2\n`EAT` -> UTC + 3\n`MET` -> UTC + 3.5\n`NET` -> UTC + 4\n`PLT` -> UTC + 5\n`IST` -> UTC + 5.5\n`VST` -> UTC + 7\n`CTT` -> UTC + 8\n`JST` -> UTC + 9\n`ACT` -> UTC + 9.5\n`AET` -> UTC + 10\n`SST` -> UTC + 11\n`NST` -> UTC + 12\n`MIT` -> UTC - 11\n`HST` -> UTC - 10\n`AST` -> UTC - 9\n`PST` -> UTC - 8\n`PNT` -> UTC - 7\n`MST` -> UTC - 7\n`CST` -> UTC - 6\n`EST` -> UTC - 5\n`IET` -> UTC - 5\n`PRT` -> UTC - 4\n`CNT` -> UTC - 3.5\n`AGT` -> UTC - 3\n`BET` -> UTC - 3\n`CAT` -> UTC - 1", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1} | Note, any changes of case will not affect the parsing of your entered timezone.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=helpembed)
+
+#endregion
+
 # custom
 #region
 
