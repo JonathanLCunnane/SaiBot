@@ -1,5 +1,6 @@
 #imports
 #region
+from typing import Text
 import discord
 from discord.user import User
 from discord.member import Member
@@ -4818,7 +4819,7 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
     if (channel.guild != ctx.guild and ctx.author_id != 457517248786202625) or (not isinstance(channel, TextChannel)):
         messageembed = discord.Embed(title="Message Cmd Error: ", color=embedcolour)
-        messageembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
+        messageembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and/or that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
         messageembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         try:
             await ctx.author.send(embed=messageembed)
@@ -5188,6 +5189,138 @@ async def role_role_info(ctx: SlashContext, role: Role):
     roleembed.add_field(name=str(role), value="{0}\n# of users: `{1}`\ncreated at: `{2}`\nmentionable: `{3}`".format(role.mention, len(role.members), role.created_at.strftime("%#x"), role.mentionable))
     roleembed.set_footer(text="Command run by {0}#{1} | Page 1 of 1".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=roleembed)
+
+
+@slash.subcommand(
+    base="slowmode",
+    base_description="Allows complete control over the slowmode feature.",
+    name="on",
+    description="Turns on slowmode in a channel and with a time period of your choice.",
+    options=[
+        {
+            "name":"channel",
+            "description":"The channel which you want to apply the slowmode changes to.",
+            "type":7,
+            "required":False
+        },
+        {
+            "name":"time_period",
+            "description":"The time period you want to apply for slowmode.",
+            "type":3,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def slowmode_on(ctx: SlashContext, channel: TextChannel=None, time_period: str="30"):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.slowmode + timedelta(seconds=slowmodecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.slowmode = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.slowmode + timedelta(seconds=slowmodecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/slowmode", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_channels:
+        await ctx.send("❌ Slowmode On Failed. You do not have the `Manage Channels` permission.", hidden=True)
+        return
+
+    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
+    if not channel:
+        channel = ctx.channel
+    if not isinstance(channel, TextChannel):
+        slowmodeembed = discord.Embed(title="Slowmode Cmd Error: ", color=embedcolour)
+        slowmodeembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and/or that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
+        slowmodeembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=slowmodeembed)
+            await ctx.send("❌ Message failed to send. See DM's for more information.", hidden=True)
+        except:
+            await ctx.send(embed=slowmodeembed, hidden=True)
+        return
+
+    time_period = parsetimestring(time_period)
+    if not time_period:
+        slowmodeembed = discord.Embed(title="Slowmode Cmd Error: ", color=embedcolour)
+        slowmodeembed.add_field(name="Time Period Error: ", value = "\nMake sure that the time period is in one of the accepted formats. Run s.help timeformats to list all accepted time formats.")
+        slowmodeembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=slowmodeembed)
+            await ctx.send("❌ Slow mode failed to toggle. See DM's for more information.", hidden=True)
+        except:
+            await ctx.send(embed=slowmodeembed, hidden=True)
+        return
+    if time_period > 21600:
+        slowmodeembed = discord.Embed(title="Slowmode Cmd Error: ", color=embedcolour)
+        slowmodeembed.add_field(name="Time Period Error: ", value = "\nMake sure that the time period is less than 6 hours.")
+        slowmodeembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=slowmodeembed)
+            await ctx.send("❌ Slow mode failed to toggle. See DM's for more information.", hidden=True)
+        except:
+            await ctx.send(embed=slowmodeembed, hidden=True)
+        return
+
+    await channel.edit(slowmode_delay=time_period)
+    await channel.send(f"Slowmode turned on, delay is {formattimedelta(timedelta(seconds=time_period))}. ✅")
+    await ctx.send(content="Success ✅", hidden=True)
+        
+
+@slash.subcommand(
+    base="slowmode",
+    base_description="Allows complete control over the slowmode feature.",
+    name="off",
+    description="Turns off slowmode in a channel of your choice.",
+    options=[
+        {
+            "name":"channel",
+            "description":"The channel which you want to apply the slowmode changes to.",
+            "type":7,
+            "required":False
+        }
+    ],
+    guild_ids=[917125124770132038]
+)
+async def slowmode_off(ctx: SlashContext, channel: TextChannel=None):
+    #firstly checks if the cooldown has been met
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.slowmode + timedelta(seconds=slowmodecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.slowmode = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.slowmode + timedelta(seconds=slowmodecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/slowmode", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed)
+        return
+
+    #check that the user has required permissions
+    if not ctx.author.permissions_in(ctx.channel).manage_channels:
+        await ctx.send("❌ Slowmode On Failed. You do not have the `Manage Channels` permission.", hidden=True)
+        return
+
+    #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
+    if not channel:
+        channel = ctx.channel
+    if not isinstance(channel, TextChannel):
+        slowmodeembed = discord.Embed(title="Slowmode Cmd Error: ", color=embedcolour)
+        slowmodeembed.add_field(name="Channel Error: ", value = "\nMake sure that the `<channelid>` is in the same guild that you are running the command, and/or that the channel option is selecting a text channel, not a voice channel, channel category, etc.")
+        slowmodeembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        try:
+            await ctx.author.send(embed=slowmodeembed)
+            await ctx.send("❌ Message failed to send. See DM's for more information.", hidden=True)
+        except:
+            await ctx.send(embed=slowmodeembed, hidden=True)
+        return
+
+    await channel.edit(slowmode_delay=0)
+    await channel.send(f"Slowmode turned off. ✅")
+    await ctx.send(content="Success ✅", hidden=True)
 
 
 #endregion
@@ -6490,6 +6623,33 @@ async def role(ctx: ComponentContext):
     helpembed.add_field(name="How to use it", value="To add/remove a role: ```/role add [user mention] or [user ID] [role mention] or [role ID]``````/role remove [user mention] or [user ID] [role mention] or [role ID]```To get info about all roles: ```/role all_info```To get info about a singular role: ```/role role_info [role mention] or [role ID]```To get all role info about a singular user: ```/role user_info {command user} or [user mention] or [user ID]```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(rolecooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=button)
+
+
+@slash.component_callback()
+async def slowmode(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    button = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        )
+    ]
+    button = [create_actionrow(*button)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `slowmode` <:moderation_and_admin:881897640948826133>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `slowmode` command allows a user to toggle on and off slowmode for channels, and set a desired duration. Note that to run this command you need to have manage channel perms.", inline=False)
+    helpembed.add_field(name="How to use it", value="General command notation for turning on slowmode:```/slowmode on {current channel} or (desired channel mention or ID) {30seconds} or (desired slowmode time <MAX 6 HOURS>)```General command notation for turning off slowmode:```/slowmode off {current channel} or (channel mention or ID)```\nExamples:\nSlowmode current channel for certain time -```/slowmode on hours:minutes:seconds```Slowmode certain channel for default time -```/slowmode on #channel-name```Slowmode certain channel for certain time -```/slowmode on channelID minutes:seconds```Slowmode current channel for default time -```/slowmode on```Turn off slowmode for current channel -```/slowmode off```Turn off slowmode for certain channel -```/slowmode off #channel-name```\n (This list of examples is not exhaustive, so experiment!)", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Aliases:** ```slowmode, slow, sm```\n**Cooldown**: `{0}` seconds\n**Delimiter:** ` `".format(slowmodecooldown), inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1} | For accepted time formats, run 's.help timeformats'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
