@@ -105,10 +105,10 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 31
-version = "1.16.3"
-linesofcode = "14091"
+version = "2.0.0"
+linesofcode = "16010"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 6108
+total_commands_run = 6445
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 weeklytulaiigif = "https://tenor.com/view/mark-zuckerberg-bug-bugs-insect-insects-gif-24007881"
@@ -751,7 +751,7 @@ async def on_message(message):
                 helpembed.set_thumbnail(url=client.user.avatar_url)
                 helpembed.add_field(name="<:naruto:886208833393938452> Naruto", value="```character, information```", inline=False)
                 helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
-                helpembed.add_field(name="<:utility:881883277424746546> Utility", value="```editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
+                helpembed.add_field(name="<:utility:881883277424746546> Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
                 helpembed.add_field(name="<:moderation_and_admin:881897640948826133> Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
                 helpembed.add_field(name="<:fun:881899126286061609> Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
@@ -3423,14 +3423,14 @@ def get_current_user(author) -> usercooldown:
 
 @slash.slash(name="character",
              description="Get the general information of any character in naruto.",
-             guild_ids=[917125124770132038],
-             options=[{
-                 "name":"character_name",
-                 "description":"The name of the desired character",
-                 "type":3,
-                 "required":True
-             }],
-             
+             options=[
+                {
+                    "name":"character_name",
+                    "description":"The name of the desired character",
+                    "type":3,
+                    "required":True
+                }
+             ]        
 )
 async def character(ctx: SlashContext, character_name: str):
     #firstly checks if the cooldown has been met and logs the command
@@ -3449,7 +3449,7 @@ async def character(ctx: SlashContext, character_name: str):
     
     #if no character found
     if character == None:
-        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `s.help characterlist`")
+        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `/characterlist`")
         return
 
     #get character info and post the embed 
@@ -3475,7 +3475,6 @@ async def character(ctx: SlashContext, character_name: str):
 
 @slash.slash(name="information",
              description="Get the specific information of any character in naruto.",
-             guild_ids=[917125124770132038],
              options=[
                  {
                      "name":"character_name",
@@ -3501,7 +3500,7 @@ async def information(ctx: SlashContext, character_name: str):
     character = Characters.find(character_name)   
     #if no character found
     if character == None:
-        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `s.help characterlist`")
+        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `/characterlist`")
         return
     
     #generate dropdown
@@ -3535,9 +3534,7 @@ async def information(ctx: SlashContext, character_name: str):
 
 @slash.slash(
     name="about",
-    description="Get general information about Sai.",
-    guild_ids=[917125124770132038],
-    
+    description="Get general information about Sai."
 )
 async def about(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3599,8 +3596,7 @@ async def about(ctx: SlashContext):
 
 
 @slash.slash(name="help", 
-             description="The simplest way to get help for all commands, or specific commands themselves.", 
-             guild_ids=[917125124770132038],
+             description="The simplest way to get help for all commands, or specific commands themselves."
              )
 async def help(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3638,9 +3634,7 @@ async def help(ctx: SlashContext):
 
 @slash.slash(
     name="links",
-    description="A hub of all Sai's important links. You can support the creator and get support here!",
-    guild_ids=[917125124770132038],
-    
+    description="A hub of all Sai's important links. You can support the creator and get support here!"
 )
 async def links(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3707,9 +3701,7 @@ async def links(ctx: SlashContext):
 
 @slash.slash(
     name="patreon",
-    description="One of the ways which you can support Sai! Run this command to get the link.",
-    guild_ids=[917125124770132038],
-    
+    description="One of the ways which you can support Sai! Run this command to get the link."
 )
 async def patreon(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3753,8 +3745,7 @@ async def patreon(ctx: SlashContext):
             "type":6,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def profile(ctx: SlashContext, member: User=None):
     #firstly checks if the cooldown has been met and logs the command
@@ -3859,8 +3850,7 @@ async def profile(ctx: SlashContext, member: User=None):
 
 @slash.slash(
     name="statistics",
-    description="View much more detailed information about the bot.",
-    guild_ids=[917125124770132038]
+    description="View much more detailed information about the bot."
 )
 async def statistics(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -3918,8 +3908,7 @@ async def statistics(ctx: SlashContext):
     base="testcount",
     base_description="Displays the number of times a user has tested in the Sai Support Server.",
     name="all",
-    description="Lists all of the testers and their test count.",
-    guild_ids=[917125124770132038]
+    description="Lists all of the testers and their test count."
 )
 async def testcount_all(ctx: SlashContext):
     #if the user is not in the guild send a message to join the Sai Support Server
@@ -3990,8 +3979,7 @@ async def testcount_all(ctx: SlashContext):
             "type":6,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def testcount_tester(ctx: SlashContext, member: User=None):
     #if the user is not in the guild send a message to join the Sai Support Server
@@ -4057,8 +4045,7 @@ async def testcount_tester(ctx: SlashContext, member: User=None):
 
 @slash.slash(
     name="cooldowns",
-    description="Provides a full, informative list of all your cooldowns.",
-    guild_ids=[917125124770132038]
+    description="Provides a full, informative list of all your cooldowns."
 )
 async def cooldowns(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4114,8 +4101,7 @@ async def cooldowns(ctx: SlashContext):
 
 @slash.slash(
     name="editsnipe",
-    description="Returns the last edited message.",
-    guild_ids=[917125124770132038]
+    description="Returns the last edited message."
 )
 async def editsnipe(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4169,8 +4155,7 @@ async def editsnipe(ctx: SlashContext):
             "type":3,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def event(ctx: SlashContext, channel: TextChannel, title: str, description: str="No Description."):
     #firstly checks if the cooldown has been met and logs the command
@@ -4238,8 +4223,7 @@ async def event(ctx: SlashContext, channel: TextChannel, title: str, description
     base="nickname",
     base_description="Allows you to change or reset your nickname.",
     name="reset",
-    description="Resets your nickname to the default nickname, your username.",
-    guild_ids=[917125124770132038]
+    description="Resets your nickname to the default nickname, your username."
 )
 async def nickname_reset(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4286,8 +4270,7 @@ async def nickname_reset(ctx: SlashContext):
             "type":3,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def nickname_change(ctx: SlashContext, new_nickname: str):
     #firstly checks if the cooldown has been met and logs the command
@@ -4323,8 +4306,7 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
 
 @slash.slash(
     name="ping",
-    description="Finds your latency to Sai bot.",
-    guild_ids=[917125124770132038]
+    description="Finds your latency to Sai bot."
 )
 async def ping(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4353,8 +4335,7 @@ async def ping(ctx: SlashContext):
 
 @slash.slash(
     name="rescue",
-    description="Nullifies any snipe and editsnipe commands. (smh 🙄)",
-    guild_ids=[917125124770132038]
+    description="Nullifies any snipe and editsnipe commands. (smh 🙄)"
 )
 async def rescue(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4379,8 +4360,7 @@ async def rescue(ctx: SlashContext):
 
 @slash.slash(
     name="snipe",
-    description="Retrieves the last deleted message.",
-    guild_ids=[917125124770132038]
+    description="Retrieves the last deleted message."
 )
 async def snipe(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4421,8 +4401,7 @@ async def snipe(ctx: SlashContext):
             "type":3,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def timecmd(ctx: SlashContext, timezone: str=None):
     #firstly checks if the cooldown has been met and logs the command
@@ -4508,8 +4487,7 @@ async def timecmd(ctx: SlashContext, timezone: str=None):
 
 @slash.slash(
     name="votereminder", 
-    description="This is a command that will remind after twelve hours to vote for Sai on top.gg!", 
-    guild_ids=[917125124770132038]
+    description="This is a command that will remind after twelve hours to vote for Sai on top.gg!"
 )
 async def votereminder(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -4560,8 +4538,7 @@ async def votereminder(ctx: SlashContext):
             "type":3,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
     #firstly checks if the cooldown has been met
@@ -4648,8 +4625,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
             "type":3,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
     #firstly checks if the cooldown has been met
@@ -4730,8 +4706,7 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
             "type":7,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def lockdown(ctx: SlashContext, channel: TextChannel=None):
     #firstly checks if the cooldown has been met
@@ -4795,8 +4770,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
             "type":3,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def message(ctx: SlashContext, channel: TextChannel, message: str):
     #firstly checks if the cooldown has been met
@@ -4843,8 +4817,7 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
             "type":4,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def purge(ctx: SlashContext, purgenum: int):
     #firstly checks if the cooldown has been met
@@ -4890,8 +4863,7 @@ async def purge(ctx: SlashContext, purgenum: int):
             "type":8,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def role_add(ctx: SlashContext, user: Member, role: Role):
     #firstly checks if the cooldown has been met
@@ -4956,8 +4928,7 @@ async def role_add(ctx: SlashContext, user: Member, role: Role):
             "type":8,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def role_remove(ctx: SlashContext, user: Member, role: Role):
     #firstly checks if the cooldown has been met
@@ -5009,8 +4980,7 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
     base="role",
     base_description="Gives various functionality for dealing with roles.",
     name="all_info",
-    description="Lists all of the roles and information about them.",
-    guild_ids=[917125124770132038]
+    description="Lists all of the roles and information about them."
 )
 async def role_all_info(ctx: SlashContext):
     #firstly checks if the cooldown has been met
@@ -5084,8 +5054,7 @@ async def role_all_info(ctx: SlashContext):
             "type":6,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def role_user_info(ctx: SlashContext, user: Member=None):
     #firstly checks if the cooldown has been met
@@ -5163,8 +5132,7 @@ async def role_user_info(ctx: SlashContext, user: Member=None):
             "type":8,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def role_role_info(ctx: SlashContext, role: Role):
     #firstly checks if the cooldown has been met
@@ -5209,8 +5177,7 @@ async def role_role_info(ctx: SlashContext, role: Role):
             "type":3,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def slowmode_on(ctx: SlashContext, channel: TextChannel=None, time_period: str="30"):
     #firstly checks if the cooldown has been met
@@ -5247,7 +5214,7 @@ async def slowmode_on(ctx: SlashContext, channel: TextChannel=None, time_period:
     time_period = parsetimestring(time_period)
     if not time_period:
         slowmodeembed = discord.Embed(title="Slowmode Cmd Error: ", color=embedcolour)
-        slowmodeembed.add_field(name="Time Period Error: ", value = "\nMake sure that the time period is in one of the accepted formats. Run s.help timeformats to list all accepted time formats.")
+        slowmodeembed.add_field(name="Time Period Error: ", value = "\nMake sure that the time period is in one of the accepted formats. Run /timeformats to list all accepted time formats.")
         slowmodeembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
         try:
             await ctx.author.send(embed=slowmodeembed)
@@ -5283,8 +5250,7 @@ async def slowmode_on(ctx: SlashContext, channel: TextChannel=None, time_period:
             "type":7,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def slowmode_off(ctx: SlashContext, channel: TextChannel=None):
     #firstly checks if the cooldown has been met
@@ -5333,8 +5299,7 @@ async def slowmode_off(ctx: SlashContext, channel: TextChannel=None):
             "type":7,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def unlockdown(ctx: SlashContext, channel: TextChannel=None):
     #firstly checks if the cooldown has been met
@@ -5452,8 +5417,7 @@ async def unlockdown(ctx: SlashContext, channel: TextChannel=None):
             "type":3,
             "required":False
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: str=None, choice4: str=None, choice5: str=None, choice6: str=None, choice7: str=None, choice8: str=None, choice9: str=None, choice10: str=None):
     #firstly checks if the cooldown has been met and logs the command
@@ -5495,8 +5459,7 @@ async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: st
 
 @slash.slash(
     name="gif",
-    description="Returns a random Sai gif.",
-    guild_ids=[917125124770132038]
+    description="Returns a random Sai gif."
 )
 async def gif(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -5517,8 +5480,7 @@ async def gif(ctx: SlashContext):
 
 @slash.slash(
     name="quote",
-    description="Returns a random Sai quote.",
-    guild_ids=[917125124770132038]
+    description="Returns a random Sai quote."
 )
 async def quote(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -5539,8 +5501,7 @@ async def quote(ctx: SlashContext):
 
 @slash.slash(
     name="tulaiiisabigman",
-    description="Returns a the current gif chosen by tulaii✿#6598.",
-    guild_ids=[917125124770132038]
+    description="Returns a the current gif chosen by tulaii✿#6598."
 )
 async def tulaiiisabigman(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -5569,8 +5530,7 @@ async def tulaiiisabigman(ctx: SlashContext):
             "type":3,
             "required":True
         }
-    ],
-    guild_ids=[917125124770132038]
+    ]
 )
 async def eightball(ctx: SlashContext, question: str):
     #firstly checks if the cooldown has been met and logs the command
@@ -5598,8 +5558,7 @@ async def eightball(ctx: SlashContext, question: str):
 
 @slash.slash(
     name="characterlist",
-    description="The list of all currently accepted characters for Sai's 'Naruto' commands.",
-    guild_ids=[917125124770132038]
+    description="The list of all currently accepted characters for Sai's 'Naruto' commands."
 )
 async def characterlist(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -5634,8 +5593,7 @@ async def characterlist(ctx: SlashContext):
 
 @slash.slash(
     name="timeformats",
-    description="The list of all currently accepted time formats throughout Sai's commands.",
-    guild_ids=[917125124770132038]
+    description="The list of all currently accepted time formats throughout Sai's commands."
 )
 async def timeformats(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -5659,8 +5617,7 @@ async def timeformats(ctx: SlashContext):
 
 @slash.slash(
     name="timezones",
-    description="The list of all currently accepted timezones throughout Sai's commands.",
-    guild_ids=[917125124770132038]
+    description="The list of all currently accepted timezones throughout Sai's commands."
 )
 async def timezones(ctx: SlashContext):
     #firstly checks if the cooldown has been met and logs the command
@@ -5863,8 +5820,8 @@ async def help_home(ctx: ComponentContext):
     # if the button was clicked by someone else ### ADD ANY CUSTOM FOOTER MESSAGES HERE SO THEY ARE REMOVED ###
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "")
     original_author = original_author.replace(" | *Each answer of the custom profile has to have 115 or less characters due to resrictions in discord's embeds! If you think this should be changed, put it in bot-suggestions on the official discord server. To join the server click the link in `/links`!", "")
-    original_author = original_author.replace(" | For Sai's accepted timezones, run 's.help timezones'", "")
-    original_author = original_author.replace(" | For accepted time formats, run 's.help timeformats'", "")
+    original_author = original_author.replace(" | For Sai's accepted timezones, run '/timezones'", "")
+    original_author = original_author.replace(" | For accepted time formats, run '/timeformats'", "")
     if original_author[15:] != str(ctx.author):
         await ctx.send(content="This command is not for you!", hidden=True)
         return
@@ -6166,7 +6123,7 @@ async def character(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title="Help", description="Command specific help for: `character` <:naruto:886208833393938452>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `character` command is used to get general information and an image of any Naruto character! **BEWARE OF SPOILERS** For a list of all characters available, run 's.help characterlist'", inline=False)
+    helpembed.add_field(name="Description", value="The `character` command is used to get general information and an image of any Naruto character! **BEWARE OF SPOILERS** For a list of all characters available, run '/characterlist'", inline=False)
     helpembed.add_field(name="How to use it", value="```/character [character name] or [character alias]```For Example:```/character Sai```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(charactercooldown), inline=False)
     helpembed.add_field(name="How to read the information!", value=" - On the top left of the message will be a list of aliases, which are in *italics*\n - On the top right of the message will be the debut episode, which is in **bold**. If the debut is in Naruto Shippuden or Boruto, the episode number will be the episode number plus the number of episodes in the preceding titles. e.g. A debut in episode 3 of Naruto Shippuden, will have the debut listed as **Episode #223**, since `220 + 3 = 223`.\n - Below the debut will be a list of emojis, of which there are four rows:\n­       + The first row denotes the character's highest achieved rank.\n­       + The second row denotes the character's clan\n­       + The third row denotes the character's nature types\n­       + The fourth and last row denotes the character's kekkei genkai.", inline=False)
@@ -6201,7 +6158,7 @@ async def information(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title="Help", description="Command specific help for: `information` <:naruto:886208833393938452>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `information` command is used to get very specific information and an image of any Naruto character! **BEWARE OF SPOILERS** For a list of all characters available, run 's.help characterlist'", inline=False)
+    helpembed.add_field(name="Description", value="The `information` command is used to get very specific information and an image of any Naruto character! **BEWARE OF SPOILERS** For a list of all characters available, run '/characterlist'", inline=False)
     helpembed.add_field(name="How to use it", value="```/information [character name] or [character alias]```For Example:```/information Sai```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(informationcooldown), inline=False)
     helpembed.add_field(name="How to read the information!", value="On the 1st page:\n­ - Full Name\n­ - Aliases\n­ - Debut\nOn the 2nd page:\n­ - Kekkei Genkai and Emojis\n­ - Nature Types and Emojis\n­ - Clan and Emoji\n­ - Affiliations and Emojis\nOn the 3rd page:\n­ - Rank\n­ - Birth Date\n­ - Sex and Emoji\n­ - Height\n­ - Weight\nOn the 4th page:\n­ - Jutsu List\nOn the 5th page:\n­ - Team List\n­ - Family Members List", inline=False)
@@ -6612,7 +6569,7 @@ async def help_time(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `time` command is used for finding the time in one or a variety of timezones.", inline=False)
     helpembed.add_field(name="How to use it", value="To display desired timezone:```/time {Selector} or (timezone)``` *Note: the 'timezone selector' shows when the timezone is set to 'Selector' or no timezone is entered. Here you can also access the timezone Wikipedia page.*\nTo display all timezones:```/time all```*Note 2: timezones should be written in their shortened form (e.g. IST, BST, GMT, est, pst, ast)*", inline=False)
     helpembed.add_field(name="About", value="**Category:** Utility\n**Cooldown**: `{0}` seconds".format(timecooldown), inline=False)
-    helpembed.set_footer(text="Command run by {0}#{1} | For Sai's accepted timezones, run 's.help timezones'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    helpembed.set_footer(text="Command run by {0}#{1} | For Sai's accepted timezones, run '/timezones'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
@@ -6801,7 +6758,7 @@ async def slowmode(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `slowmode` command allows a user to toggle on and off slowmode for channels, and set a desired duration. Note that to run this command you need to have manage channel perms.", inline=False)
     helpembed.add_field(name="How to use it", value="General command notation for turning on slowmode:```/slowmode on {current channel} or (desired channel mention or ID) {30seconds} or (desired slowmode time <MAX 6 HOURS>)```General command notation for turning off slowmode:```/slowmode off {current channel} or (channel mention or ID)```\nExamples:\nSlowmode current channel for certain time -```/slowmode on hours:minutes:seconds```Slowmode certain channel for default time -```/slowmode on #channel-name```Slowmode certain channel for certain time -```/slowmode on channelID minutes:seconds```Slowmode current channel for default time -```/slowmode on```Turn off slowmode for current channel -```/slowmode off```Turn off slowmode for certain channel -```/slowmode off #channel-name```\n (This list of examples is not exhaustive, so experiment!)", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds\n".format(slowmodecooldown), inline=False)
-    helpembed.set_footer(text="Command run by {0}#{1} | For accepted time formats, run 's.help timeformats'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    helpembed.set_footer(text="Command run by {0}#{1} | For accepted time formats, run '/timeformats'".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 
 
