@@ -4255,7 +4255,7 @@ async def nickname_reset(ctx: SlashContext):
 
     # if the user does not have admin permissions
     if not ctx.author.permissions_in(ctx.channel).change_nickname:
-        await ctx.send("❌ Nickname Change Failed. You do not have the change nickname permission.", hidden=True)
+        await ctx.send("❌ Nickname Change Failed. You do not have the `Change Nickname` permission.", hidden=True)
         return
 
     # change nickname
@@ -4303,7 +4303,7 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
 
     # if the user does not have admin permissions
     if not ctx.author.permissions_in(ctx.channel).change_nickname:
-        await ctx.send("❌ Nickname Change Failed. You do not have the change nickname permission.", hidden=True)
+        await ctx.send("❌ Nickname Change Failed. You do not have the `Change Nickname` permission.", hidden=True)
         return
 
     # change nickname
@@ -4577,7 +4577,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
     
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).ban_members:
-        await ctx.send("❌ Ban Failed. You are do not have the ban members permission.", hidden=True)
+        await ctx.send("❌ Ban Failed. You are do not have the `Ban Members` permission.", hidden=True)
         return
 
     #gets server owner who can ban or kick anyone
@@ -4592,8 +4592,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
         return
 
     if sai.top_role <= user.top_role:
-        banmessage = "Sai cant ban users above or at the same level as himself! ❌"
-        await ctx.send(banmessage)
+        await ctx.send(content="Sai cant ban users above or at the same level as himself! ❌", hidden=True)
         return
     
     #check that the user is above in heirarchy and not owner (owner can ban anyone)
@@ -4602,7 +4601,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
             banmessage = "Your sexy jutsu is not powerful enough to ban this user. ❌"
         else:
             banmessage = "You cant ban users above or at the same level as you! ❌"
-        await ctx.send(banmessage)
+        await ctx.send(content=banmessage, hidden=True)
         return
 
     if reason != "No reason given.":
@@ -4666,7 +4665,7 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).kick_members:
-        await ctx.send("❌ Kick Failed. You are do not have the kick members permission.", hidden=True)
+        await ctx.send("❌ Kick Failed. You are do not have the `Kick Members` permission.", hidden=True)
         return
 
     #gets server owner who can ban or kick anyone
@@ -4680,9 +4679,8 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
         await ctx.send("The reason can be no longer than 500 characters.", hidden=True)
         return
 
-    if sai.top_role <= user.top_role:
-        banmessage = "Sai cant kick users above or at the same level as himself! ❌"
-        await ctx.send(banmessage)
+    if sai.top_role <= user.top_role:      
+        await ctx.send(content="Sai cant kick users above or at the same level as himself! ❌", hidden=True)
         return
      
     #check that the user is above in heirarchy and not the owner (owner can kick anyone)
@@ -4691,7 +4689,7 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
             kickmessage = "Your sexy jutsu is not powerful enough to kick this user ❌"
         else:
             kickmessage = "You cant kick users above or at the same level as you! ❌"
-        await ctx.send(kickmessage)
+        await ctx.send(content=kickmessage, hidden=True)
         return
 
     if reason != "No reason given.":
@@ -4749,7 +4747,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_permissions:
-        await ctx.send("❌ Lockdown Failed. You are do not have the manage permissions permission.", hidden=True)
+        await ctx.send("❌ Lockdown Failed. You are do not have the `Manage Permissions` permission.", hidden=True)
         return
 
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
@@ -4772,7 +4770,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
 
     #if the channel is not locked
     if lockdownoverwrite.send_messages == False:
-        await ctx.send("This channel is already locked! ❌")
+        await ctx.send("This channel is already locked! ❌", hidden=True)
         return
 
     lockdownoverwrite.send_messages = False
@@ -4814,7 +4812,7 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).administrator:
-        await ctx.send("❌ Message Failed to send. You are do not have the administrator permission.", hidden=True)
+        await ctx.send("❌ Message Failed to send. You are do not have the `Administrator` permission.", hidden=True)
         return
 
     #send dm to command sender if channel is not in guild OR the channel given is not a TextChannel
@@ -4862,7 +4860,7 @@ async def purge(ctx: SlashContext, purgenum: int):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_messages:
-        await ctx.send("❌ Purge Failed. You are do not have the manage messages permission.", hidden=True)
+        await ctx.send("❌ Purge Failed. You are do not have the `Manage Messages` permission.", hidden=True)
         return
 
     # purges messages
@@ -4909,7 +4907,7 @@ async def role_add(ctx: SlashContext, user: Member, role: Role):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_roles:
-        await ctx.send("❌ Role Add Failed. You are do not have the manage roles permission.", hidden=True)
+        await ctx.send("❌ Role Add Failed. You are do not have the `Manage Roles` permission.", hidden=True)
         return
     
     saiuser = await ctx.guild.fetch_member(858663143931641857)
@@ -4923,15 +4921,15 @@ async def role_add(ctx: SlashContext, user: Member, role: Role):
 
     #if Sai's top role is not above the role to give, react with an appropriate message
     if userchanging.top_role <= roletochange and ctx.author != owner:
-        await ctx.send("You cant give this role to anyone! ❌")
+        await ctx.send("You cant give this role to anyone! ❌", hidden=True)
         return
     if saiuser.top_role <= roletochange:
-        await ctx.send("Sai cant give this role to anyone! Make sure Sai is above this role in the Hierarchy... ❌")
+        await ctx.send("Sai cant give this role to anyone! Make sure Sai is above this role in the Hierarchy... ❌", hidden=True)
         return
 
     #check if the user already has the role
     if roletochange in usertochange.roles:
-        await ctx.send("The user already has this role! ❌")
+        await ctx.send("The user already has this role! ❌", hidden=True)
         return
     
     #give specified role to specified user
@@ -4975,7 +4973,7 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
 
     #check that the user has required permissions
     if not ctx.author.permissions_in(ctx.channel).manage_roles:
-        await ctx.send("❌ Role Remove Failed. You are do not have the manage roles permission.", hidden=True)
+        await ctx.send("❌ Role Remove Failed. You are do not have the `Manage Roles` permission.", hidden=True)
         return
     
     saiuser = await ctx.guild.fetch_member(858663143931641857)
@@ -4990,15 +4988,15 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
     #if Sai's top role is not above the role to give, react with an appropriate message
     if userchanging.top_role <= roletochange and ctx.author != owner:
         #if the user running command is not the same as the user to change and the role is the same level, they cannot change the role so send this message
-        await ctx.send("You cant remove this role! ❌")
+        await ctx.send("You cant remove this role! ❌", hidden=True)
         return
     if saiuser.top_role <= roletochange:
-        await ctx.send("Sai cant remove this role from anyone! Make sure Sai is above this role in the Hierarchy... ❌")
+        await ctx.send("Sai cant remove this role from anyone! Make sure Sai is above this role in the Hierarchy... ❌", hidden=True)
         return
 
     #check if the user doesnt have the role
     if not (roletochange in usertochange.roles):
-        await ctx.send("The user does not have this role! ❌")
+        await ctx.send("The user does not have this role! ❌", hidden=True)
         return
     
     #give specified role to specified user
