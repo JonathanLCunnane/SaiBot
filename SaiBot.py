@@ -201,6 +201,7 @@ slowmodecooldown = temp.get_cooldown_length("slowmode")
 unlockdowncooldown = temp.get_cooldown_length("unlockdown")
 
 ### FUN ###
+coinflipcooldown = temp.get_cooldown_length("coinflip")
 decidecooldown = temp.get_cooldown_length("decide")
 eightballcooldown = temp.get_cooldown_length("eightball")
 gifcooldown = temp.get_cooldown_length("gif")
@@ -3442,7 +3443,7 @@ async def character(ctx: SlashContext, character_name: str):
         timeleft = (currentuser.cooldowns.character + timedelta(seconds=charactercooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/character", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     character = Characters.find(character_name)
@@ -3494,7 +3495,7 @@ async def information(ctx: SlashContext, character_name: str):
         timeleft = (currentuser.cooldowns.information + timedelta(seconds=informationcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/information", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     
     character = Characters.find(character_name)   
@@ -3546,7 +3547,7 @@ async def about(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.about + timedelta(seaconds=aboutcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/about", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #create embed
@@ -3608,7 +3609,7 @@ async def help(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("help", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     # create menu
     menu = create_select(placeholder="Select a Category...", custom_id="help_category",
@@ -3646,7 +3647,7 @@ async def links(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.about + timedelta(seaconds=aboutcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/about", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     
     owner = await client.fetch_user(457517248786202625)
@@ -3713,7 +3714,7 @@ async def patreon(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.patreon + timedelta(seaconds=patreoncooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/patreon", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #creates embed, button and sends
@@ -3757,7 +3758,7 @@ async def profile(ctx: SlashContext, member: User=None):
         timeleft = (currentuser.cooldowns.profile + timedelta(seconds=profilecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/profile", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     #sets the user
     if not member:
@@ -3862,7 +3863,7 @@ async def statistics(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.statistics + timedelta(seconds=statisticscooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/statistics", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     
     #gets bot info   
@@ -3929,7 +3930,7 @@ async def testcount_all(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.testcount + timedelta(seconds=testcountcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/testcount", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #start database conection
@@ -4000,7 +4001,7 @@ async def testcount_tester(ctx: SlashContext, member: User=None):
         timeleft = (currentuser.cooldowns.testcount + timedelta(seconds=testcountcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/testcount", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     # run command
     if member == None: member = client.get_guild(ctx.guild_id).get_member(ctx.author_id)
@@ -4057,7 +4058,7 @@ async def cooldowns(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.cooldowns + timedelta(seconds=cooldownscooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/cooldowns", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     # create and then attempt to return an embed
     cooldownsembed = discord.Embed(title=f"Cooldowns", description="Above is a table of your cooldowns for each of the commands. The first column shows the command in question, and the columns show, in order the cooldown left for a certain user, the generic cooldown length, the time the command was last run, and if the command is runnable now.", color=embedcolour)
@@ -4113,7 +4114,7 @@ async def editsnipe(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.editsnipe + timedelta(seconds=editsnipecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/editsnipe", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     # execute the command
@@ -4167,7 +4168,7 @@ async def event(ctx: SlashContext, channel: TextChannel, title: str, description
         timeleft = (currentuser.cooldowns.event + timedelta(seconds=eventcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/event", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     # execute command by setting up the base embed
     eventguildicon = ctx.guild.icon_url
@@ -4235,7 +4236,7 @@ async def nickname_reset(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.nickname + timedelta(seconds=nicknamecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/nickname", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     # if the user does not have admin permissions
@@ -4282,7 +4283,7 @@ async def nickname_change(ctx: SlashContext, new_nickname: str):
         timeleft = (currentuser.cooldowns.nickname + timedelta(seconds=nicknamecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/nickname", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     # if the user does not have admin permissions
@@ -4318,7 +4319,7 @@ async def ping(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.ping + timedelta(seconds=pingcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/ping", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     response = await ctx.send("Currently Pinging... ")
@@ -4347,7 +4348,7 @@ async def rescue(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.rescue + timedelta(seconds=rescuecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/rescue", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     rescuemessage = await ctx.send("­")
@@ -4372,7 +4373,7 @@ async def snipe(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.snipe + timedelta(seconds=snipecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/snipe", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     try:
@@ -4413,7 +4414,7 @@ async def timecmd(ctx: SlashContext, timezone: str=None):
         timeleft = (currentuser.cooldowns.time + timedelta(seconds=timecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/time", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     timezones=[timezone]
@@ -4499,7 +4500,7 @@ async def votereminder(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.votereminder + timedelta(seconds=voteremindercooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/votereminder", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     # get link button
     button = create_button(
@@ -4550,7 +4551,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
         timeleft = (currentuser.cooldowns.ban + timedelta(seconds=bancooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/ban", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return 
     
     #check that the user has required permissions
@@ -4637,7 +4638,7 @@ async def kick(ctx: SlashContext, user: Member, reason: str="No reason given."):
         timeleft = (currentuser.cooldowns.kick + timedelta(seconds=kickcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/kick", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return 
 
     #check that the user has required permissions
@@ -4718,7 +4719,7 @@ async def lockdown(ctx: SlashContext, channel: TextChannel=None):
         timeleft = (currentuser.cooldowns.lockdown + timedelta(seconds=lockdowncooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/lockdown", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return 
 
     #check that the user has required permissions
@@ -4782,7 +4783,7 @@ async def message(ctx: SlashContext, channel: TextChannel, message: str):
         timeleft = (currentuser.cooldowns.message + timedelta(seconds=messagecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/message", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return 
 
     #check that the user has required permissions
@@ -4829,7 +4830,7 @@ async def purge(ctx: SlashContext, purgenum: int):
         timeleft = (currentuser.cooldowns.purge + timedelta(seconds=purgecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/purge", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return 
 
     #check that the user has required permissions
@@ -4875,7 +4876,7 @@ async def role_add(ctx: SlashContext, user: Member, role: Role):
         timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -4940,7 +4941,7 @@ async def role_remove(ctx: SlashContext, user: Member, role: Role):
         timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -4992,7 +4993,7 @@ async def role_all_info(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -5066,7 +5067,7 @@ async def role_user_info(ctx: SlashContext, user: Member=None):
         timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -5144,7 +5145,7 @@ async def role_role_info(ctx: SlashContext, role: Role):
         timeleft = (currentuser.cooldowns.role + timedelta(seconds=rolecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/role", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -5189,7 +5190,7 @@ async def slowmode_on(ctx: SlashContext, channel: TextChannel=None, time_period:
         timeleft = (currentuser.cooldowns.slowmode + timedelta(seconds=slowmodecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/slowmode", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -5262,7 +5263,7 @@ async def slowmode_off(ctx: SlashContext, channel: TextChannel=None):
         timeleft = (currentuser.cooldowns.slowmode + timedelta(seconds=slowmodecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/slowmode", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #check that the user has required permissions
@@ -5311,7 +5312,7 @@ async def unlockdown(ctx: SlashContext, channel: TextChannel=None):
         timeleft = (currentuser.cooldowns.unlockdown + timedelta(seconds=unlockdowncooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/unlockdown", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return 
 
     #check that the user has required permissions
@@ -5351,6 +5352,26 @@ async def unlockdown(ctx: SlashContext, channel: TextChannel=None):
 
 # fun
 #region
+
+
+@slash.slash(
+    name="coinflip",
+    description="Sai will flip a coin and return the answer"
+)
+async def coinflip(ctx: SlashContext):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.coinflip + timedelta(seconds=coinflipcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.coinflip = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.coinflip + timedelta(seconds=coinflipcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/coinflip", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed, hidden=True)
+        return
+    flip = choice(["Heads", "Tails"])
+    await ctx.send(f"The coin landed on: {flip}.")
 
 
 @slash.slash(
@@ -5429,7 +5450,7 @@ async def decide(ctx: SlashContext, choice1: str, choice2: str=None, choice3: st
         timeleft = (currentuser.cooldowns.decide + timedelta(seconds=decidecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/decide", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     
     choices = [choice1, choice2, choice3, choice4, choice5, choice6, choice7, choice8, choice9, choice10]
@@ -5471,7 +5492,7 @@ async def gif(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.gif + timedelta(seconds=gifcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/gif", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     randomgif = choice(saigifs)
@@ -5492,7 +5513,7 @@ async def quote(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.quote + timedelta(seconds=quotecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/quote", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #sends a random Sai quote
@@ -5513,7 +5534,7 @@ async def tulaiiisabigman(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.tulaiiisabigman + timedelta(seconds=tulaiiisabigmancooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/tulaiiisabigman", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     #sends gif
@@ -5542,7 +5563,7 @@ async def eightball(ctx: SlashContext, question: str):
         timeleft = (currentuser.cooldowns.eightball + timedelta(seconds=eightballcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("/eightball", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
     # send the response.
     if question == "deez nuts":
@@ -5570,7 +5591,7 @@ async def characterlist(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("help", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     # send help embed
@@ -5605,7 +5626,7 @@ async def timeformats(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("help", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     # send help embed
@@ -5629,7 +5650,7 @@ async def timezones(ctx: SlashContext):
         timeleft = (currentuser.cooldowns.help + timedelta(seconds=helpcooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
         cooldownembed = getcooldownembed("help", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed)
+        await ctx.send(embed=cooldownembed, hidden=True)
         return
 
     # send help embed

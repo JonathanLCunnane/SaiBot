@@ -8,7 +8,7 @@ class allcooldowns:
     about=epoch, help=epoch, links=epoch, patreon=epoch, profile=epoch, statistics=epoch, testcount=epoch, ### INFO ###
     cooldowns=epoch, editsnipe=epoch, event=epoch, nickname=epoch, ping=epoch, rescue=epoch, snipe=epoch, time=epoch, votereminder=epoch, ### UTILITY ###
     ban=epoch, kick=epoch, lockdown=epoch, message=epoch, purge=epoch, role=epoch, slowmode=epoch, unlockdown=epoch, ### MODERATION AND ADMIN ###
-    decide=epoch, eightball=epoch, gif=epoch, quote=epoch, tulaiiisabigman=epoch): ### FUN ###
+    coinflip=epoch, decide=epoch, eightball=epoch, gif=epoch, quote=epoch, tulaiiisabigman=epoch): ### FUN ###
         
         ### NARUTO ###
         self.character = character
@@ -44,6 +44,7 @@ class allcooldowns:
         self.unlockdown = unlockdown
 
         ### FUN ###
+        self.coinflip = coinflip
         self.decide = decide
         self.eightball = eightball
         self.gif = gif
@@ -87,6 +88,7 @@ class usercooldown:
                         "role":2, 
                         "slowmode":10, 
                         "unlockdown":10, ### MODERATION AND ADMIN ###
+                        "coinflip":2,
                         "decide":5, 
                         "eightball":2, 
                         "gif":3, 
