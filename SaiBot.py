@@ -4823,12 +4823,12 @@ async def purge(ctx: SlashContext, purgenum: int):
     #firstly checks if the cooldown has been met
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
-    if (currentuser.cooldowns.message + timedelta(seconds=messagecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
-        currentuser.cooldowns.message = datetime.now()
+    if (currentuser.cooldowns.purge + timedelta(seconds=purgecooldown) <= datetime.now()) or ctx.author_id == 457517248786202625:
+        currentuser.cooldowns.purge = datetime.now()
     else:
-        timeleft = (currentuser.cooldowns.message + timedelta(seconds=messagecooldown)) - datetime.now()
+        timeleft = (currentuser.cooldowns.purge + timedelta(seconds=purgecooldown)) - datetime.now()
         timeleft = formattimedelta(timeleft)
-        cooldownembed = getcooldownembed("/message", timeleft, ctx.author)
+        cooldownembed = getcooldownembed("/purge", timeleft, ctx.author)
         await ctx.send(embed=cooldownembed)
         return 
 
