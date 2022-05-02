@@ -104,8 +104,8 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 31
-version = "2.0.0"
+commandnumber = 32
+version = "2.1.0"
 linesofcode = "16010"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 6445
