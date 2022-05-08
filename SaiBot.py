@@ -169,6 +169,7 @@ temp = usercooldown(0)
 ### NARUTO ###
 charactercooldown = temp.get_cooldown_length("character")
 informationcooldown = temp.get_cooldown_length("information")
+searchcooldown = temp.get_cooldown_length("search")
 
 ### INFO ###
 aboutcooldown = temp.get_cooldown_length("about")
@@ -3422,16 +3423,17 @@ def get_current_user(author) -> usercooldown:
 # naruto
 #region
 
-@slash.slash(name="character",
-             description="Get the general information of any character in naruto.",
-             options=[
-                {
-                    "name":"character_name",
-                    "description":"The name of the desired character",
-                    "type":3,
-                    "required":True
-                }
-             ]        
+@slash.slash(
+    name="character",
+    description="Get the general information of any character in Naruto.",
+    options=[
+        {
+            "name":"character_name",
+            "description":"The name of the desired character",
+            "type":3,
+            "required":True
+        }
+    ]        
 )
 async def character(ctx: SlashContext, character_name: str):
     #firstly checks if the cooldown has been met and logs the command
@@ -3474,17 +3476,18 @@ async def character(ctx: SlashContext, character_name: str):
     await ctx.send(embed=characterembed)
 
 
-@slash.slash(name="information",
-             description="Get the specific information of any character in naruto.",
-             options=[
-                 {
-                     "name":"character_name",
-                     "description":"The name of the desired character",
-                     "type":3,
-                     "required":True
-                 }
-             ]
-             )
+@slash.slash(
+    name="information",
+    description="Get the specific information of any character in Naruto.",
+    options=[
+        {
+            "name":"character_name",
+            "description":"The name of the desired character",
+            "type":3,
+            "required":True
+        }
+    ]
+)
 async def information(ctx: SlashContext, character_name: str):
     #firstly checks if the cooldown has been met and logs the command
     await logslashcommand(ctx)
@@ -3527,6 +3530,294 @@ async def information(ctx: SlashContext, character_name: str):
     informationembed.set_footer(text="Command run by {0}#{1} | Page {2} of 5 | Run 's.help information' for more info on how this command functions!".format(ctx.author.name, ctx.author.discriminator, "1"), icon_url=ctx.author.avatar_url)
 
     await ctx.send(embed=informationembed, components=select_menu)
+
+
+@slash.slash(
+    name="search",
+    description="Lets you do an in-depth search for any Naruto characters.",
+    options=[
+        {
+            "name":"related",
+            "description":"The name of the character which all returned characters will be related to.",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"has_kekkei_genkai",
+            "description":"All returned characters will have a kekkei genkai.",
+            "type":5,
+            "required":False
+        },
+        {
+            "name":"kekkei_genkai",
+            "description":"The kekkei genkai which all returned characters will have.",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"sex",
+            "description":"The sex which all returned characters will have.",
+            "type":3,
+            "choices":[
+                {
+                    "name":"Male",
+                    "value":"♂️"
+                },
+                {
+                    "name":"Female",
+                    "value": "♀️"
+                }
+                
+            ],
+            "required":False
+        },
+        {
+            "name":"rank",
+            "description":"The rank which all returned characters will have.",
+            "type":3,
+            "choices":[
+                {
+                    "name":"Kage",
+                    "value":"<:kage:885603650112720896>",
+                },
+                {
+                    "name":"Genin",
+                    "value":"<:genin:886227190587482162>",
+                },
+                {
+                    "name":"Chunin",
+                    "value":"<:chunin:886227436524691559>",
+                },
+                {
+                    "name":"Jonin",
+                    "value":"<:jonin:886227639306698752>",
+                },
+                {
+                    "name":"Anbu",
+                    "value":"<:anbu:886256679241515069>",
+                },
+                {
+                    "name":"Chubu",
+                    "value":"<:chubu:886257056145883167>",
+                }
+            ],
+            "required":False
+        },
+        {
+            "name":"affiliation",
+            "description":"The affiliation which all returned characters will have.",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"clan",
+            "description":"The clan which all returned characters will have.",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"team",
+            "description":"The team which all returned characters will have been part of.",
+            "type":3,
+            "required":False
+        },
+        {
+            "name":"nature_type",
+            "description":"The nature type affinity which all returned characters will have.",
+            "type":3,
+            "choices":[
+                {
+                    "name":"Earth Release",
+                    "value":"<:earthrelease:886019985909108748>",
+                },
+                {
+                    "name":"Fire Release",
+                    "value":"<:firerelease:886019827121127445>",
+                },
+                {
+                    "name":"Lightning Release",
+                    "value":"<:lightningrelease:886020049457008710>",
+                },
+                {
+                    "name":"Water Release",
+                    "value":"<:waterrelease:886019914727571566>",
+                },
+                {
+                    "name":"Wind Release",
+                    "value":"<:windrelease:886019877847068732>",
+                },
+                {
+                    "name":"Yang Release",
+                    "value":"<:yangrelease:886020578392293396>",
+                },
+                {
+                    "name":"Yin Release",
+                    "value":"<:yinrelease:886020498482397226>",
+                },
+                {
+                    "name":"Yin-Yang Release",
+                    "value":"<:yinyangrelease:886020626068930711>",
+                }
+            ],
+            "required":False
+        }
+    ]
+)
+async def search(
+    ctx: SlashContext, 
+    related: str=None, 
+    has_kekkei_genkai: bool=None, 
+    kekkei_genkai: str=None, 
+    sex: str=None, 
+    rank: str=None, 
+    affiliation: str=None, 
+    clan: str=None, 
+    team: str=None, 
+    nature_type: str=None
+):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.search + timedelta(seconds=searchcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.search = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.search + timedelta(seconds=searchcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/search", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed, hidden=True)
+        return
+    
+    # if 'None' was entered treat it as None for some parameters
+    if related == "None":
+        related = None
+    if kekkei_genkai == "None":
+        kekkei_genkai = None
+    if rank == "None":
+        rank = None
+    if affiliation == "None":
+        affiliation = None
+    if clan == "None":
+        clan == None
+    if team == "None":
+        team = None
+
+    # checks that at least one option was entered
+    if not (related or has_kekkei_genkai != None or kekkei_genkai or sex or rank or affiliation or clan or team or nature_type):
+        await ctx.send("You have to have at least one option selected!", hidden=True)
+        return
+    # checks that has_kekkei_genkai is not False while kekkei_genkai has a value
+    elif has_kekkei_genkai == False and kekkei_genkai:
+        await ctx.send("You have to choose whether to search for a kekkei genkai or not!\nYou cannot select 'False' for `has_kekkei_genkai` while inputting an option for `kekkei_genkai`.", hidden=True)
+        return
+
+    # get list of characters and then move through one by one eliminating based on the options selected.
+    character_names = Characters.list()[1:]
+
+    # get characters
+    characters = dict(Characters.__dict__)
+    # filter out unnecessary variables
+    characters.popitem() #__doc__ None
+    characters.popitem() #__weakref__ <attr>
+    characters.popitem() #__dict__ <attr>
+    characters.popitem() #list <function Characters.list>
+    characters.popitem() #find <function Characters.find>
+    characters.pop("__module__")
+
+    # loop through characters
+    for character in characters.values():
+
+        # remove unrelated characters
+        if related:
+            related = related.lower().strip()
+            character_related = False
+            for member in character.familymembers:
+                member = member.lower().strip()
+                if related == member or member.split(" ")[0] == related:
+                    character_related = True
+            if not character_related:
+                character_names.remove(character.name)
+                continue
+
+        # remove any characters that do not have kekkei_genkai if they should have kekkei_genkai 
+        if has_kekkei_genkai:
+            if character.kekkeigenkaiemojis == ["<:none:886242085244649522>"]:
+                character_names.remove(character.name)
+                continue
+
+        # remove any characters that do not have a specific kekkei genkai
+        if kekkei_genkai:
+            kekkei_genkai = kekkei_genkai.lower().strip()
+            curr_has_kekkei_genkai = False
+            for curr_kekkei_genkai in character.kekkeigenkai:
+                curr_kekkei_genkai = curr_kekkei_genkai.lower().strip()
+                if curr_kekkei_genkai == kekkei_genkai:
+                    curr_has_kekkei_genkai = True
+            if not curr_has_kekkei_genkai:
+                character_names.remove(character.name)
+                continue
+            
+        # remove any characters that are not a specific sex
+        if sex:
+            if character.sexemoji != sex:
+                character_names.remove(character.name)
+                continue
+
+        # remove any characters that are not a specific rank
+        if rank:
+            if character.rankemoji != rank:
+                character_names.remove(character.name)
+                continue
+        
+        # remove any characters that do not have the selected affiliation
+        if affiliation:
+            affiliation = affiliation.lower().strip()
+            has_affilation = False
+            for curr_affiliation in character.affiliations:
+                curr_affiliation = curr_affiliation.lower().strip()
+                if curr_affiliation == affiliation or curr_affiliation.split(" ")[-1] == affiliation:
+                    has_affilation = True
+            if not has_affilation:
+                character_names.remove(character.name)
+                continue
+
+        # remove any characters not in the selected clan
+        if clan:
+            clan = clan.lower().replace("'", "").replace("clan", "").strip()
+            in_clan = False
+            if "and" in character.clan:
+                clans = character.clan.split("and")
+                for curr_clan in clans:
+                    curr_clan = curr_clan.lower().replace("'", "").replace("clan", "").strip()
+                    if curr_clan == clan:
+                        in_clan = True
+            elif character.clan.lower().replace("'", "").replace("clan", "").strip() == clan:
+                in_clan = True
+            if not in_clan:
+                character_names.remove(character.name)
+                continue
+
+        # remove any characters not in the desired team
+        if team:
+            team = team.lower().strip()
+            teams = character.team.split(",")
+            in_team = False
+            for curr_team in teams:
+                curr_team = curr_team.lower().strip()
+                if curr_team == team:
+                    in_team = True
+            if not in_team:
+                character_names.remove(character.name)
+                continue
+
+        # remove any characters which do not have the desired nature type
+        if nature_type:
+            nature_type = nature_type.lower().strip()
+            if nature_type not in character.naturetypeemojis:
+                character_names.remove(character.name)
+                continue
+
+
+    await ctx.send(f"yoink\n{character_names}")
 
 #endregion
 

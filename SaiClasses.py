@@ -4,7 +4,7 @@ epoch = datetime.utcfromtimestamp(0)
 class allcooldowns:
     """a class that contains last time run for each cmnd"""
     def __init__(self, 
-    character=epoch, information=epoch, ### NARUTO ###
+    character=epoch, information=epoch, search=epoch,### NARUTO ###
     about=epoch, help=epoch, links=epoch, patreon=epoch, profile=epoch, statistics=epoch, testcount=epoch, ### INFO ###
     cooldowns=epoch, editsnipe=epoch, event=epoch, nickname=epoch, ping=epoch, rescue=epoch, snipe=epoch, time=epoch, votereminder=epoch, ### UTILITY ###
     ban=epoch, kick=epoch, lockdown=epoch, message=epoch, purge=epoch, role=epoch, slowmode=epoch, unlockdown=epoch, ### MODERATION AND ADMIN ###
@@ -13,6 +13,7 @@ class allcooldowns:
         ### NARUTO ###
         self.character = character
         self.information = information
+        self.search = search
         
         ### INFO ###
         self.about = about
@@ -63,7 +64,8 @@ class usercooldown:
         self.userID = int(userID)
         self.cooldowns = allcooldowns()
         self.cooldown_lengths = {"character":5, 
-                        "information":5, ### NARUTO ###
+                        "information":5, 
+                        "search":5, ### NARUTO ###
                         "about":5, 
                         "help":5, 
                         "links":5, 
@@ -1992,7 +1994,7 @@ class Characters():
                        "<:genin:886227190587482162>",
                        ["Konohagakure", "Ryuchi Cave"],
                        ["<:konohagakure:886006368572690452>", "<:ryuchicave:886006866348478495>"],
-                       "Uzumaki Clan + Hyuga Clan",
+                       "Uzumaki Clan and Hyuga Clan",
                        "<:uzumakiclan:885982315036176394> + <:hyugaclan:885972994864840745>",
                        "Team 7",
                        ["Minato Namikaze", "Kushina Uzumaki", "Naruto Uzumaki", "Hyuga Elder", "Hiashi Hyuga", "Hizashi Hyuga", "Hinata and Hanabi's Mother", "Hinata Hyuga", "Hanabi Hyuga", "Himawari Uzumaki", "Neji Hyuga", "Kawaki", "Momo Otsutsuki"],
@@ -4742,7 +4744,7 @@ class Characters():
                          "<:none:886242085244649522>",
                          ["Konohagakure"],
                          ["<:konohagakure:886006368572690452>"],
-                         "Uzumaki Clan + Hyuga Clan",
+                         "Uzumaki Clan and Hyuga Clan",
                          "<:uzumakiclan:885982315036176394> + <:hyugaclan:885972994864840745>",
                          "Unknown",
                          ["Minato Namikaze", "Kushina Uzumaki", "Naruto Uzumaki", "Hyuga Elder", "Hiashi Hyuga", "Hizashi Hyuga", "Hinata and Hanabi's Mother", "Hinata Hyuga", "Hanabi Hyuga", "Boruto Uzumaki", "Neji Hyuga", "Kawaki", "Jaggy"],
@@ -6634,7 +6636,7 @@ class Characters():
                      "<:none:886242085244649522>",
                      ["Uzushiogakure", "Konohagakure"],
                      ["<:uzushiogakure:886007500573397022>", "<:konohagakure:886006368572690452>"],
-                     "Uzumaki Clan + Senju Clan",
+                     "Uzumaki Clan and Senju Clan",
                      "<:uzumakiclan:885982315036176394> + <:senjuclan:885981097144496128>",
                      "None",
                      ["Hashirama Senju", "Tsunade", "Nawaki"],
@@ -7536,7 +7538,7 @@ class Characters():
                          "<:genin:886227190587482162>",
                          ["Konohagakure"],
                          ["<:konohagakure:886006368572690452>"],
-                         "Nara Clan + Kazekage Clan",
+                         "Nara Clan and Kazekage Clan",
                          "<:naraclan:885976759823134742> + <:emojinotfound:886242853066526741>",
                          "Team 10",
                          ["Shikaku Nara", "Yoshino Nara", "Shikamaru Nara", "Karura", "Rasa", "Temari", "Gaara", "Kankuro", "Yashamaru", "Shinki"],
@@ -8064,7 +8066,7 @@ class Characters():
                        "<:jonin:886227639306698752>",
                        ["Sunagakure", "Konohagakure", "Allied Shinobi Forces"],
                        ["<:sunagakure:886007156418150500>", "<:konohagakure:886006368572690452>", "<:alliedshinobiforces:886009038385598464>"],
-                       "Nara Clan + Kazekage Clan",
+                       "Nara Clan and Kazekage Clan",
                        "<:kazekageclan:885975724341731339> + <:naraclan:885976759823134742>",
                        "Three Sand Siblings, Fourth Division, Wind Release Team",
                        ["Rasa", "Karura", "Gaara", "Kankuro", "Shikadai Nara", "Yashamaru", "Shikamaru Nara", "Shinki"],
@@ -8778,7 +8780,7 @@ class Characters():
                      "https://cdn.discordapp.com/attachments/886205213420191795/922155579722575882/zaku_abumi.png")
     
     #function for getting a list of characters and returning it
-    def list() -> str:
+    def list() -> list[str]:
         characters = dict(Characters.__dict__)
 
         #filter out unnecessary variables
