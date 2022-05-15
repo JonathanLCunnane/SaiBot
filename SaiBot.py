@@ -3544,7 +3544,7 @@ async def information(ctx: SlashContext, character_name: str):
         },
         {
             "name":"has_kekkei_genkai",
-            "description":"All returned characters will have a kekkei genkai.",
+            "description":"All returned characters will have/not have a kekkei genkai.",
             "type":5,
             "required":False
         },
@@ -3855,6 +3855,9 @@ async def search(
     for character in character_names:
         character_text += f"{count}. {character}\n"
         count += 1
+
+    if character_text == "":
+        character_text = "There are no characters fitting these criteria."
     
     # try to send an embed, if the embed is too long, send a txt file instead.
     searchembed = discord.Embed(title=f"Character search for {option_count} categories:", description=category_text, color=embedcolour)
@@ -6532,6 +6535,40 @@ async def information(ctx: ComponentContext):
     helpembed.add_field(name="How to use it", value="```/information [character name] or [character alias]```For Example:```/information Sai```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(informationcooldown), inline=False)
     helpembed.add_field(name="How to read the information!", value="On the 1st page:\n­ - Full Name\n­ - Aliases\n­ - Debut\nOn the 2nd page:\n­ - Kekkei Genkai and Emojis\n­ - Nature Types and Emojis\n­ - Clan and Emoji\n­ - Affiliations and Emojis\nOn the 3rd page:\n­ - Rank\n­ - Birth Date\n­ - Sex and Emoji\n­ - Height\n­ - Weight\nOn the 4th page:\n­ - Jutsu List\nOn the 5th page:\n­ - Team List\n­ - Family Members List", inline=False)
+    helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=buttons)
+
+
+@slash.component_callback()
+async def search(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    buttons = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        ),
+        create_button(
+            style=5,
+            label="Visit the Characters Page",
+            emoji=client.get_emoji(886208833393938452),
+            url="https://naruto.fandom.com/wiki/Category:Characters"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `search` <:naruto:886208833393938452>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `search` command is used to filter through the many Naruto characters and return a list which fits the entered criteria. For a list of all characters available, run '/characterlist'", inline=False)
+    helpembed.add_field(name="How to use it", value="```/search (options)```Options to choose from are:\n- Related: *The name of the character which all returned characters will be related to*\n- Has Kekkei Genkai: *All returned characters will have/not have a kekkei genkai*\n- Kekkei Genkai: *The kekkei genkai which all returned characters will have*\n- Sex: *The sex which all returned characters will have*\n- Rank: *The rank which all returned characters will have*\n- Affiliation: *The affiliation which all returned characters will have*\n- Clan: *The clan which all returned characters will have*\n- Team: *The team which all returned characters will have been part of*\n- Nature Type: *The nature type affinity which all returned characters will have*", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(searchcooldown), inline=False)
     helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
