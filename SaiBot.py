@@ -104,11 +104,11 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 32
-version = "2.1.1"
-linesofcode = "16010"
+commandnumber = 33
+version = "2.2.0"
+linesofcode = "16607"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 6445
+total_commands_run = 6604
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 weeklytulaiigif = "https://tenor.com/view/lemonem-lemonemed-eminem-eminem-lemon-lemon-eminem-gif-20561122"
@@ -6241,6 +6241,11 @@ async def help_category(ctx: ComponentContext):
                 style=ButtonStyle.secondary,
                 label="Information",
                 custom_id="information"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Search",
+                custom_id="search"
             )
         ]
         buttons = [create_actionrow(*buttons)]
