@@ -3472,7 +3472,7 @@ async def character(ctx: SlashContext, character_name: str):
     characterembed.add_field(name=f"{character.name}  {character.sexemoji}", value=f"""­\n{aliaslist}""", inline=True)
     characterembed.add_field(name="­", value=f"""­\n**Episode #{character.debut}**\n\n{character.rankemoji}\n{character.clanemoji}\n{"".join(character.naturetypeemojis)}\n{"".join(character.kekkeigenkaiemojis)}\n­""", inline=True)
     characterembed.set_image(url=character.image)
-    characterembed.set_footer(text="Command run by {0}#{1} | Run 's.help character' for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    characterembed.set_footer(text="Command run by {0}#{1} | Run '/help' and select 'character' in the 'Naruto' section for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=characterembed)
 
 
@@ -3527,7 +3527,7 @@ async def information(ctx: SlashContext, character_name: str):
     informationembed.add_field(name="Aliases:", value=", ".join(character.aliases), inline=False)
     informationembed.add_field(name="Debut:", value=str(character.debut), inline=False)
     informationembed.set_image(url=character.image)
-    informationembed.set_footer(text="Command run by {0}#{1} | Page {2} of 5 | Run 's.help information' for more info on how this command functions!".format(ctx.author.name, ctx.author.discriminator, "1"), icon_url=ctx.author.avatar_url)
+    informationembed.set_footer(text="Command run by {0}#{1} | Page {2} of 5 | Run '/help' and select 'information' in the 'Naruto' section for more info on how this command functions!".format(ctx.author.name, ctx.author.discriminator, "1"), icon_url=ctx.author.avatar_url)
 
     await ctx.send(embed=informationembed, components=select_menu)
 
@@ -3561,11 +3561,11 @@ async def information(ctx: SlashContext, character_name: str):
             "choices":[
                 {
                     "name":"Male",
-                    "value":"♂️"
+                    "value":"Male"
                 },
                 {
                     "name":"Female",
-                    "value": "♀️"
+                    "value": "Female"
                 }
                 
             ],
@@ -3723,6 +3723,8 @@ async def search(
     characters.popitem() #find <function Characters.find>
     characters.pop("__module__")
 
+    sex_dict = {"Male": "♂️", "Female": "♀️"}
+
     # loop through characters
     for character in characters.values():
 
@@ -3758,7 +3760,7 @@ async def search(
             
         # remove any characters that are not a specific sex
         if sex:
-            if character.sexemoji != sex:
+            if character.sexemoji != sex_dict[sex]:
                 character_names.remove(character.name)
                 continue
 
@@ -3816,8 +3818,59 @@ async def search(
                 character_names.remove(character.name)
                 continue
 
+    # get number of categories selected and the category text
+    option_count = 0
+    category_text = ""
+    if related:
+        option_count += 1
+        category_text += f"- Related: **{related}**\n"
+    if has_kekkei_genkai:
+        option_count += 1
+        category_text += f"- Has Kekkei Genkai: **{has_kekkei_genkai}**\n"
+    if kekkei_genkai:
+        option_count += 1
+        category_text += f"- Kekkei Genkai: **{kekkei_genkai}**\n"
+    if sex:
+        option_count += 1
+        category_text += f"- Sex: **{sex}**\n"
+    if rank:
+        option_count += 1
+        category_text += f"- Rank: **{rank}**\n"
+    if affiliation:
+        option_count += 1
+        category_text += f"- Affiliation: **{affiliation}**\n"
+    if clan:
+        option_count += 1
+        category_text += f"- Clan: **{clan}**\n"
+    if team:
+        option_count += 1
+        category_text += f"- Team: **{team}**\n"
+    if nature_type:
+        option_count += 1
+        category_text += f"- Nature Type: **{nature_type}**\n"
 
-    await ctx.send(f"yoink\n{character_names}")
+    # generate numbered character list
+    character_text = ""
+    count = 1
+    for character in character_names:
+        character_text += f"{count}. {character}\n"
+        count += 1
+    
+    # try to send an embed, if the embed is too long, send a txt file instead.
+    searchembed = discord.Embed(title=f"Character search for {option_count} categories:", description=category_text, color=embedcolour)
+    searchembed.add_field(name="Characters fitting the search criteria:", value=character_text)
+    searchembed.set_footer(text="Command run by {0}#{1} | Run '/help' and select 'search' in the 'Naruto' section for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    try:
+        await ctx.send(embed=searchembed)
+    except:
+        # open SaiSearch.txt files, write the Characters.list() list to the file and then add it to the embed as a text file.
+        characterlistfile = open("SaiSearch.txt", "w")
+        characterlistfile.write(f"Characters fitting the search criteria of:\n{category_text}\n")
+        characterlistfile.write(character_text)
+        characterlistfile.close()
+        searchembed=discord.Embed(title=f"Character search for {option_count} categories:", description="Due to the amount of characters being selected, the full message could not be sent in an embed, so see the attached file for the relevant characters.", color=embedcolour)
+        searchembed.set_footer(text="Command run by {0}#{1} | Run '/help' and select 'search' in the 'Naruto' section for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=searchembed, file=discord.File(r".\SaiSearch.txt"))
 
 #endregion
 
