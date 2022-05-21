@@ -4885,10 +4885,30 @@ async def votereminder(ctx: SlashContext):
             "description":"The reason that you want to ban the specified user.",
             "type":3,
             "required":False
+        },
+        {
+            "name":"delete_messages",
+            "description":"The option to be used if you want to delete messages from the user being banned.",
+            "type":3,
+            "choices":[
+                {
+                    "name":"Do Not Delete Any",
+                    "value":0
+                },
+                {
+                    "name":"Previous 24 Hours",
+                    "value":1
+                },
+                {
+                    "name":"Previous 7 Days",
+                    "value":7
+                }
+            ],
+            "required":False
         }
     ]
 )
-async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
+async def ban(ctx: SlashContext, user: Member, reason: str="No reason given.", delete_days: int=0):
     #firstly checks if the cooldown has been met
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
@@ -4952,7 +4972,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given."):
     #ban the user and react to message
     banreason = reason
     try:
-        await user.ban(reason=banreason)
+        await user.ban(reason=banreason, delete_message_days=delete_days)
     except Exception as e:
         await ctx.send(f"Ban failed, send this message to the bot developer jlc#8474: {e}.")
 
@@ -7005,8 +7025,8 @@ async def ban(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title="Help", description="Command specific help for: `ban` <:moderation_and_admin:881897640948826133>", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `ban` command is used to ban a specified user. Note that to run this command you need to have user banning perms.", inline=False)
-    helpembed.add_field(name="How to use it", value="```/ban [user ID] or [user mention] (reason)```", inline=False)
+    helpembed.add_field(name="Description", value="The `ban` command is used to ban a specified user, with an option to give a reason and delete messages from the past 24 hours or 7 days. Note that to run this command you need to have user banning perms.", inline=False)
+    helpembed.add_field(name="How to use it", value="```/ban [user ID] or [user mention] (reason) (delete messages)```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Moderation and Admin\n**Cooldown**: `{0}` seconds".format(bancooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
