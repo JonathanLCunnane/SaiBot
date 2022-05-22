@@ -103,14 +103,13 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 33
+commandnumber = 32
 version = "2.2.0"
 linesofcode = "16607"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 6604
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
-weeklytulaiigif = "https://tenor.com/view/lemonem-lemonemed-eminem-eminem-lemon-lemon-eminem-gif-20561122"
 eightballreplies = ["It is Certain.",
                     "It is decidedly so.",
                     "Without a doubt.",
@@ -206,7 +205,6 @@ decidecooldown = temp.get_cooldown_length("decide")
 eightballcooldown = temp.get_cooldown_length("eightball")
 gifcooldown = temp.get_cooldown_length("gif")
 quotecooldown = temp.get_cooldown_length("quote")
-tulaiiisabigmancooldown = temp.get_cooldown_length("tulaiiisabigman")
 #endregion
 
 #functions
@@ -754,7 +752,7 @@ async def on_message(message):
                 helpembed.add_field(name="<:info:881883500515590144> Info", value="```about, help, links (/vote/server/invite), patreon (/donate/premium), profile, statistics, testcount```", inline=False)
                 helpembed.add_field(name="<:utility:881883277424746546> Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, vote reminder```", inline=False)
                 helpembed.add_field(name="<:moderation_and_admin:881897640948826133> Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
-                helpembed.add_field(name="<:fun:881899126286061609> Fun", value="```decide, gif, quote, tulaiiisabigman, 8ball```", inline=False)
+                helpembed.add_field(name="<:fun:881899126286061609> Fun", value="```decide, gif, quote, 8ball```", inline=False)
                 helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed)
 
@@ -1076,16 +1074,6 @@ async def on_message(message):
                 helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
                 await message.channel.send(embed=helpembed)
                   
-            #if 's.help tulaiiisabigman' is run
-            elif helpcommand == "tulaiiisabigman":
-                helpembed=discord.Embed(title="Help", description="Command specific help for: `tulaiiisabigman` <:fun:881899126286061609>", color=embedcolour)
-                helpembed.set_thumbnail(url=client.user.avatar_url)
-                helpembed.add_field(name="Description", value="The `tulaiiisabigman` command gives the spiciest gif of the week, found by my specialist gif curator: tulaii✿#6598", inline=False)
-                helpembed.add_field(name="How to use it", value="```s.tulaiiisabigman```", inline=False)
-                helpembed.add_field(name="About", value="**Category:** Fun\n**Aliases:** ```tulaiiisabigman```\n**Cooldown**: `{0}` seconds\n**Delimiter:** None".format(tulaiiisabigmancooldown), inline=False)
-                helpembed.set_footer(text="Command run by {0}#{1}".format(message.author.name, message.author.discriminator), icon_url=message.author.avatar_url)
-                await message.channel.send(embed=helpembed)
-
             #if 's.help 8ball' is run
             elif helpcommand == "8ball":
                 helpembed=discord.Embed(title="Help", description="Command specific help for: `8ball` <:fun:881899126286061609>", color=embedcolour)
@@ -2921,22 +2909,6 @@ async def on_message(message):
 
             #sends a random Sai quote
             await message.channel.send(f"\"{choice(saiquotes)}\"")
-
-        #code for tulaii weekly gif command
-        elif command == "tulaiiisabigman":
-
-            #firstly checks if the cooldown has been met
-            if (currentuser.cooldowns.tulaiiisabigman + timedelta(seconds=tulaiiisabigmancooldown) <= datetime.now()) or message.author.id == 457517248786202625:
-                currentuser.cooldowns.tulaiiisabigman = datetime.now()
-            else:
-                timeleft = (currentuser.cooldowns.tulaiiisabigman + timedelta(seconds=tulaiiisabigmancooldown)) - datetime.now()
-                timeleft = formattimedelta(timeleft)
-                cooldownembed = getcooldownembed("tulaiiisabigman", timeleft, message.author)
-                await message.channel.send(embed=cooldownembed)
-                return
-            
-            #sends gif
-            await message.channel.send(weeklytulaiigif)
         
         #code for 8ball command
         elif command == "8ball" or command[0:6] == "8ball ":
@@ -3974,7 +3946,7 @@ async def help(ctx: SlashContext):
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```coinflip, decide, gif, quote, tulaiiisabigman, eightball```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```coinflip, decide, gif, quote, eightball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.send(embed=helpembed, components=menu)
 
@@ -5887,27 +5859,6 @@ async def quote(ctx: SlashContext):
 
 
 @slash.slash(
-    name="tulaiiisabigman",
-    description="Returns a the current gif chosen by tulaii✿#6598."
-)
-async def tulaiiisabigman(ctx: SlashContext):
-    #firstly checks if the cooldown has been met and logs the command
-    await logslashcommand(ctx)
-    currentuser = get_current_user(ctx.author)
-    if (currentuser.cooldowns.tulaiiisabigman + timedelta(seconds=tulaiiisabigmancooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
-        currentuser.cooldowns.tulaiiisabigman = datetime.now()
-    else:
-        timeleft = (currentuser.cooldowns.tulaiiisabigman + timedelta(seconds=tulaiiisabigmancooldown)) - datetime.now()
-        timeleft = formattimedelta(timeleft)
-        cooldownembed = getcooldownembed("/tulaiiisabigman", timeleft, ctx.author)
-        await ctx.send(embed=cooldownembed, hidden=True)
-        return
-
-    #sends gif
-    await ctx.send(weeklytulaiigif)
-
-
-@slash.slash(
     name="eightball",
     description="Sai will decide your fate.",
     options=[
@@ -6229,7 +6180,7 @@ async def help_home(ctx: ComponentContext):
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
-    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```coinflip, decide, gif, quote, tulaiiisabigman, eightball```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(881899126286061609)} Fun", value="```coinflip, decide, gif, quote, eightball```", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=menu)
 
@@ -6475,11 +6426,6 @@ async def help_category(ctx: ComponentContext):
             )
         ]
         buttons_two = [
-            create_button(
-                style=ButtonStyle.secondary,
-                label="Tulaiiisabigman",
-                custom_id="tulaiiisabigman"
-            ),
             create_button(
                 style=ButtonStyle.secondary,
                 label="Eightball",
@@ -7323,33 +7269,6 @@ async def quote(ctx: ComponentContext):
     helpembed.add_field(name="Description", value="The `quote` command returns a random Sai quote.\n**Note: If you havent finished Naruto and Naruto Shippuden be wary when clicking on spoilers :)**", inline=False)
     helpembed.add_field(name="How to use it", value="```/quote```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(quotecooldown), inline=False)
-    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-    await ctx.edit_origin(embed=helpembed, components=button)
-
-
-@slash.component_callback()
-async def tulaiiisabigman(ctx: ComponentContext):
-    # if the button was clicked by someone else
-    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
-    if original_author != str(ctx.author):
-        await ctx.send(content="This command is not for you!", hidden=True)
-        return
-    # create back button
-    button = [
-        create_button(
-            style=ButtonStyle.primary,
-            label="Help Home",
-            emoji=client.get_emoji(881883309142077470),
-            custom_id="help_home"
-        )
-    ]
-    button = [create_actionrow(*button)]
-    # create embed
-    helpembed=discord.Embed(title="Help", description="Command specific help for: `tulaiiisabigman` <:fun:881899126286061609>", color=embedcolour)
-    helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name="Description", value="The `tulaiiisabigman` command gives the spiciest gif of the week, found by my specialist gif curator: tulaii✿#6598", inline=False)
-    helpembed.add_field(name="How to use it", value="```/tulaiiisabigman```", inline=False)
-    helpembed.add_field(name="About", value="**Category:** Fun\n**Cooldown**: `{0}` seconds".format(tulaiiisabigmancooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
 

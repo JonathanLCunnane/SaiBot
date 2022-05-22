@@ -8,7 +8,7 @@ class allcooldowns:
     about=epoch, help=epoch, links=epoch, patreon=epoch, profile=epoch, statistics=epoch, testcount=epoch, ### INFO ###
     cooldowns=epoch, editsnipe=epoch, event=epoch, nickname=epoch, ping=epoch, rescue=epoch, snipe=epoch, time=epoch, votereminder=epoch, ### UTILITY ###
     ban=epoch, kick=epoch, lockdown=epoch, message=epoch, purge=epoch, role=epoch, slowmode=epoch, unlockdown=epoch, ### MODERATION AND ADMIN ###
-    coinflip=epoch, decide=epoch, eightball=epoch, gif=epoch, quote=epoch, tulaiiisabigman=epoch): ### FUN ###
+    coinflip=epoch, decide=epoch, eightball=epoch, gif=epoch, quote=epoch): ### FUN ###
         
         ### NARUTO ###
         self.character = character
@@ -50,7 +50,6 @@ class allcooldowns:
         self.eightball = eightball
         self.gif = gif
         self.quote = quote
-        self.tulaiiisabigman = tulaiiisabigman
         self.kick = kick
     
     # for iterating over all cooldowns
@@ -94,8 +93,7 @@ class usercooldown:
                         "decide":5, 
                         "eightball":2, 
                         "gif":3, 
-                        "quote":3, 
-                        "tulaiiisabigman":120}### FUN ###
+                        "quote":3}### FUN ###
     
     def __iter__(self):
         for cooldown, time in self.cooldowns:
