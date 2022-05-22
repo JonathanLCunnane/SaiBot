@@ -1,6 +1,5 @@
 #imports
 #region
-from typing import Text
 import discord
 from discord.user import User
 from discord.member import Member
@@ -4889,7 +4888,7 @@ async def votereminder(ctx: SlashContext):
         {
             "name":"delete_messages",
             "description":"The option to be used if you want to delete messages from the user being banned.",
-            "type":3,
+            "type":4,
             "choices":[
                 {
                     "name":"Do Not Delete Any",
@@ -4908,7 +4907,7 @@ async def votereminder(ctx: SlashContext):
         }
     ]
 )
-async def ban(ctx: SlashContext, user: Member, reason: str="No reason given.", delete_days: int=0):
+async def ban(ctx: SlashContext, user: Member, reason: str="No reason given.", delete_messages: int=0):
     #firstly checks if the cooldown has been met
     await logslashcommand(ctx)
     currentuser = get_current_user(ctx.author)
@@ -4972,7 +4971,7 @@ async def ban(ctx: SlashContext, user: Member, reason: str="No reason given.", d
     #ban the user and react to message
     banreason = reason
     try:
-        await user.ban(reason=banreason, delete_message_days=delete_days)
+        await user.ban(reason=banreason, delete_message_days=delete_messages)
     except Exception as e:
         await ctx.send(f"Ban failed, send this message to the bot developer jlc#8474: {e}.")
 
