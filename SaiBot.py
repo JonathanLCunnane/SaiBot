@@ -104,10 +104,10 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 32
-version = "2.2.0"
-linesofcode = "16607"
+version = "2.3.0"
+linesofcode = "16763"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 6604
+total_commands_run = 6619
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 eightballreplies = ["It is Certain.",
