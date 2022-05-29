@@ -166,6 +166,7 @@ saiquotes = [
 temp = usercooldown(0)
 ### NARUTO ###
 charactercooldown = temp.get_cooldown_length("character")
+imagecooldown = temp.get_cooldown_length("image")
 informationcooldown = temp.get_cooldown_length("information")
 searchcooldown = temp.get_cooldown_length("search")
 
@@ -3448,6 +3449,44 @@ async def character(ctx: SlashContext, character_name: str):
 
 
 @slash.slash(
+    name="image",
+    description="Fetch an image for any character in Naruto.",
+    options=[
+        {
+            "name":"character_name",
+            "description":"The name of the desired character",
+            "type":3,
+            "required":True
+        }
+    ]   
+)
+async def image(ctx: SlashContext, character_name: str):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.image + timedelta(seconds=imagecooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.image = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.image + timedelta(seconds=imagecooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/image", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed, hidden=True)
+        return
+
+    character = Characters.find(character_name)
+    
+    #if no character found
+    if character == None:
+        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `/characterlist`")
+        return
+
+    characterembed=discord.Embed(color=embedcolour, title="Character Image", description=f"{character.name}:")
+    characterembed.set_image(url=character.image)
+    characterembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=characterembed)
+
+
+@slash.slash(
     name="information",
     description="Get the specific information of any character in Naruto.",
     options=[
@@ -6209,6 +6248,11 @@ async def help_category(ctx: ComponentContext):
             ),
             create_button(
                 style=ButtonStyle.secondary,
+                label="Image",
+                custom_id="image"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
                 label="Information",
                 custom_id="information"
             ),
@@ -6470,6 +6514,40 @@ async def character(ctx: ComponentContext):
     helpembed.add_field(name="How to use it", value="```/character [character name] or [character alias]```For Example:```/character Sai```", inline=False)
     helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(charactercooldown), inline=False)
     helpembed.add_field(name="How to read the information!", value=" - On the top left of the message will be a list of aliases, which are in *italics*\n - On the top right of the message will be the debut episode, which is in **bold**. If the debut is in Naruto Shippuden or Boruto, the episode number will be the episode number plus the number of episodes in the preceding titles. e.g. A debut in episode 3 of Naruto Shippuden, will have the debut listed as **Episode #223**, since `220 + 3 = 223`.\n - Below the debut will be a list of emojis, of which there are four rows:\n­       + The first row denotes the character's highest achieved rank.\n­       + The second row denotes the character's clan\n­       + The third row denotes the character's nature types\n­       + The fourth and last row denotes the character's kekkei genkai.", inline=False)
+    helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=buttons)
+
+
+@slash.component_callback()
+async def image(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    buttons = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        ),
+        create_button(
+            style=5,
+            label="Visit the Characters Page",
+            emoji=client.get_emoji(886208833393938452),
+            url="https://naruto.fandom.com/wiki/Category:Characters"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `image` <:naruto:886208833393938452>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `image` command is used to fetch an image of any Naruto character! For a list of all characters available, run '/characterlist'", inline=False)
+    helpembed.add_field(name="How to use it", value="```/image [character name] or [character alias]```For Example:```/image Sai```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(imagecooldown), inline=False)
     helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
