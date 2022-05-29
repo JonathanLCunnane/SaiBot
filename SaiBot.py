@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 from random import choice, randrange, randint
 import sqlite3
-from re import S, search
+from re import search
 from asyncio import sleep
 import asyncio
 import psutil
@@ -103,8 +103,8 @@ editsnipedict = {}
 allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 32
-version = "2.3.0"
+commandnumber = 33
+version = "2.4.0"
 linesofcode = "16763"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 6619
@@ -3981,7 +3981,7 @@ async def help(ctx: SlashContext):
     # create embed
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, information```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, image, information, search```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
@@ -6215,7 +6215,7 @@ async def help_home(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, information```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, image, information, search```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
