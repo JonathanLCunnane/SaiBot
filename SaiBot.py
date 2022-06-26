@@ -104,7 +104,7 @@ allcooldowns = []
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 34
-version = "2.5.0"
+version = "2.5.1"
 linesofcode = "17299"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
 total_commands_run = 6668
