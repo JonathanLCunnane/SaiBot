@@ -13,15 +13,14 @@ import os
 from discord_slash import SlashCommand, SlashContext, ComponentContext
 from discord_slash.utils.manage_components import create_select, create_select_option, create_actionrow, create_button, ButtonStyle
 from dotenv import load_dotenv
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from random import choice, randrange, randint
 import sqlite3
-from re import search
+import re
 from asyncio import sleep
 import asyncio
 import psutil
 from math import ceil
-from threading import Thread
 
 import time
 timeone = time.time()
@@ -268,22 +267,22 @@ def isint(number):
 def isuserID(string):
     """retruns true if string is a user ID, otherwise returns false"""
     string  = str(string)
-    return ((search("<@.+>", string) and len(string) == 21) or (search("<@!.+>", string) and len(string) == 22) or (isint(string) and len(string) == 18))
+    return ((re.search("<@.+>", string) and len(string) == 21) or (re.search("<@!.+>", string) and len(string) == 22) or (isint(string) and len(string) == 18))
 def isroleID(string):
     """retruns true if string is a role ID, otherwise returns false"""
     string  = str(string)
-    return ((search("<@\&.+>", string) and len(string) == 22) or (isint(string) and len(string) == 18))
+    return ((re.search("<@\&.+>", string) and len(string) == 22) or (isint(string) and len(string) == 18))
 def ischannelID(string):
     """retruns true if string is a role ID, otherwise returns false"""
     string  = str(string)
-    return ((search("<#.+>", string) and len(string) == 21) or (isint(string) and len(string) == 18))
+    return ((re.search("<#.+>", string) and len(string) == 21) or (isint(string) and len(string) == 18))
 def getuserID(string):
     """returns a user ID from a mention string or from a user ID string if the string has an accepted user ID format"""
     string  = str(string)
     try:
-        if (search("<@.+>", string) and len(string) == 21):
+        if (re.search("<@.+>", string) and len(string) == 21):
             userID = string[2:20]
-        elif (search("<@!.+>", string) and len(string) == 22):
+        elif (re.search("<@!.+>", string) and len(string) == 22):
             userID = string[3:21]
         else:
             userID = string
@@ -294,7 +293,7 @@ def getroleID(string):
     """returns a role ID from a mention string or from a role ID string if the string has an accepted role ID format"""
     string  = str(string)
     try:
-        if search("<@\&.+>", string):
+        if re.search("<@\&.+>", string):
             roleID = string[3:21]
         else:
             roleID = string
@@ -305,7 +304,7 @@ def getchannelID(string):
     """returns a channel ID from a mention string or from a channel ID string if the string has an accepted channel ID format"""
     string  = str(string)
     try:
-        if search("<#.+>", string):
+        if re.search("<#.+>", string):
             channelID = string[2:20]
         else:
             channelID = string
@@ -315,41 +314,34 @@ def getchannelID(string):
 def parsetimestring(string):
     """returns an amount of seconds depending on what is entered, or returns None if no format is recognised"""
     string = string.lower()
-    string.replace(" ", "")
-    try:
-        time = datetime.strptime(string, "%H:%M:%S")
-    except:
-        try:
-            time = datetime.strptime(string, "%M:%S")
-        except:
-            try:
-                time = datetime.strptime(string, "%Hh%Mm%Ss")
-            except:
-                try:
-                    time = datetime.strptime(string, "%Hh%Mm")
-                except:
-                    try:
-                        time = datetime.strptime(string, "%Hh%Ss")
-                    except:
-                        try:
-                            time = datetime.strptime(string, "%Hh")
-                        except:
-                            try:
-                                time = datetime.strptime(string, "%Mm%Ss")
-                            except:
-                                try:
-                                    time = datetime.strptime(string, "%Mm")
-                                except:
-                                    try:
-                                        time = datetime.strptime(string, "%Ss")
-                                    except:
-                                        try:
-                                            time = datetime.strptime(string, "%S")
-                                        except:
-                                            return None
-    time = time - datetime(1900, 1, 1)
-    time = time.total_seconds()
-    return time
+    string = string.replace(" ", "")
+    float_regex = "(\d+(?:\.\d*)?|\.\d+)"
+    regexes = {
+        f"^{float_regex}:{float_regex}:{float_regex}:{float_regex}$":[24*60*60, 60*60, 60, 1],
+        f"^{float_regex}:{float_regex}:{float_regex}$":[60*60, 60, 1],
+        f"^{float_regex}:{float_regex}$":[60, 1],
+        f"^{float_regex}$":[1],
+        f"^{float_regex}d{float_regex}h{float_regex}m{float_regex}s$":[24*60*60, 60*60, 60, 1],
+        f"^{float_regex}d{float_regex}h{float_regex}m$":[60*60, 60, 1],
+        f"^{float_regex}d{float_regex}h{float_regex}s$":[24*60*60, 60*60, 1],
+        f"^{float_regex}d{float_regex}m{float_regex}s$":[24*60*60, 60, 1],
+        f"^{float_regex}d{float_regex}s$":[24*60*60, 1],
+        f"^{float_regex}d$":[24*60*60],
+        f"^{float_regex}h{float_regex}m{float_regex}s$":[60*60, 60, 1],
+        f"^{float_regex}h{float_regex}m$":[60*60, 60],
+        f"^{float_regex}h{float_regex}s$":[60*60, 1],
+        f"^{float_regex}h$":[60*60],
+        f"^{float_regex}m{float_regex}s$":[60, 1],
+        f"^{float_regex}m$":[60],
+        f"^{float_regex}s$":[1]
+    }
+    for kvp in regexes.items():
+        curr_search = re.search(kvp[0], string)
+        if curr_search:
+            seconds = 0
+            for multiple, value in zip(kvp[1], curr_search.groups()):
+                seconds += multiple * float(value)
+            return seconds
 async def logslashcommand(ctx: SlashContext):
     """Logs the command in the given slash context `SlashContext`"""
     global commandsrun
@@ -1970,9 +1962,9 @@ async def on_message(message):
 
             #check if user has been inputted correctly
             try:
-                if search("<@.+>", banparams[0]) and len(banparams[0]) == 21:
+                if re.search("<@.+>", banparams[0]) and len(banparams[0]) == 21:
                     banuser = message.guild.get_member(int(banparams[0][2:20]))
-                elif search("<@!.+>", banparams[0]) and len(banparams[0]) == 22:
+                elif re.search("<@!.+>", banparams[0]) and len(banparams[0]) == 22:
                     banuser = message.guild.get_member(int(banparams[0][3:21]))
                 else:
                     banuser = message.guild.get_member(int(banparams[0]))
@@ -2064,9 +2056,9 @@ async def on_message(message):
 
             #check if user has been inputted correctly
             try:
-                if search("<@.+>", kickparams[0]) and len(kickparams[0]) == 21:
+                if re.search("<@.+>", kickparams[0]) and len(kickparams[0]) == 21:
                     kickuser = message.guild.get_member(int(kickparams[0][2:20]))
-                elif search("<@!.+>", kickparams[0]) and len(kickparams[0]) == 22:
+                elif re.search("<@!.+>", kickparams[0]) and len(kickparams[0]) == 22:
                     kickuser = message.guild.get_member(int(kickparams[0][3:21]))
                 else:
                     kickuser = message.guild.get_member(int(kickparams[0]))
@@ -2927,7 +2919,7 @@ async def on_message(message):
     if message.channel.id == 859939744199606272:
 
         #if the message is in the correct format then add up and downvotes
-        if search("[S].+\n.+[R].+", message.content):
+        if re.search("[S].+\n.+[R].+", message.content):
             await message.add_reaction("\N{White Heavy Check Mark}")
             await message.add_reaction("\N{Upwards Black Arrow}")
             await message.add_reaction("\N{Downwards Black Arrow}")
