@@ -171,11 +171,11 @@ months_dict = {
 }
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 34
-version = "2.5.2"
-linesofcode = "17299"
+commandnumber = 35
+version = "2.6.0"
+linesofcode = "17772"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 6668
+total_commands_run = 6716
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 eightballreplies = ["It is Certain.",
