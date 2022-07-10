@@ -100,6 +100,75 @@ commandsrun = 0
 snipedict = {}
 editsnipedict = {}
 allcooldowns = []
+float_regex = "(\d+(?:\.\d*)?|\.\d+)"
+time_regexes = {
+        f"^{float_regex}:{float_regex}:{float_regex}:{float_regex}$":[24*60*60, 60*60, 60, 1],
+        f"^{float_regex}:{float_regex}:{float_regex}$":[60*60, 60, 1],
+        f"^{float_regex}:{float_regex}$":[60, 1],
+        f"^{float_regex}$":[1],
+        f"^{float_regex}d{float_regex}h{float_regex}m{float_regex}s$":[24*60*60, 60*60, 60, 1],
+        f"^{float_regex}d{float_regex}h{float_regex}m$":[60*60, 60, 1],
+        f"^{float_regex}d{float_regex}h{float_regex}s$":[24*60*60, 60*60, 1],
+        f"^{float_regex}d{float_regex}m{float_regex}s$":[24*60*60, 60, 1],
+        f"^{float_regex}d{float_regex}s$":[24*60*60, 1],
+        f"^{float_regex}d$":[24*60*60],
+        f"^{float_regex}h{float_regex}m{float_regex}s$":[60*60, 60, 1],
+        f"^{float_regex}h{float_regex}m$":[60*60, 60],
+        f"^{float_regex}h{float_regex}s$":[60*60, 1],
+        f"^{float_regex}h$":[60*60],
+        f"^{float_regex}m{float_regex}s$":[60, 1],
+        f"^{float_regex}m$":[60],
+        f"^{float_regex}s$":[1]
+    }
+# days_dict contains an integer key and its respective text date representation value
+# month_dict contains and integer key and a tuple(int max_days_in_month, string month) value
+days_dict = {
+    1:"1st",
+    2:"2nd",
+    3:"3rd",
+    4:"4th",
+    5:"5th",
+    6:"6th",
+    7:"7th",
+    8:"8th",
+    9:"9th",
+    10:"10th",
+    11:"11th",
+    12:"12th",
+    13:"13th",
+    14:"14th",
+    15:"15th",
+    16:"16th",
+    17:"17th",
+    18:"18th",
+    19:"19th",
+    20:"20th",
+    21:"21st",
+    22:"22nd",
+    23:"23rd",
+    24:"24th",
+    25:"25th",
+    26:"26th",
+    27:"27th",
+    28:"28th",
+    29:"29th",
+    30:"30th",
+    31:"31st"
+}
+months_dict = {
+    1:(31, "January"),
+    2:(29, "February"),
+    3:(31, "March"),
+    4:(30, "April"),
+    5:(31, "May"),
+    6:(30, "June"),
+    7:(31, "July"),
+    8:(31, "August"),
+    9:(30, "September"),
+    10:(31, "October"),
+    11:(30, "November"),
+    12:(31, "December")
+}
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
 commandnumber = 34
@@ -164,6 +233,7 @@ saiquotes = [
 
 temp = usercooldown(0)
 ### NARUTO ###
+birthdaycooldown = temp.get_cooldown_length("birthday")
 charactercooldown = temp.get_cooldown_length("character")
 imagecooldown = temp.get_cooldown_length("image")
 informationcooldown = temp.get_cooldown_length("information")
@@ -315,27 +385,7 @@ def parsetimestring(string):
     """returns an amount of seconds depending on what is entered, or returns None if no format is recognised"""
     string = string.lower()
     string = string.replace(" ", "")
-    float_regex = "(\d+(?:\.\d*)?|\.\d+)"
-    regexes = {
-        f"^{float_regex}:{float_regex}:{float_regex}:{float_regex}$":[24*60*60, 60*60, 60, 1],
-        f"^{float_regex}:{float_regex}:{float_regex}$":[60*60, 60, 1],
-        f"^{float_regex}:{float_regex}$":[60, 1],
-        f"^{float_regex}$":[1],
-        f"^{float_regex}d{float_regex}h{float_regex}m{float_regex}s$":[24*60*60, 60*60, 60, 1],
-        f"^{float_regex}d{float_regex}h{float_regex}m$":[60*60, 60, 1],
-        f"^{float_regex}d{float_regex}h{float_regex}s$":[24*60*60, 60*60, 1],
-        f"^{float_regex}d{float_regex}m{float_regex}s$":[24*60*60, 60, 1],
-        f"^{float_regex}d{float_regex}s$":[24*60*60, 1],
-        f"^{float_regex}d$":[24*60*60],
-        f"^{float_regex}h{float_regex}m{float_regex}s$":[60*60, 60, 1],
-        f"^{float_regex}h{float_regex}m$":[60*60, 60],
-        f"^{float_regex}h{float_regex}s$":[60*60, 1],
-        f"^{float_regex}h$":[60*60],
-        f"^{float_regex}m{float_regex}s$":[60, 1],
-        f"^{float_regex}m$":[60],
-        f"^{float_regex}s$":[1]
-    }
-    for kvp in regexes.items():
+    for kvp in time_regexes.items():
         curr_search = re.search(kvp[0], string)
         if curr_search:
             seconds = 0
@@ -3376,6 +3426,85 @@ def get_current_user(author) -> usercooldown:
 
 # naruto
 #region
+
+@slash.slash(
+    name="birthday",
+    description="Fetch the characters which have the desired birthday.",
+    options=[
+        {
+            "name":"day",
+            "description":"The day of the month which you want to search.",
+            "type":4,
+            "required":True
+        },
+        {
+            "name":"month",
+            "description":"The month of the year which you want to search.",
+            "type":4,
+            "required":True
+        }
+    ]
+)
+async def birthday(ctx: SlashContext, day: int, month: int):
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.birthday + timedelta(seconds=birthdaycooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.birthday = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.birthday + timedelta(seconds=birthdaycooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/birthday", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed, hidden=True)
+        return
+
+    # firstly check if the month is valid and the day is in the bounds of dates within the current month
+    birthdayerrorembed = discord.Embed(title="Birthday Cmd Error: ", color=embedcolour)
+    birthdayerrorembed.add_field(name="Date Error: ", value = "\nEnsure that the date entered is valid, i.e. the month is from 1-12 and the day is from 1-29, 1-30, or 1-31 depending on the month.")
+    birthdayerrorembed.set_footer(text="Error Triggered by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    if month < 1 or month > 12:
+        await ctx.send(embed=birthdayerrorembed, hidden=True)
+        return
+    if day < 1 or day > months_dict[month][0]:
+        await ctx.send(embed=birthdayerrorembed, hidden=True)
+        return
+    
+    date_str = f"{months_dict[month][1]} {days_dict[day]}"
+
+    # get list of characters and then move through one by one eliminating based on the options selected.
+    character_names = Characters.list()[1:]
+
+    # get characters
+    characters = dict(Characters.__dict__)
+    # filter out unnecessary variables
+    characters.popitem() #__doc__ None
+    characters.popitem() #__weakref__ <attr>
+    characters.popitem() #__dict__ <attr>
+    characters.popitem() #list <function Characters.list>
+    characters.popitem() #find <function Characters.find>
+    characters.pop("__module__")
+
+    # loop through characters
+    for character in characters.values():
+        if character.dob != date_str:
+            character_names.remove(character.name)
+
+    # generate numbered character list
+    character_text = ""
+    count = 1
+    for character in character_names:
+        character_text += f"{count}. {character}\n"
+        count += 1
+
+    if character_text == "":
+        character_text = "There are no characters fitting these criteria."
+    
+    # try to send an embed, if the embed is too long, send a txt file instead.
+    birthdayembed = discord.Embed(title="Birthday Search", color=embedcolour)
+    birthdayembed.add_field(name=f"Characters who have a birthday on `{date_str}`:", value=character_text)
+    birthdayembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=birthdayembed)
+
 
 @slash.slash(
     name="character",
