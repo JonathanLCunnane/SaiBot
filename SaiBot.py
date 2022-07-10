@@ -4092,7 +4092,7 @@ async def help(ctx: SlashContext):
     # create embed
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, image, information, search```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```birthday, character, image, information, search```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```avatar, cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
@@ -6362,7 +6362,7 @@ async def help_home(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```character, image, information, search```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```birthday, character, image, information, search```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```avatar, cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
@@ -6381,12 +6381,17 @@ async def help_category(ctx: ComponentContext):
         return
     if option == "Naruto":
         # create buttons
-        buttons = [
+        buttons_one = [
             create_button(
                 style=ButtonStyle.primary,
                 label="Help Home",
                 emoji=client.get_emoji(881883309142077470),
                 custom_id="help_home"
+            ),
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Birthday",
+                custom_id="birthday"
             ),
             create_button(
                 style=ButtonStyle.secondary,
@@ -6402,14 +6407,16 @@ async def help_category(ctx: ComponentContext):
                 style=ButtonStyle.secondary,
                 label="Information",
                 custom_id="information"
-            ),
+            )
+        ]
+        buttons_two = [
             create_button(
                 style=ButtonStyle.secondary,
                 label="Search",
                 custom_id="search"
             )
         ]
-        buttons = [create_actionrow(*buttons)]
+        buttons = [create_actionrow(*buttons_one), create_actionrow(*buttons_two)]
         # create embed
         helpembed=discord.Embed(title=f"Naruto Commands {client.get_emoji(886208833393938452)}", description="Here is a list of all of Sai's commands in the Naruto Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
         helpembed.set_thumbnail(url=client.user.avatar_url)
@@ -6634,6 +6641,40 @@ async def help_category(ctx: ComponentContext):
         helpembed=discord.Embed(title=f"Fun Commands {client.get_emoji(881899126286061609)}", description="Here is a list of all of Sai's commands in the Fun Category.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, __**select a specific command from one of the buttons**__.\n\nTo go back to the initial category select, __**select the `Help Home` button**__", color=embedcolour)
         helpembed.set_thumbnail(url=client.user.avatar_url)
         helpembed.set_footer(text="Command run by {0}#{1} | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=buttons)
+
+
+@slash.component_callback()
+async def birthday(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    buttons = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        ),
+        create_button(
+            style=5,
+            label="Visit the Characters Page",
+            emoji=client.get_emoji(886208833393938452),
+            url="https://naruto.fandom.com/wiki/Category:Characters"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `birthday` <:naruto:886208833393938452>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `birthday` command is used to get the Naruto characters which have a certain birthday! For a list of all characters available, run '/characterlist'", inline=False)
+    helpembed.add_field(name="How to use it", value="```/birthday [day] or [month]```For Example to search for characters with a birthday on the 25th November:```/birthday 25 11```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(charactercooldown), inline=False)
+    helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=buttons)
 
 
