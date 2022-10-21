@@ -9710,21 +9710,40 @@ class Characters():
                      "https://cdn.discordapp.com/attachments/886205213420191795/922155579722575882/zaku_abumi.png")
     
     #function for getting a list of characters and returning it
-    def list() -> list[str]:
+    def chr_list() -> list[str]:
         characters = dict(Characters.__dict__)
 
         #filter out unnecessary variables
         characters.popitem() #__doc__ None
         characters.popitem() #__weakref__ <attr>
         characters.popitem() #__dict__ <attr>
-        characters.popitem() #list <function Characters.list>
+        characters.popitem() #chr_list <function Characters.chr_list>
+        characters.popitem() #chr_num_and_list <function Characters.chr_num_and_list>
         characters.popitem() #find <function Characters.find>
         characters.pop("__module__")
 
         characterlist = [characters[character].name for character in characters]
-        characterlist.insert(0, len(characterlist))
-        return characterlist[1:]
+        return characterlist
     
+
+    #function for getting the # of characters and the list of characters
+    def chr_num_and_list() -> tuple[int, list[str]]:
+        characters = dict(Characters.__dict__)
+
+        #filter out unnecessary variables
+        characters.popitem() #__doc__ None
+        characters.popitem() #__weakref__ <attr>
+        characters.popitem() #__dict__ <attr>
+        characters.popitem() #chr_list <function Characters.chr_list>
+        characters.popitem() #chr_num_and_list <function Characters.chr_num_and_list>
+        characters.popitem() #find <function Characters.find>
+        characters.pop("__module__")
+
+        characterlist = [characters[character].name for character in characters]
+        return (len(characterlist), characterlist)
+
+
+
     #function for finding a character and returning it
     def find(name: str) -> Character:
         """returns None if Character is not in Characters"""

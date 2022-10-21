@@ -1157,11 +1157,9 @@ async def on_message(message):
 
             #if 's.help characterlist'
             elif helpcommand == "characterlist":
-                characterlist = Characters.list()
-                charactercount = characterlist[0]
-                characterlist = characterlist[1:]
+                charactercount, characterlist = Characters.chr_num_and_list()
 
-                #open SaiCharacterlist.txt files, write the Characters.list() list to the file and then add it to the embed as a text file.
+                #open SaiCharacterlist.txt files, write the Characters.chr_list() list to the file and then add it to the embed as a text file.
                 characterlistfile = open("SaiCharacterlist.txt", "w")
                 with characterlistfile as f: 
                     for character in characterlist:
@@ -3507,7 +3505,7 @@ async def birthday(ctx: SlashContext, day: int, month: int):
     date_str = f"{months_dict[month][1]} {days_dict[day]}"
 
     # get list of characters and then move through one by one eliminating based on the options selected.
-    character_names = Characters.list()
+    character_names = Characters.chr_list()
 
     # get characters
     characters = dict(Characters.__dict__)
@@ -3669,7 +3667,7 @@ async def information(ctx: SlashContext, character_name: str):
 )
 async def random(ctx: SlashContext):
     # get list of characters and then move through one by one eliminating based on the options selected.
-    character_names = Characters.list()
+    character_names = Characters.chr_list()
     character_name = choice(character_names)
 
     await send_character_embed(ctx, character_name)
@@ -3854,7 +3852,7 @@ async def search(
         return
 
     # get list of characters and then move through one by one eliminating based on the options selected.
-    character_names = Characters.list()
+    character_names = Characters.chr_list()
 
     # get characters
     characters = dict(Characters.__dict__)
@@ -4009,7 +4007,7 @@ async def search(
     try:
         await ctx.send(embed=searchembed)
     except:
-        # open SaiSearch.txt files, write the Characters.list() list to the file and then add it to the embed as a text file.
+        # open SaiSearch.txt files, write the Characters.chr_list() list to the file and then add it to the embed as a text file.
         characterlistfile = open("SaiSearch.txt", "w")
         characterlistfile.write(f"Characters fitting the search criteria of:\n{category_text}\n")
         characterlistfile.write(character_text)
@@ -6120,11 +6118,9 @@ async def characterlist(ctx: SlashContext):
         return
 
     # send help embed
-    characterlist = Characters.list()
-    charactercount = characterlist[0]
-    characterlist = characterlist[1:]
+    charactercount, characterlist = Characters.chr_num_and_list()
 
-    # open SaiCharacterlist.txt files, write the Characters.list() list to the file and then add it to the embed as a text file.
+    # open SaiCharacterlist.txt files, write the Characters.chr_list() list to the file and then add it to the embed as a text file.
     characterlistfile = open("SaiCharacterlist.txt", "w")
     with characterlistfile as f: 
         for character in characterlist:
