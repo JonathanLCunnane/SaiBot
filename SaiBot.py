@@ -1,30 +1,36 @@
 #imports
 #region
-import discord
-from discord.user import User
-from discord.member import Member
-from discord.role import Role
-from discord.enums import ActivityType, ChannelType
-from discord.ext import tasks
-from discord import Spotify, TextChannel, Embed, FFmpegPCMAudio
+import asyncio
 #import interactions
 #from interactions import ComponentContext, SlashContext, SelectMenu, SelectOption, Button, ButtonStyle, Option, OptionType, ActionRow
 import os
-from discord_slash import SlashCommand, SlashContext, ComponentContext
-from discord_slash.utils.manage_components import create_select, create_select_option, create_actionrow, create_button, ButtonStyle
-from dotenv import load_dotenv
-from datetime import datetime, timedelta
-from random import choice, randrange, randint
-import sqlite3
 import re
-from asyncio import sleep
-import asyncio
-import psutil
-from math import ceil
-
+import sqlite3
 import time
+from asyncio import sleep
+from datetime import datetime, timedelta
+from math import ceil
+from random import choice, randint, randrange
+
+import discord
+import psutil
+from discord import Embed, FFmpegPCMAudio, Spotify, TextChannel
+from discord.enums import ActivityType, ChannelType
+from discord.ext import tasks
+from discord.member import Member
+from discord.role import Role
+from discord.user import User
+from discord_slash import ComponentContext, SlashCommand, SlashContext
+from discord_slash.utils.manage_components import (ButtonStyle,
+                                                   create_actionrow,
+                                                   create_button,
+                                                   create_select,
+                                                   create_select_option)
+from dotenv import load_dotenv
+
 timeone = time.time()
-from SaiClasses import Character, usercooldown, Characters
+from SaiClasses import Character, Characters, usercooldown
+
 timetwo = time.time()
 print(f"Character Import Time: {timetwo - timeone}\n\n")
 #endregion
@@ -3427,6 +3433,35 @@ def get_current_user(author) -> usercooldown:
 # naruto
 #region
 
+async def send_character_embed(ctx: SlashContext, chr_name: str):
+    character = Characters.find(chr_name)
+    
+    #if no character found
+    if character == None:
+        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `/characterlist`")
+        return
+
+    #get character info and post the embed 
+    if len(character.aliases) >= 8:
+        aliaslist = "\n".join(["*" + alias + "*" for alias in character.aliases[0:7]])
+    else:
+        aliaslist = ["*" + alias + "*" for alias in character.aliases[0:len(character.aliases)]]
+        missingaliases = 8 - len(character.aliases)
+        aliasfillerlines = missingaliases // 2
+        for fillerline in range(aliasfillerlines):
+            aliaslist.insert(0, "­")
+            aliaslist.append("­")
+        aliaslist = "\n".join(aliaslist)
+
+    
+    characterembed=discord.Embed(color=embedcolour)
+    characterembed.add_field(name=f"{character.name}  {character.sexemoji}", value=f"""­\n{aliaslist}""", inline=True)
+    characterembed.add_field(name="­", value=f"""­\n**Episode #{character.debut}**\n\n{character.rankemoji}\n{character.clanemoji}\n{"".join(character.naturetypeemojis)}\n{"".join(character.kekkeigenkaiemojis)}\n­""", inline=True)
+    characterembed.set_image(url=character.image)
+    characterembed.set_footer(text="Command run by {0}#{1} | Run '/help' and select 'character' in the 'Naruto' section for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=characterembed)
+
+
 @slash.slash(
     name="birthday",
     description="Fetch the characters which have the desired birthday.",
@@ -3472,7 +3507,7 @@ async def birthday(ctx: SlashContext, day: int, month: int):
     date_str = f"{months_dict[month][1]} {days_dict[day]}"
 
     # get list of characters and then move through one by one eliminating based on the options selected.
-    character_names = Characters.list()[1:]
+    character_names = Characters.list()
 
     # get characters
     characters = dict(Characters.__dict__)
@@ -3531,32 +3566,7 @@ async def character(ctx: SlashContext, character_name: str):
         await ctx.send(embed=cooldownembed, hidden=True)
         return
 
-    character = Characters.find(character_name)
-    
-    #if no character found
-    if character == None:
-        await ctx.send("Make sure you enter the character correctly with no typos! Capitalisation does not matter. To check all supported characters, run `/characterlist`")
-        return
-
-    #get character info and post the embed 
-    if len(character.aliases) >= 8:
-        aliaslist = "\n".join(["*" + alias + "*" for alias in character.aliases[0:7]])
-    else:
-        aliaslist = ["*" + alias + "*" for alias in character.aliases[0:len(character.aliases)]]
-        missingaliases = 8 - len(character.aliases)
-        aliasfillerlines = missingaliases // 2
-        for fillerline in range(aliasfillerlines):
-            aliaslist.insert(0, "­")
-            aliaslist.append("­")
-        aliaslist = "\n".join(aliaslist)
-
-    
-    characterembed=discord.Embed(color=embedcolour)
-    characterembed.add_field(name=f"{character.name}  {character.sexemoji}", value=f"""­\n{aliaslist}""", inline=True)
-    characterembed.add_field(name="­", value=f"""­\n**Episode #{character.debut}**\n\n{character.rankemoji}\n{character.clanemoji}\n{"".join(character.naturetypeemojis)}\n{"".join(character.kekkeigenkaiemojis)}\n­""", inline=True)
-    characterembed.set_image(url=character.image)
-    characterembed.set_footer(text="Command run by {0}#{1} | Run '/help' and select 'character' in the 'Naruto' section for more info on how to understand all the information here!".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
-    await ctx.send(embed=characterembed)
+    await send_character_embed(ctx, character_name)
 
 
 @slash.slash(
@@ -3652,7 +3662,19 @@ async def information(ctx: SlashContext, character_name: str):
 
     await ctx.send(embed=informationembed, components=select_menu)
 
+    
+@slash.slash(
+    name="random",
+    description="Get the general information of a random character in Naruto."
+)
+async def random(ctx: SlashContext):
+    # get list of characters and then move through one by one eliminating based on the options selected.
+    character_names = Characters.list()
+    character_name = choice(character_names)
 
+    await send_character_embed(ctx, character_name)
+
+    
 @slash.slash(
     name="search",
     description="Lets you do an in-depth search for any Naruto characters.",
@@ -3832,7 +3854,7 @@ async def search(
         return
 
     # get list of characters and then move through one by one eliminating based on the options selected.
-    character_names = Characters.list()[1:]
+    character_names = Characters.list()
 
     # get characters
     characters = dict(Characters.__dict__)

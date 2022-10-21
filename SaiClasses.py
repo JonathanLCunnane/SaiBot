@@ -1,4 +1,5 @@
 from datetime import datetime
+
 epoch = datetime.utcfromtimestamp(0)
 
 class allcooldowns:
@@ -9722,7 +9723,7 @@ class Characters():
 
         characterlist = [characters[character].name for character in characters]
         characterlist.insert(0, len(characterlist))
-        return characterlist
+        return characterlist[1:]
     
     #function for finding a character and returning it
     def find(name: str) -> Character:

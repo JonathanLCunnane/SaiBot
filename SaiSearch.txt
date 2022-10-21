@@ -1,300 +1,82 @@
 Characters fitting the search criteria of:
-- Sex: **Male**
+- Sex: **Female**
 
-1. A (First Raikage)
-2. A (Second Raikage)
-3. A (Third Raikage)
-4. A (Fourth Raikage)
-5. Abiru
-6. Agara
-7. Agari Kaisen
-8. Agira Ryudoin
-9. Ahiko
-10. Akaboshi
-11. Akahoshi
-12. Akamaru
-13. Akane
-14. Akane's Father
-15. Akatsuchi
-16. Akemaru
-17. Akino
-18. Akio
-19. Amachi
-20. Amado
-21. Amai
-22. Anato
-23. Aniki
-24. Ao
-25. Aoba Yamashiro
-26. Aoda
-27. Aoi Rokusho
-28. Aosa
-29. Arai
-30. Arashi
-31. Araya
-32. Armadiko
-33. Asaka
-34. Ashimaru
-35. Ashina Uzumaki
-36. Ashitaba
-37. Asuma Sarutobi
-38. Asura Path
-39. Asura Otsutsuki
-40. Atsui
-41. Awaji Unabara
-42. Baiu
-43. Baji
-44. Baki
-45. Baku (Anbu)
-46. Bakuto
-47. Bando
-48. Banna
-49. Bansai
-50. Baru Uchiha
-51. Beekeeper
-52. Bekko
-53. Benga
-54. Benten
-55. Bird-Masked Anbu Member
-56. Bisuke
-57. Blue B
-58. Boar-Masked Anbu Member
-59. Boro
-60. Boruto Uzumaki
-61. Bull
-62. Buna
-63. Bunpuku
-64. Bunzo
-65. Burami
-66. Butsuma Senju
-67. Byakuren
-68. C
-69. Captain of the Ghost Ship
-70. Chamaru
-71. Chen
-72. Chibi
-73. Chikara
-74. Chiriku
-75. Chishima
-76. Chiyomatsu
-77. Chohan
-78. Choji Akimichi
-79. Chojuro
-80. Choseki
-81. Choza Akimichi
-82. Chuji
-83. Chukaku
-84. Chukichi
-85. Chushin
-86. Code
-87. Condor
-88. Cursed Warrior
-89. Daen Nara
-90. Daibutsu
-91. Daichi
-92. Daikoku Funeno
-93. Daimaru
-94. Dan Kato
-95. Dango
-96. Danzo Shimura
-97. Daore Dotonbori
-98. Darui
-99. Daruma Izuno
-100. Datsuji
-101. Deepa
-102. Deidara
-103. Dengaku
-104. Denka
-105. Denki Kaminarimon
-106. Disonasu
-107. Dodai
-108. Dokan
-109. Dokku
-110. Don
-111. Doragu
-112. Dosu Kinuta
-113. Doreddoraion
-114. Doshu Goetsu
-115. Doto Akimichi
-116. Eagle-Masked Anbu Member
-117. Earth Daimyo
-118. Ebisu
-119. Ebizo
-120. Eho Norimaki
-121. Tsuchigumo Chief
-122. En Oyashiro
-123. Enchu Nara
-124. Enra
-125. Ensui Nara
-126. Ereki Kaminarimon
-127. Evil Minister of the Tea Daimyo
-128. F
-129. Fang Daimyo
-130. Faz
-131. Fire Daimyo
-132. First Animal Path
-133. First Hoshikage
-134. Fox-Masked Anbu Member
-135. Frost Daimyo
-136. Fudo
-137. Fugaku Uchiha
-138. Fu Yamanaka
-139. Fukasaku
-140. Gaara
-141. Gaku Inuzuka
-142. Gama
-143. Gamabunta
-144. Gamaden
-145. Gamagoro
-146. Gamahiro
-147. Gamaken
-148. Gamakichi
-149. Gamamaru
-150. Gamariki
-151. Gamatama
-152. Gamatatsu
-153. Geotora
-154. Gengetsu Hozuki
-155. Hagoromo Otsutsuki
-156. Hamura Otsutsuki
-157. Han
-158. Hashirama Senju
-159. Hato
-160. Hiashi Hyuga
-161. Hidan
-162. Hikaku Uchiha
-163. Hinoe
-164. Hiruko
-165. Hiruzen Sarutobi
-166. Hizashi Hyuga
-167. Hoheto Hyuga
-168. Human Path
-169. Hyo
-170. Hyuga Elder
-171. Ibiki Morino
-172. Inabi Uchiha
-173. Indra Uchiha
-174. Inoichi Yamanaka
-175. Inojin Yamanaka
-176. Iroha Hyuga
-177. Iruka Umino
-178. Ishikawa
-179. Isshiki Otsutsuki
-180. Itachi Uchiha
-181. Itama Senju
-182. Izuna Uchiha
-183. Jirobo
-184. Jugo
-185. Juzo Biwa
-186. Kabuto Yakushi
-187. Kagami Uchiha
-188. Kakashi Hatake
-189. Kakuzu
-190. Kakuzu's Partner
-191. Kankuro
-192. Kanoe
-193. Kanoto
-194. Karin
-195. Kasuga Nara
-196. Kawaki
-197. Kawarama Senju
-198. Kiba Inuzuka
-199. Kidomaru
-200. Kie
-201. Killer B
-202. Kimimaro
-203. Kinoto
-204. Kinshiki Otsutsuki
-205. Kisame Hoshigaki
-206. Ko Hyuga
-207. Kohan Yamanaka
-208. Konohamaru Sarutobi
-209. Kosuke
-210. Kotatsu
-211. Kuromaru
-212. Kyusuke
-213. Madara Uchiha
-214. Maen Nara
-215. Makaro Akimichi
-216. Mangetsu Hozuki
-217. Maruten Akimichi
-218. Metal Lee
-219. Midare
-220. Might Duy
-221. Might Guy
-222. Minato Namikaze
-223. Mitsuki
-224. Mizunoe
-225. Mizunoto
-226. Momoshiki Otsutsuki
-227. Mozuku
-228. Mu
-229. Muta Aburame
-230. Nagato
-231. Naka Uchiha
-232. Nango
-233. Naraka Path
-234. Naruto Uzumaki
-235. Nawaki
-236. Neji Hyuga
-237. Obito Uchiha
-238. Onoki
-239. Preta Path
-240. Rai Uchiha
-241. Rasa
-242. Reto
-243. Rock Lee
-244. Roshi
-245. Sai
-246. Sakon and Ukon
-247. Santa Yamanaka
-248. Sasori
-249. Sasuke Uchiha
-250. Setsuna Uchiha
-251. Shamon
-252. Shibi Aburame
-253. Shigure
-254. Shikadai Nara
-255. Shikaku Nara
-256. Shikamaru Nara
-257. Shikuro Aburame
-258. Shin
-259. Shino Aburame
-260. Shin Uchiha
-261. Shinki
-262. Shinobu Mibu
-263. Shiranami
-264. Shisui Uchiha
-265. Shito Akimichi
-266. Suigetsu Hozuki
-267. Suzaku Nara
-268. Taiko Uchiha
-269. Tajima Uchiha
-270. Tanuki Shigaraki
-271. Tatsuma Aburame
-272. Tayuya
-273. Tekka Uchiha
-274. Terai
-275. Teyaki Uchiha
-276. Third Hoshikage
-277. Third Kazekage
-278. Third Mizukage
-279. Three Haimaru Brothers
-280. Tobirama Senju
-281. Tokuma Hyuga
-282. Tonbee
-283. Toneri Otsutsuki
-284. Torifu Akimichi
-285. Torune Aburame
-286. Tsuchigumo Chief
-287. Tshuchinoto
-288. Urashiki Otsutsuki
-289. Utakata
-290. White Zetsu
-291. Yagura Karatachi
-292. Yahiko
-293. Yakumi Uchiha
-294. Yamato
-295. Yashiro Uchiha
-296. Yugito Nii
-297. Zaku Abumi
+1. Agari
+2. Ageha
+3. Aino
+4. Ajisai
+5. Akari
+6. Akita Inuzuka
+7. Amagi Izuno
+8. Ameno
+9. Ameyuri Ringo
+10. Ami
+11. Anko Mitarashi
+12. Ankorodo Shop Owner
+13. Asaki
+14. Ashina
+15. Ayame
+16. Azami
+17. Biwako Sarutobi
+18. Buntan Kurosuki
+19. Buriko Nekoka
+20. Chino
+21. Chiyo
+22. Chiyo (Princess)
+23. Chocho Akimichi
+24. Choji's Mother
+25. Delta
+26. Emi
+27. Emiru
+28. Enko Onikuma
+29. Former Leader of Nadeshiko Village
+30. Fuen
+31. Fuki
+32. Fuki (Land of Sound)
+33. Fuku
+34. Furofuki
+35. Fuso
+36. Futaba
+37. Fuyo
+38. Fu
+39. Fuka
+40. Hana Inuzuka
+41. Hanabi Hyuga
+42. Himawari Uzumaki
+43. Hinata Hyuga
+44. Hinata and Hanabi's Mother
+45. Hinoto
+46. Hotaru
+47. Ino Yamanaka
+48. Ino's Mother
+49. Izumi Uchiha
+50. Kaguya Otsutsuki
+51. Kanna
+52. Karin's Mother
+53. Karui
+54. Karura
+55. Kin Tsuchi
+56. Konan
+57. Kurenai Yuhi
+58. Kurotsuchi
+59. Kushina Uzumaki
+60. Mei Terumi
+61. Mikoto Uchiha
+62. Mirai Sarutobi
+63. Mito Uzumaki
+64. Naori Uchiha
+65. Natsu Hyuga
+66. Nono Yakushi
+67. Obito's Grandmother
+68. Rin Nohara
+69. Sakura Haruno
+70. Sarada Uchiha
+71. Shima
+72. Temari
+73. Tenten
+74. Toka Senju
+75. Tsuchinoe
+76. Tsume Inuzuka
+77. Tsunade
+78. Uruchi Uchiha
+79. Yoshino Nara
