@@ -5,7 +5,7 @@ epoch = datetime.utcfromtimestamp(0)
 class allcooldowns:
     """a class that contains last time run for each cmnd"""
     def __init__(self, 
-    birthday=epoch, character=epoch, image=epoch, information=epoch, search=epoch,### NARUTO ###
+    birthday=epoch, character=epoch, image=epoch, information=epoch, random=epoch, search=epoch,### NARUTO ###
     about=epoch, help=epoch, links=epoch, patreon=epoch, profile=epoch, statistics=epoch, testcount=epoch, ### INFO ###
     avatar=epoch, cooldowns=epoch, editsnipe=epoch, event=epoch, nickname=epoch, ping=epoch, rescue=epoch, snipe=epoch, time=epoch, votereminder=epoch, ### UTILITY ###
     ban=epoch, kick=epoch, lockdown=epoch, message=epoch, purge=epoch, role=epoch, slowmode=epoch, unlockdown=epoch, ### MODERATION AND ADMIN ###
@@ -16,6 +16,7 @@ class allcooldowns:
         self.character = character
         self.image = image
         self.information = information
+        self.random = random
         self.search = search
         
         ### INFO ###
@@ -70,7 +71,8 @@ class usercooldown:
                         "birthday":5,
                         "character":5, 
                         "image":5,
-                        "information":5, 
+                        "information":5,
+                        "random": 1,
                         "search":5, ### NARUTO ###
                         "about":5, 
                         "help":5, 
