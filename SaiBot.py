@@ -243,6 +243,7 @@ birthdaycooldown = temp.get_cooldown_length("birthday")
 charactercooldown = temp.get_cooldown_length("character")
 imagecooldown = temp.get_cooldown_length("image")
 informationcooldown = temp.get_cooldown_length("information")
+randomcooldown = temp.get_cooldown_length("random")
 searchcooldown = temp.get_cooldown_length("search")
 
 ### INFO ###
@@ -3667,6 +3668,18 @@ async def information(ctx: SlashContext, character_name: str):
 )
 async def random(ctx: SlashContext):
     # get list of characters and then move through one by one eliminating based on the options selected.
+    #firstly checks if the cooldown has been met and logs the command
+    await logslashcommand(ctx)
+    currentuser = get_current_user(ctx.author)
+    if (currentuser.cooldowns.random + timedelta(seconds=randomcooldown) <= datetime.now()) or ctx.author.id == 457517248786202625:
+        currentuser.cooldowns.random = datetime.now()
+    else:
+        timeleft = (currentuser.cooldowns.random + timedelta(seconds=randomcooldown)) - datetime.now()
+        timeleft = formattimedelta(timeleft)
+        cooldownembed = getcooldownembed("/random", timeleft, ctx.author)
+        await ctx.send(embed=cooldownembed, hidden=True)
+        return
+
     character_names = Characters.chr_list()
     character_name = choice(character_names)
 
@@ -4112,7 +4125,7 @@ async def help(ctx: SlashContext):
     # create embed
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```birthday, character, image, information, search```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```birthday, character, image, information, random, search```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```avatar, cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
@@ -6380,7 +6393,7 @@ async def help_home(ctx: ComponentContext):
     # create embed
     helpembed=discord.Embed(title=f"Help Home {client.get_emoji(881883309142077470)}", description="Here is a list of all of Sai's commands.\nIf you would like a feature to be implemented, join the [official discord server for Sai](https://discord.gg/BSFCCFKK7f).\n\nTo get help for a specific command, firstly __**select a command category in the dropdown below**__.", color=embedcolour)
     helpembed.set_thumbnail(url=client.user.avatar_url)
-    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```birthday, character, image, information, search```", inline=False)
+    helpembed.add_field(name=f"{client.get_emoji(886208833393938452)} Naruto", value="```birthday, character, image, information, random, search```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883500515590144)} Info", value="```about, help, links, patreon, profile, statistics, testcount```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881883277424746546)} Utility", value="```avatar, cooldowns, editsnipe, event, nickname, ping, rescue, snipe, time, votereminder```", inline=False)
     helpembed.add_field(name=f"{client.get_emoji(881897640948826133)} Moderation and Admin", value="```ban, kick, lockdown, message, purge, role, slowmode, unlockdown```", inline=False)
@@ -6428,6 +6441,11 @@ async def help_category(ctx: ComponentContext):
             )
         ]
         buttons_two = [
+            create_button(
+                style=ButtonStyle.secondary,
+                label="Random",
+                custom_id="random"
+            ),
             create_button(
                 style=ButtonStyle.secondary,
                 label="Search",
@@ -6835,6 +6853,41 @@ async def search(ctx: ComponentContext):
 
 
 @slash.component_callback()
+async def random(ctx: ComponentContext):
+    # if the button was clicked by someone else
+    original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
+    if original_author != str(ctx.author):
+        await ctx.send(content="This command is not for you!", hidden=True)
+        return
+    # create back button
+    buttons = [
+        create_button(
+            style=ButtonStyle.primary,
+            label="Help Home",
+            emoji=client.get_emoji(881883309142077470),
+            custom_id="help_home"
+        ),
+        create_button(
+            style=5,
+            label="Visit the Characters Page",
+            emoji=client.get_emoji(886208833393938452),
+            url="https://naruto.fandom.com/wiki/Category:Characters"
+        )
+    ]
+    buttons = [create_actionrow(*buttons)]
+    # create embed
+    helpembed=discord.Embed(title="Help", description="Command specific help for: `random` <:naruto:886208833393938452>", color=embedcolour)
+    helpembed.set_thumbnail(url=client.user.avatar_url)
+    helpembed.add_field(name="Description", value="The `random` command is used to get general information and an image of a Naruto character! **BEWARE OF SPOILERS** For a list of all 'rollable' characters available, run '/characterlist'", inline=False)
+    helpembed.add_field(name="How to use it", value="```/random```", inline=False)
+    helpembed.add_field(name="About", value="**Category:** Naruto\n**Cooldown**: `{0}` seconds".format(randomcooldown), inline=False)
+    helpembed.add_field(name="How to read the information!", value=" - On the top left of the message will be a list of aliases, which are in *italics*\n - On the top right of the message will be the debut episode, which is in **bold**. If the debut is in Naruto Shippuden or Boruto, the episode number will be the episode number plus the number of episodes in the preceding titles. e.g. A debut in episode 3 of Naruto Shippuden, will have the debut listed as **Episode #223**, since `220 + 3 = 223`.\n - Below the debut will be a list of emojis, of which there are four rows:\n­       + The first row denotes the character's highest achieved rank.\n­       + The second row denotes the character's clan\n­       + The third row denotes the character's nature types\n­       + The fourth and last row denotes the character's kekkei genkai.", inline=False)
+    helpembed.add_field(name="Extra Info", value="This command uses material from the [“Characters”](https://naruto.fandom.com/wiki/Category:Characters) articles on the [Naruto wiki](https://naruto.fandom.com) at [Fandom](https://www.fandom.com) and is licensed under the [Creative Commons Attribution-Share Alike License](https://creativecommons.org/licenses/by-sa/3.0/).", inline=False)
+    helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
+    await ctx.edit_origin(embed=helpembed, components=buttons)
+
+    
+@slash.component_callback()
 async def about(ctx: ComponentContext):
     # if the button was clicked by someone else
     original_author = ctx.origin_message.embeds[0].footer.text.replace(" | If you want me to make a private version of the bot for your server, or add custom commands, or you simply want to make suggestions, get in contact with the owner of the bot, jlc, by joining the official Sai Support server.", "").replace("Command run by ", "")
@@ -6859,8 +6912,8 @@ async def about(ctx: ComponentContext):
     helpembed.add_field(name="About", value="**Category:** Info\n**Cooldown**: `{0}` seconds".format(aboutcooldown), inline=False)
     helpembed.set_footer(text="Command run by {0}#{1}".format(ctx.author.name, ctx.author.discriminator), icon_url=ctx.author.avatar_url)
     await ctx.edit_origin(embed=helpembed, components=button)
-
-
+    
+    
 @slash.component_callback()
 async def help(ctx: ComponentContext):
     # if the button was clicked by someone else
