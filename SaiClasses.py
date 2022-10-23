@@ -9760,6 +9760,7 @@ class Characters():
         characters.popitem() #__weakref__ <attr>
         characters.popitem() #__dict__ <attr>
         characters.popitem() #list <function Characters.list>
+        characters.popitem() #chr_num_and_list <function Characters.chr_num_and_list>
         characters.popitem() #find <function Characters.find>
         characters.pop("__module__")
 

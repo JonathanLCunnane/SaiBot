@@ -177,11 +177,11 @@ months_dict = {
 }
 
 ### UPDATE THESE BEFORE BOT UPDATE ###
-commandnumber = 35
-version = "2.6.0"
-linesofcode = "17772"
+commandnumber = 36
+version = "2.7.0"
+linesofcode = "17869"
 libraries = "os, dotenv, datetime, random, sqlite3, re, asyncio, psutil, math"
-total_commands_run = 6716
+total_commands_run = 8658
 ### UPDATE THESE BEFORE BOT UPDATE ###
 
 eightballreplies = ["It is Certain.",
@@ -3515,6 +3515,7 @@ async def birthday(ctx: SlashContext, day: int, month: int):
     characters.popitem() #__weakref__ <attr>
     characters.popitem() #__dict__ <attr>
     characters.popitem() #list <function Characters.list>
+    characters.popitem() #chr_num_and_list <function Characters.chr_num_and_list>
     characters.popitem() #find <function Characters.find>
     characters.pop("__module__")
 
@@ -3874,6 +3875,7 @@ async def search(
     characters.popitem() #__weakref__ <attr>
     characters.popitem() #__dict__ <attr>
     characters.popitem() #list <function Characters.list>
+    characters.popitem() #chr_num_and_list <function Characters.chr_num_and_list>
     characters.popitem() #find <function Characters.find>
     characters.pop("__module__")
 
